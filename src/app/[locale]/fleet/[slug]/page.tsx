@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/config/site";
 import { site } from "@/config/site";
 import { locales } from "@/i18n/config";
+import { equipmentImage, categoryImages, unsplash } from "@/config/images";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata } from "@/lib/seo";
 import { localeHref } from "@/lib/utils";
@@ -89,7 +91,6 @@ export default async function EquipmentDetailPage({
           { label: cat.title, href: `/fleet?category=${item.category}` },
           { label: item.name },
         ]}
-        eyebrow={cat.title}
         title={item.name}
         lead={item.summary}
       />
@@ -98,12 +99,27 @@ export default async function EquipmentDetailPage({
         <div className="grid gap-10 lg:grid-cols-12">
           {/* Visual */}
           <div className="lg:col-span-5">
-            <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-ink-900 to-ink-700">
-              <div className="absolute inset-0 bg-grid opacity-10" aria-hidden="true" />
-              <Icon name={item.icon} size={120} className="relative text-brand-400" />
-            </div>
+            {(() => {
+              const photo = equipmentImage(item.slug) ?? categoryImages[item.category];
+              return photo ? (
+                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-ink-900">
+                  <Image
+                    src={unsplash(photo.id, 900, 76)}
+                    alt={photo.alt}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 42vw"
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-2xl bg-ink-900">
+                  <div className="absolute inset-0 bg-grid opacity-10" aria-hidden="true" />
+                  <Icon name={item.icon} size={120} className="relative text-brand-400" />
+                </div>
+              );
+            })()}
             <p className="mt-3 text-xs text-muted-foreground text-center">
-              Representative illustration — request photos of the specific unit.
+              Representative image — request photos of the specific unit on quotation.
             </p>
           </div>
 

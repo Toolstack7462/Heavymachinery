@@ -68,7 +68,6 @@ export default async function ServiceDetailPage({
           { label: dict.nav.services, href: "/services" },
           { label: service.title },
         ]}
-        eyebrow={service.tagline}
         title={service.title}
         lead={service.summary}
       />

@@ -23,13 +23,11 @@ export function Section({
 }
 
 export function SectionHeader({
-  eyebrow,
   title,
   subtitle,
   align = "left",
   className,
 }: {
-  eyebrow?: string;
   title: string;
   subtitle?: string;
   align?: "left" | "center";
@@ -43,10 +41,7 @@ export function SectionHeader({
         className,
       )}
     >
-      {eyebrow && <span className="eyebrow">{eyebrow}</span>}
-      <h2 className="mt-3 text-3xl md:text-4xl font-bold text-ink-900">
-        {title}
-      </h2>
+      <h2 className="text-3xl md:text-4xl font-bold text-ink-900">{title}</h2>
       {subtitle && (
         <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
           {subtitle}

@@ -40,7 +40,6 @@ export default async function QuotePage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.quote }]}
-        eyebrow={dict.sections.quoteTitle}
         title={dict.sections.quoteTitle}
         lead={dict.sections.quoteSubtitle}
       />

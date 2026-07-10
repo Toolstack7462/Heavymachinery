@@ -38,7 +38,6 @@ export default async function IndustriesPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.industries }]}
-        eyebrow={dict.sections.industriesTitle}
         title={dict.sections.industriesTitle}
         lead={dict.sections.industriesSubtitle}
       />

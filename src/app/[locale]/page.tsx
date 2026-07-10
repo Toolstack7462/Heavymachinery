@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import type { Locale } from "@/config/site";
 import { site } from "@/config/site";
+import { categoryImages, unsplash } from "@/config/images";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata } from "@/lib/seo";
 import { localeHref } from "@/lib/utils";
@@ -74,7 +76,6 @@ export default async function HomePage({
       {/* Services */}
       <Section>
         <SectionHeader
-          eyebrow={dict.sections.servicesTitle}
           title={dict.sections.servicesTitle}
           subtitle={dict.sections.servicesSubtitle}
         />
@@ -94,7 +95,6 @@ export default async function HomePage({
       <Section muted>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <SectionHeader
-            eyebrow={dict.nav.fleet}
             title={dict.sections.fleetTitle}
             subtitle={dict.sections.fleetSubtitle}
           />
@@ -107,39 +107,51 @@ export default async function HomePage({
           </Button>
         </div>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {equipmentCategories.map((cat) => (
-            <Link
-              key={cat.key}
-              href={localeHref(locale, `/fleet?category=${cat.key}`)}
-              className="group relative overflow-hidden rounded-2xl bg-ink-900 p-6 text-white transition-transform duration-300 hover:-translate-y-1"
-            >
-              <div className="absolute inset-0 bg-grid opacity-10" aria-hidden="true" />
-              <div
-                className="absolute -bottom-8 -end-8 h-28 w-28 rounded-full bg-brand-500/20 blur-2xl"
-                aria-hidden="true"
-              />
-              <Icon name={cat.icon} size={40} className="relative text-brand-400" />
-              <h3 className="relative mt-5 text-lg font-bold">{cat.title}</h3>
-              <p className="relative mt-2 text-sm text-ink-300 leading-relaxed">
-                {cat.blurb}
-              </p>
-              <span className="relative mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400">
-                {dict.actions.viewDetails}
-                <Icon
-                  name="arrowRight"
-                  size={16}
-                  className="transition-transform group-hover:translate-x-1 rtl:rotate-180"
+          {equipmentCategories.map((cat) => {
+            const cover = categoryImages[cat.key];
+            return (
+              <Link
+                key={cat.key}
+                href={localeHref(locale, `/fleet?category=${cat.key}`)}
+                className="group relative flex min-h-[19rem] flex-col justify-end overflow-hidden rounded-2xl bg-ink-900 p-6 text-white transition-transform duration-300 hover:-translate-y-1 active:scale-[0.99]"
+              >
+                {cover && (
+                  <Image
+                    src={unsplash(cover.id, 640, 68)}
+                    alt={cover.alt}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover opacity-70 transition-all duration-500 group-hover:scale-105 group-hover:opacity-80"
+                  />
+                )}
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/60 to-ink-900/10"
+                  aria-hidden="true"
                 />
-              </span>
-            </Link>
-          ))}
+                <div className="relative">
+                  <Icon name={cat.icon} size={32} className="text-brand-400" />
+                  <h3 className="mt-3 text-lg font-bold">{cat.title}</h3>
+                  <p className="mt-2 text-sm text-ink-300 leading-relaxed">
+                    {cat.blurb}
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400">
+                    {dict.actions.viewDetails}
+                    <Icon
+                      name="arrowRight"
+                      size={16}
+                      className="transition-transform group-hover:translate-x-1 rtl:rotate-180"
+                    />
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </Section>
 
       {/* Why choose us */}
       <Section>
         <SectionHeader
-          eyebrow={dict.sections.whyTitle}
           title={dict.sections.whyTitle}
           subtitle={dict.sections.whySubtitle}
         />
@@ -164,7 +176,6 @@ export default async function HomePage({
       {/* Values / safety */}
       <Section muted>
         <SectionHeader
-          eyebrow={dict.sections.valuesTitle}
           title={dict.sections.valuesTitle}
           align="center"
         />
@@ -178,7 +189,6 @@ export default async function HomePage({
       {/* Industries */}
       <Section>
         <SectionHeader
-          eyebrow={dict.sections.industriesTitle}
           title={dict.sections.industriesTitle}
           subtitle={dict.sections.industriesSubtitle}
         />
@@ -192,7 +202,7 @@ export default async function HomePage({
       {/* Insights */}
       <Section muted>
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <SectionHeader eyebrow={dict.nav.insights} title={dict.nav.insights} />
+          <SectionHeader title={dict.nav.insights} />
           <Button
             href={localeHref(locale, "/insights")}
             variant="outline"

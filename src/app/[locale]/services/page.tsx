@@ -37,7 +37,6 @@ export default async function ServicesPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.services }]}
-        eyebrow={dict.sections.servicesTitle}
         title={dict.nav.services}
         lead={dict.sections.servicesSubtitle}
       />

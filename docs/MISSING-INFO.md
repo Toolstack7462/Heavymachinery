@@ -32,6 +32,7 @@ need client confirmation** before public launch. Each lists exactly where to cha
 | Project case studies | **Editable empty-state** | Add real, permissioned case studies to the Projects page |
 | Testimonials / client logos | **Not present** | Add only with permission and real content |
 | Equipment exact capacities / models | Verified figures only; rest "Available on request" | Fill real specs in `src/content/equipment.ts` |
+| Photography | Real, license-free Unsplash stock (verified to depict machinery) | Replace with the client's **owned** equipment photos in `src/config/images.ts` |
 | Social media links | Empty (hidden) | `src/config/site.ts` → `social` |
 
 ## Arabic content

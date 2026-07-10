@@ -48,7 +48,6 @@ export default async function LeadershipPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.leadership }]}
-        eyebrow={dict.nav.leadership}
         title="Leadership"
         lead="Experienced leadership committed to integrity, professionalism and the success of every project we support."
       />

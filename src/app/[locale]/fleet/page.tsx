@@ -55,7 +55,6 @@ export default async function FleetPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.fleet }]}
-        eyebrow={dict.sections.fleetTitle}
         title={dict.nav.fleet}
         lead={dict.sections.fleetSubtitle}
       />

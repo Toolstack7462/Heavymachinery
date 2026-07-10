@@ -38,7 +38,6 @@ export default async function WhyChooseUsPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.whyUs }]}
-        eyebrow={dict.sections.whyTitle}
         title={dict.sections.whyTitle}
         lead={dict.sections.whySubtitle}
       />

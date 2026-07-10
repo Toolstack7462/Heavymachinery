@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import type { Locale } from "@/config/site";
 import { site } from "@/config/site";
+import { images, unsplash } from "@/config/images";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata } from "@/lib/seo";
 import { localeHref } from "@/lib/utils";
@@ -42,7 +44,6 @@ export default async function AboutPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.about }]}
-        eyebrow={dict.nav.about}
         title={`Built on solid ground`}
         lead={site.descriptionLong}
       />
@@ -106,6 +107,27 @@ export default async function AboutPage({
         </div>
       </Section>
 
+      {/* Full-bleed capability image band */}
+      <section className="relative h-[280px] overflow-hidden md:h-[420px]">
+        <Image
+          src={unsplash(images.fleetYard.id, 1920, 74)}
+          alt={images.fleetYard.alt}
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-ink-900/85 via-ink-900/40 to-transparent"
+          aria-hidden="true"
+        />
+        <div className="container-page relative flex h-full items-center">
+          <p className="max-w-md font-heading text-2xl font-bold leading-snug text-white md:text-3xl">
+            A modern fleet, trained operators, and one accountable partner from
+            mobilisation to handover.
+          </p>
+        </div>
+      </section>
+
       {/* Vision & Mission */}
       <Section muted>
         <div className="grid gap-6 md:grid-cols-2">
@@ -133,7 +155,6 @@ export default async function AboutPage({
       {/* Values */}
       <Section>
         <SectionHeader
-          eyebrow={dict.sections.valuesTitle}
           title={dict.sections.valuesTitle}
           align="center"
         />

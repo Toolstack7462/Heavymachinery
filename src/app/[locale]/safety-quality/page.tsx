@@ -39,7 +39,6 @@ export default async function SafetyQualityPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.safety }]}
-        eyebrow={dict.nav.safety}
         title="Safety & Quality"
         lead="Safety leads every lift, load and excavation. We plan the method, maintain the machines and train the people who run them."
       />

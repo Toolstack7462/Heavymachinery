@@ -37,7 +37,6 @@ export default async function ContactPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.contact }]}
-        eyebrow={dict.actions.getInTouch}
         title={dict.sections.contactTitle}
         lead={dict.sections.ctaSubtitle}
       />

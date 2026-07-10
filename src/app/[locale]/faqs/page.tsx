@@ -40,7 +40,6 @@ export default async function FaqsPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.faqs }]}
-        eyebrow={dict.sections.faqTitle}
         title={dict.sections.faqTitle}
         lead="Everything you need to know about renting equipment and working with us."
       />

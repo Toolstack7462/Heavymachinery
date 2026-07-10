@@ -65,7 +65,6 @@ export default async function InsightDetailPage({
           { label: dict.nav.insights, href: "/insights" },
           { label: article.title },
         ]}
-        eyebrow={article.category}
         title={article.title}
         lead={article.excerpt}
       />

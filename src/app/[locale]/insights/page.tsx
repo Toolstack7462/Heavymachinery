@@ -38,7 +38,6 @@ export default async function InsightsPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.insights }]}
-        eyebrow={dict.nav.insights}
         title="Insights & Guides"
         lead="Practical, no-nonsense guidance on choosing, renting and running heavy equipment."
       />

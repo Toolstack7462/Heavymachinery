@@ -40,7 +40,6 @@ export default async function ProjectsPage({
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         crumbs={[{ label: dict.nav.projects }]}
-        eyebrow={dict.nav.projects}
         title="Projects & Capabilities"
         lead="We support projects of all sizes across Qatar's construction, infrastructure, industrial and demolition sectors."
       />
