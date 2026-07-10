@@ -48,6 +48,18 @@ export function Header({
     };
   }, [mobileOpen]);
 
+  // Escape closes any open menu (keyboard accessibility).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpenMenu(null);
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const isActive = (href: string) => {
     const full = localeHref(locale, href);
     if (href === "/") return pathname === full;

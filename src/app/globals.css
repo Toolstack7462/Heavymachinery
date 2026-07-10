@@ -87,6 +87,18 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Cut the 300ms tap delay and prevent double-tap zoom on controls. */
+  a,
+  button,
+  [role="button"],
+  summary,
+  input,
+  select,
+  textarea,
+  label {
+    touch-action: manipulation;
+  }
+
   h1,
   h2,
   h3,

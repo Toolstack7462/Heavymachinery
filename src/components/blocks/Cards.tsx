@@ -33,7 +33,7 @@ export function ServiceCard({
   return (
     <Link
       href={localeHref(locale, `/services/${service.slug}`)}
-      className="group flex flex-col rounded-2xl border border-ink-100 bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-[var(--shadow-elevated)]"
+      className="group flex flex-col rounded-2xl border border-ink-100 bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 active:scale-[0.99] hover:border-brand-200 hover:shadow-[var(--shadow-elevated)]"
     >
       <IconTile name={service.icon} />
       <h3 className="mt-5 text-xl font-bold text-ink-900 group-hover:text-brand-700 transition-colors">
@@ -66,7 +66,7 @@ export function EquipmentCard({
   return (
     <Link
       href={localeHref(locale, `/fleet/${item.slug}`)}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-[var(--shadow-elevated)]"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 active:scale-[0.99] hover:border-brand-200 hover:shadow-[var(--shadow-elevated)]"
     >
       {/* Visual placeholder tile — replace with real equipment photography */}
       <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-ink-900 to-ink-700">
@@ -145,7 +145,7 @@ export function InsightCard({
   return (
     <Link
       href={localeHref(locale, `/insights/${insight.slug}`)}
-      className="group flex flex-col rounded-2xl border border-ink-100 bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-[var(--shadow-elevated)]"
+      className="group flex flex-col rounded-2xl border border-ink-100 bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 active:scale-[0.99] hover:border-brand-200 hover:shadow-[var(--shadow-elevated)]"
     >
       <span className="text-xs font-semibold uppercase tracking-wider text-brand-700">
         {insight.category}

@@ -75,3 +75,13 @@ export default async function LocaleLayout({
 export const metadata = {
   metadataBase: new URL(site.url),
 };
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1d21" },
+  ],
+  colorScheme: "light" as const,
+};
