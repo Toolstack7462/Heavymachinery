@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import type { Locale } from "@/config/site";
 import { getDictionary } from "@/i18n/dictionaries";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, seoText } from "@/lib/seo";
 import { PageHero } from "@/components/blocks/PageHero";
 import { Section } from "@/components/Section";
 import { EnquiryForm } from "@/components/forms/EnquiryForm";
 import { ContactInfo } from "@/components/blocks/ContactInfo";
+import { Reveal } from "@/components/motion/Reveal";
 
 export async function generateMetadata({
   params,
@@ -16,14 +17,13 @@ export async function generateMetadata({
   const dict = getDictionary(locale);
   return buildMetadata({
     locale,
-    title: dict.nav.quote,
-    description:
-      "Request a quote for heavy equipment rental or contracting services in Qatar. Fast response with availability and pricing.",
+    title: dict.pages.requestTitle,
+    description: seoText.request[locale],
     path: "/request-a-quote",
   });
 }
 
-export default async function QuotePage({
+export default async function RequestPage({
   params,
   searchParams,
 }: {
@@ -39,20 +39,26 @@ export default async function QuotePage({
       <PageHero
         locale={locale}
         homeLabel={dict.breadcrumb.home}
-        crumbs={[{ label: dict.nav.quote }]}
-        title={dict.sections.quoteTitle}
-        lead={dict.sections.quoteSubtitle}
+        breadcrumbLabel={dict.breadcrumb.label}
+        crumbs={[{ label: dict.pages.requestTitle }]}
+        title={dict.pages.requestTitle}
+        lead={dict.pages.requestLead}
       />
       <Section>
         <div className="grid gap-10 lg:grid-cols-12">
-          <div className="lg:col-span-7">
-            <div className="rounded-2xl border border-ink-100 bg-white p-6 md:p-8 shadow-[var(--shadow-card)]">
-              <EnquiryForm dict={dict} variant="quote" defaultEquipment={equipment} />
+          <Reveal className="lg:col-span-7">
+            <div className="rounded-2xl border border-ink-150 bg-white p-6 md:p-8">
+              <EnquiryForm
+                locale={locale}
+                dict={dict}
+                variant="request"
+                defaultEquipment={equipment}
+              />
             </div>
-          </div>
-          <div className="lg:col-span-5">
-            <ContactInfo dict={dict} />
-          </div>
+          </Reveal>
+          <Reveal delay={0.08} className="lg:col-span-5">
+            <ContactInfo locale={locale} dict={dict} />
+          </Reveal>
         </div>
       </Section>
     </>

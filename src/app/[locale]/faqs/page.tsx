@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Locale } from "@/config/site";
 import { getDictionary } from "@/i18n/dictionaries";
-import { buildMetadata, faqJsonLd } from "@/lib/seo";
+import { buildMetadata, faqJsonLd, seoText } from "@/lib/seo";
 import { PageHero } from "@/components/blocks/PageHero";
 import { Section } from "@/components/Section";
 import { CtaBand } from "@/components/blocks/CtaBand";
@@ -19,8 +19,7 @@ export async function generateMetadata({
   return buildMetadata({
     locale,
     title: dict.nav.faqs,
-    description:
-      "Answers to common questions about heavy equipment rental, operated hire, delivery, terms and quotes in Qatar.",
+    description: seoText.faqs[locale],
     path: "/faqs",
   });
 }
@@ -35,28 +34,34 @@ export default async function FaqsPage({
 
   return (
     <>
-      <JsonLd data={faqJsonLd()} />
+      <JsonLd data={faqJsonLd(locale)} />
       <PageHero
         locale={locale}
         homeLabel={dict.breadcrumb.home}
+        breadcrumbLabel={dict.breadcrumb.label}
         crumbs={[{ label: dict.nav.faqs }]}
-        title={dict.sections.faqTitle}
-        lead="Everything you need to know about renting equipment and working with us."
+        title={dict.pages.faqsTitle}
+        lead={dict.pages.faqsLead}
       />
       <Section>
-        <div className="mx-auto max-w-3xl divide-y divide-ink-100">
-          {faqs.map((f, i) => (
-            <details key={i} className="group py-5" name="faq">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-heading text-lg font-semibold text-ink-900">
-                {f.question}
+        <div className="mx-auto max-w-3xl divide-y divide-ink-150">
+          {/*
+            The vertical padding lives on <summary>, not on <details>: the
+            summary is the element you tap, and on <details> it produced a 24px
+            touch target for single-line questions.
+          */}
+          {faqs.map((faq) => (
+            <details key={faq.question.en} className="group" name="faq">
+              <summary className="flex list-none items-center justify-between gap-4 py-5 font-heading text-base font-semibold text-ink-900 md:text-lg">
+                {faq.question[locale]}
                 <Icon
                   name="chevronRight"
                   size={20}
-                  className="shrink-0 rotate-90 text-brand-600 transition-transform group-open:-rotate-90"
+                  className="shrink-0 rotate-90 text-brand-600 transition-transform duration-200 group-open:-rotate-90"
                 />
               </summary>
-              <p className="mt-3 text-muted-foreground leading-relaxed">
-                {f.answer}
+              <p className="measure -mt-1 pb-5 leading-relaxed text-muted-foreground">
+                {faq.answer[locale]}
               </p>
             </details>
           ))}

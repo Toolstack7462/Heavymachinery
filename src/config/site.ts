@@ -1,71 +1,88 @@
 /**
  * ============================================================================
- *  SINGLE SOURCE OF TRUTH — BRAND & CONTACT CONFIG
+ *  SINGLE SOURCE OF TRUTH — BRAND, LOCATION & CONTACT
  * ============================================================================
- *  Edit THIS FILE to rebrand the entire website. Every page, the header,
- *  footer, metadata, structured data, WhatsApp/phone CTAs and the sitemap
- *  read from here. Nothing else needs to change to swap the brand.
+ *  Every page, the header, footer, metadata, structured data and the sitemap
+ *  read from this file.
  *
- *  NOTE ON PLACEHOLDER BRAND:
- *  "RASIKH Heavy Equipment & Contracting" is an ORIGINAL placeholder name
- *  (Arabic: رَاسِخ — "solid / firmly established"). Replace `name`, `legalName`,
- *  `logoText` and the domain with the client's real registered brand.
+ *  SOURCE OF FACTS: "Jowain Yanbu Est. Profile Overview" (client-supplied
+ *  company profile, August 2026) and the official Logo.pdf. Nothing here is
+ *  inferred or invented.
  *
- *  CONTACT DETAILS below are REAL, taken from the supplied company profile and
- *  are safe to publish. The email currently uses the legacy address — replace
- *  with a branded inbox (e.g. info@yourdomain.com) once the domain is live.
+ *  DELIBERATELY ABSENT — the profile supplies no telephone or WhatsApp number,
+ *  no street address, no opening hours and no social profiles. Those fields are
+ *  therefore `null`/empty and every dependent UI element (click-to-call,
+ *  WhatsApp buttons, hours row, social icons) hides itself. Do not fill them
+ *  with plausible values; see docs/MISSING-INFO.md.
  * ============================================================================
  */
 
 export const site = {
-  /** Public-facing brand name (placeholder — replace with real name). */
-  name: "RASIKH",
+  /** Short public-facing brand name. */
+  name: "Jowain Yanbu Est.",
   /** Full brand name used in headings & metadata. */
-  fullName: "RASIKH Heavy Equipment & Contracting",
-  /** Registered legal entity name (replace with real W.L.L. registration). */
-  legalName: "RASIKH Heavy Equipment & Contracting W.L.L.",
-  /** Short wordmark shown in the logo lockup. */
-  logoText: "RASIKH",
-  /** Meaning note surfaced in the About page (editable). */
-  nameMeaning: "rāsikh (رَاسِخ) — solid, firmly established, deeply rooted.",
+  fullName: "Jowain Yanbu Est.",
+  /** Registered establishment name as printed in the company profile. */
+  legalName: "Jowain Yanbu Est.",
+  /** Wordmark shown in the header/footer lockup. */
+  logoText: "JOWAIN",
+  /** Second line of the wordmark lockup. */
+  logoSubText: "YANBU EST.",
 
-  tagline: "Powering Qatar's Progress",
-  taglineSecondary: "Built on Solid Ground",
-  descriptionShort:
-    "Heavy equipment rental, earthmoving, transportation, lifting, demolition and contracting across Qatar.",
-  descriptionLong:
-    "A Qatar-based heavy equipment rental and contracting company delivering a single-source solution for earthworks, machinery rental, heavy transport, lifting, demolition and project execution — backed by a modern fleet, trained operators and an uncompromising commitment to safety.",
+  /** Corporate positioning line from the profile cover. */
+  positioning: "Heavy Equipment Rental & Transportation",
+  /** Primary tagline from the profile. */
+  tagline: "Reliable Equipment. Dependable Transportation.",
 
-  /** Production domain (replace once live). Used for canonical URLs & sitemap. */
-  url: "https://www.rasikh-qatar.com",
+  /** Production domain, from the profile ("www.jowain.net"). */
+  url: "https://www.jowain.net",
 
-  /** Year the underlying business was established (verified: 2013). */
-  foundedYear: 2013,
+  /** Year of establishment (profile: "EST. 1992"). */
+  foundedYear: 1992,
+  /**
+   * Reference year used for the "30+ years" claim so the number never drifts
+   * from what the profile itself states.
+   */
+  profileYear: 2026,
 
   contact: {
-    // REAL, verified from the company profile — safe to publish.
-    phonePrimary: "+974 5000 4159",
-    phoneSecondary: "+974 5539 3445",
-    /** E.164 for tel:/wa.me links (no spaces, no leading +for wa.me). */
-    phonePrimaryE164: "+97450004159",
-    whatsappNumber: "97450004159",
-    // Legacy email from the profile. REPLACE with a branded address when live.
-    email: "info@rasikh-qatar.com",
-    emailNote:
-      "Placeholder branded email — the profile lists Desertqueen0007@gmail.com as the operational inbox. Confirm the address to publish.",
+    /**
+     * No telephone or WhatsApp number appears anywhere in the supplied
+     * profile. Keep `null` until the client provides verified numbers — the
+     * UI drops all call/WhatsApp affordances while these are null.
+     */
+    phone: null as string | null,
+    phoneE164: null as string | null,
+    whatsapp: null as string | null,
+
+    /**
+     * EXACTLY as printed in the company profile, where the contact line reads
+     * "Contactsul@jowain.net" (one unbroken string). It is published verbatim
+     * rather than silently "corrected" — the client should confirm whether the
+     * intended address is this, or "sul@jowain.net" with a "Contact" label that
+     * lost its separator. Tracked in docs/MISSING-INFO.md.
+     */
+    email: "contactsul@jowain.net",
+    /** The raw string as it appears in the source document. */
+    emailAsPrinted: "Contactsul@jowain.net",
+
     address: {
-      line1: "Zone 57, Street 509, Building 42",
-      city: "Doha",
-      country: "Qatar",
-      countryCode: "QA",
-      /** Fill with a precise pin before enabling the map embed. */
-      mapQuery: "Zone 57 Street 509 Doha Qatar",
+      /** The profile gives a city only — no street address. */
+      city: "Yanbu Al Bahr",
+      region: "Al Madinah Province",
+      country: "Saudi Arabia",
+      countryCode: "SA",
+      mapQuery: "Yanbu Al Bahr, Saudi Arabia",
     },
-    /** Editable — set real opening hours. */
-    hours: "Sat–Thu, 7:00 AM – 7:00 PM (GST)",
+
+    /** Not supplied — the hours row hides while this is null. */
+    hours: null as string | null,
   },
 
-  /** Social profiles — leave empty to hide. Fill when accounts exist. */
+  /** Coverage claim supported by the profile ("Kingdom-wide"). */
+  areaServed: "Saudi Arabia",
+
+  /** Social profiles — none supplied; icons hide while empty. */
   social: {
     linkedin: "",
     instagram: "",
@@ -73,7 +90,7 @@ export const site = {
     youtube: "",
   },
 
-  /** Locales. `ar` ships full RTL layout; Arabic copy is editable placeholder. */
+  /** Locales. `ar` ships full RTL layout and fully translated content. */
   locales: ["en", "ar"] as const,
   defaultLocale: "en" as const,
 } as const;
@@ -81,13 +98,22 @@ export const site = {
 export type SiteConfig = typeof site;
 export type Locale = (typeof site.locales)[number];
 
-/** WhatsApp deep link with an optional prefilled message. */
-export function whatsappLink(message?: string): string {
-  const base = `https://wa.me/${site.contact.whatsappNumber}`;
-  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+/**
+ * NOTE ON THE EXPERIENCE CLAIM: the site says "over 30 years", which is what
+ * the company profile says. Deliberately no `2026 - 1992` helper lives here —
+ * publishing a computed "34+" would put a figure on the page that the client
+ * has never stated.
+ */
+
+/** `mailto:` for the published enquiry inbox. */
+export function mailtoLink(subject?: string): string {
+  const base = `mailto:${site.contact.email}`;
+  return subject ? `${base}?subject=${encodeURIComponent(subject)}` : base;
 }
 
-/** tel: link for the primary line. */
-export function telLink(): string {
-  return `tel:${site.contact.phonePrimaryE164}`;
+/** Google Maps search link for the stated location. */
+export function mapLink(): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    site.contact.address.mapQuery,
+  )}`;
 }

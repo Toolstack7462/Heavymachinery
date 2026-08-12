@@ -1,134 +1,219 @@
 import type { Dictionary } from "./en";
 
 /**
- * Arabic dictionary (Modern Standard Arabic).
+ * Arabic dictionary (Modern Standard Arabic), first-class and complete:
+ * every English string above has an Arabic equivalent, and all page body
+ * content in src/content/* is bilingual too — no Arabic route falls back to
+ * English copy, so there is no "translation pending" notice.
  *
- * SCOPE & HONESTY NOTE:
- * - Short UI chrome (navigation, buttons, form labels) is translated in
- *   standard Arabic and is safe to ship.
- * - Longer marketing sentences are a reasonable first-pass translation and
- *   should be reviewed by a native speaker before launch. Arabic pages show a
- *   small "translation under review" notice (see `meta.translationPending`)
- *   so nothing is presented as final/verified.
- * - Page BODY content (services/equipment descriptions in src/content/*) is not
- *   yet translated; the Arabic route renders that content in English until the
- *   client supplies Arabic copy. This is intentional and documented.
+ * TRANSLATION POLICY: the Arabic conveys exactly the same factual claims as
+ * the English, which in turn come only from the client's company profile. No
+ * claim, figure or capability is added, softened or embellished in translation.
+ *
+ * The brand name is intentionally kept as "Jowain Yanbu Est." — the client has
+ * not supplied an official Arabic registered name, and inventing one would put
+ * an unverified legal entity name on the site.
  */
 export const ar: Dictionary = {
   meta: {
     localeLabel: "العربية",
-    translationPending: "الترجمة العربية قيد المراجعة.",
+    localeShort: "ع",
+    switchTo: "English",
   },
+
   nav: {
     home: "الرئيسية",
-    about: "من نحن",
-    leadership: "القيادة",
+    about: "عن الشركة",
     services: "الخدمات",
-    fleet: "المعدات والأسطول",
+    fleet: "المعدات",
     industries: "القطاعات",
-    projects: "المشاريع",
-    safety: "السلامة والجودة",
-    whyUs: "لماذا نحن",
+    quality: "الجودة",
+    clients: "عملاؤنا",
     faqs: "الأسئلة الشائعة",
-    insights: "المقالات",
     contact: "اتصل بنا",
-    quote: "اطلب عرض سعر",
+    request: "طلب معدات",
+    menu: "القائمة",
+    openMenu: "فتح القائمة",
+    closeMenu: "إغلاق القائمة",
+    primaryLabel: "الرئيسية",
+    mobileLabel: "قائمة الجوال",
+    skipToContent: "تخطَّ إلى المحتوى",
   },
+
   actions: {
-    requestQuote: "اطلب عرض سعر",
-    getQuote: "احصل على عرض سعر",
-    callNow: "اتصل الآن",
-    whatsapp: "واتساب",
-    viewFleet: "استعرض الأسطول",
-    exploreServices: "استكشف الخدمات",
-    learnMore: "اعرف المزيد",
+    request: "طلب معدات",
+    requestShort: "طلب",
+    contactUs: "اتصل بنا",
+    exploreFleet: "استعرض أسطولنا",
+    viewFleet: "عرض جميع المعدات",
     viewDetails: "عرض التفاصيل",
-    viewAll: "عرض الكل",
-    backTo: "العودة إلى",
-    readMore: "اقرأ المزيد",
+    viewAll: "جميع المعدات",
+    learnMore: "اعرف المزيد",
     submit: "إرسال الطلب",
     sending: "جارٍ الإرسال…",
     send: "إرسال الرسالة",
-    contactUs: "اتصل بنا",
-    getInTouch: "تواصل معنا",
+    email: "راسلنا بالبريد",
+    viewOnMap: "عرض على الخريطة",
+    backHome: "العودة إلى الرئيسية",
   },
+
   hero: {
-    eyebrow: "تأجير المعدات الثقيلة والمقاولات · قطر",
-    title: "نُشغّل تقدّم قطر",
+    eyebrow: "تأسست عام 1992 · ينبع البحر، المملكة العربية السعودية",
+    title: "تأجير المعدات الثقيلة وخدمات النقل",
+    tagline: "معدات موثوقة. نقل يُعتمد عليه.",
     subtitle:
-      "شريك متكامل لتأجير المعدات الثقيلة والأعمال الترابية والنقل والرفع والهدم والمقاولات — مدعوم بأسطول حديث وطواقم مدرَّبة.",
-    primaryCta: "اطلب عرض سعر",
-    secondaryCta: "استعرض أسطولنا",
-    trust: "موثوق لتوفير معدات موثوقة وخدمة يُعتمد عليها في جميع أنحاء قطر.",
+      "أكثر من 30 عاماً في توفير معدات الرفع الثقيل والإنشاء وأعمال الحفر والنقل لمشاريع في مختلف مناطق المملكة العربية السعودية، مع مشغّلين وسائقين مؤهّلين.",
+    primaryCta: "استعرض أسطولنا",
+    secondaryCta: "طلب معدات",
+    metaEstablished: "تأسست عام 1992",
+    metaLocation: "ينبع البحر، السعودية",
+    metaCoverage: "تغطية على مستوى المملكة",
+    imageCaption: "رفع ثقيل · أعمال حفر · نقل",
   },
-  sections: {
-    servicesTitle: "ماذا نقدّم",
-    servicesSubtitle:
-      "حلول متكاملة للمعدات الثقيلة والمقاولات، تُنفَّذ بأمان وفي الوقت المحدد.",
-    fleetTitle: "أسطولنا",
-    fleetSubtitle: "مجموعة واسعة من المعدات جيدة الصيانة لمشاريع بمختلف الأحجام.",
+
+  home: {
+    capabilityTitle: "ما نوفّره",
+    capabilitySubtitle:
+      "خمس مجموعات من المعدات تغطي الرفع الثقيل، ومناولة المواد والوصول الآمن، والإنشاء وأعمال الحفر، والنقل، وتغذية المواقع بالطاقة.",
+    fleetTitle: "الأسطول والمعدات",
+    fleetSubtitle:
+      "معدات جيدة الصيانة وجاهزة للتشغيل، مع توفير مشغّلين وسائقين ذوي خبرة عند الطلب.",
     industriesTitle: "القطاعات التي نخدمها",
     industriesSubtitle:
-      "دعم مشاريع البناء والبنية التحتية والصناعة والهدم في جميع أنحاء قطر.",
-    whyTitle: "لماذا تختارنا",
-    whySubtitle: "خبرة محلية وأسطول حديث والتزام حقيقي بالسلامة والخدمة.",
-    ctaTitle: "جاهز للمضي قدماً بمشروعك؟",
-    ctaSubtitle: "أخبرنا باحتياجاتك وسيتواصل فريقنا معك بالتوفر والأسعار.",
-    valuesTitle: "قيمنا",
-    quoteTitle: "اطلب عرض سعر",
-    quoteSubtitle: "شارك متطلبات المعدات أو المشروع وسنعاود التواصل معك سريعاً.",
-    faqTitle: "الأسئلة الشائعة",
-    contactTitle: "اتصل بنا",
-    relatedEquipment: "معدات ذات صلة",
-    relatedServices: "خدمات ذات صلة",
-    exploreCategory: "استكشف الفئة",
+      "مشاريع النفط والغاز، والبتروكيماويات، والإنشاء والبنية التحتية، والطاقة والكهرباء في مختلف مناطق المملكة.",
+    whyTitle: "لماذا جوين؟",
+    whySubtitle: "شريكك الموثوق في المعدات الثقيلة.",
+    valuesTitle: "قيمنا الأساسية",
+    valuesSubtitle: "التميّز في كل عملية.",
+    clientsTitle: "عملاؤنا",
+    clientsSubtitle:
+      "دعم بالمعدات والنقل لمقاولين ومشغّلين في مشاريع صناعية كبرى.",
+    qualityTitle: "التزامنا بالجودة",
+    ctaTitle: "أخبرنا بما يحتاجه مشروعك",
+    ctaSubtitle:
+      "أرسل متطلبات المعدات أو النقل وسيوافيك فريقنا بالتوفّر والتفاصيل.",
   },
+
+  pages: {
+    aboutTitle: "ثلاثة عقود من القدرة في المعدات الثقيلة",
+    aboutLead:
+      "توفّر مؤسسة Jowain Yanbu Est. حلول المعدات الثقيلة والنقل من ينبع البحر منذ عام 1992، لخدمة مشاريع الإنشاء والصناعة والطاقة في مختلف مناطق المملكة العربية السعودية.",
+    visionTitle: "رؤيتنا",
+    visionKicker: "رؤيتنا للمستقبل",
+    missionTitle: "مهمتنا",
+    missionKicker: "التزامنا في كل مشروع",
+    fleetTitle: "المعدات والأسطول",
+    fleetLead:
+      "معدات الرفع الثقيل، ومناولة المواد، وأعمال الحفر، والنقل، وتغذية المواقع بالطاقة، متاحة مع مشغّلين وسائقين مؤهّلين عند الحاجة.",
+    servicesTitle: "الخدمات",
+    servicesLead:
+      "خدمات تأجير المعدات والنقل مبنية على ما يحتاجه المشروع فعلياً في الموقع.",
+    industriesTitle: "القطاعات التي نخدمها",
+    industriesLead:
+      "ندعم متطلبات الرفع الثقيل وأعمال الحفر والنقل في أربعة قطاعات رئيسية.",
+    qualityTitle: "التزامنا بالجودة",
+    qualityLead:
+      "الجودة في صميم كل ما نقوم به: معدات موثوقة، وخدمة احترافية، ومعايير تشغيلية عالية في كل مشروع.",
+    qualityPhilosophyTitle: "فلسفتنا في الجودة",
+    qualityPracticeTitle: "كيف نحقّقها",
+    clientsTitle: "عملاؤنا",
+    clientsLead:
+      "توفّر مؤسسة Jowain Yanbu Est. المعدات وخدمات النقل لمقاولين ومشغّلين يعملون في مشاريع صناعية وبنية تحتية كبرى.",
+    clientsDirectTitle: "علاقات مباشرة مع العملاء",
+    clientsGridTitle: "جهات نخدمها",
+    whyTitle: "لماذا جوين؟",
+    whyLead: "شريكك الموثوق في المعدات الثقيلة.",
+    contactTitle: "اتصل بنا",
+    contactLead:
+      "أرسل إلينا متطلبات المعدات أو النقل وسيوافيك فريقنا بالتوفّر والتفاصيل.",
+    requestTitle: "طلب معدات",
+    requestLead:
+      "أخبرنا بالمعدات أو النقل المطلوب، وموقع العمل، والمدة المطلوبة.",
+    faqsTitle: "الأسئلة الشائعة",
+    faqsLead: "أسئلة متكرّرة حول تأجير المعدات وترتيب أعمال النقل معنا.",
+    sitemapTitle: "خريطة الموقع",
+    sitemapLead: "جميع صفحات هذا الموقع.",
+    privacyTitle: "سياسة الخصوصية",
+    termsTitle: "شروط الاستخدام",
+  },
+
+  labels: {
+    applications: "مجالات الاستخدام",
+    specifications: "المواصفات",
+    included: "ما يشمله",
+    relatedEquipment: "معدات ذات صلة",
+    otherServices: "خدمات أخرى",
+    exploreCategory: "استعرض الفئة",
+    categories: "فئات المعدات",
+    capacityRange: "نطاق الحمولة",
+    onRequest: "متاح عند الطلب",
+    imageNote:
+      "صورة توضيحية للفئة. تُقدَّم صور الوحدة المطلوبة تحديداً مع عرض السعر.",
+    specNote:
+      "تُحدَّد الطرازات والحمولات بدقة مع عرض السعر. أخبرنا بطبيعة العمل وسنرشّح الوحدة المناسبة.",
+    clientNote:
+      "شعارات العملاء مأخوذة من مواد مقدَّمة من مؤسسة Jowain Yanbu Est.، وتبقى ملكاً لأصحابها.",
+    operatorsNote: "مشغّلون وسائقون مؤهّلون عند الطلب.",
+    operatorsShort: "مشغّلون وسائقون مؤهّلون",
+    established: "التأسيس",
+    coverage: "التغطية",
+    experience: "الخبرة",
+    yearsPlus: "أكثر من 30 عاماً",
+    equipmentGroups: "مجموعات المعدات",
+    location: "الموقع",
+  },
+
   form: {
+    legendContact: "بياناتك",
+    legendRequirement: "متطلباتك",
     name: "الاسم الكامل",
     company: "الشركة",
     email: "البريد الإلكتروني",
-    phone: "الهاتف / واتساب",
-    service: "الخدمة / المعدات المطلوبة",
-    servicePlaceholder: "اختر خدمة",
-    duration: "مدة التأجير",
+    phone: "الهاتف",
+    equipment: "المعدات أو الخدمة المطلوبة",
+    equipmentPlaceholder: "اختر معدات أو خدمة",
     location: "موقع المشروع",
-    message: "الرسالة / المتطلبات",
-    messagePlaceholder: "أخبرنا عن مشروعك أو المعدات التي تحتاجها…",
+    duration: "مدة التأجير",
+    durationPlaceholder: "مثال: 3 أشهر، أو عملية رفع واحدة",
+    message: "تفاصيل المتطلبات",
+    messagePlaceholder:
+      "أخبرنا عن عملية الرفع أو الحمل أو النقل المطلوبة، مع ذكر الموقع والتوقيت وأي قيود على الوصول.",
     required: "مطلوب",
     optional: "اختياري",
     successTitle: "تم استلام الطلب",
-    successBody: "شكراً لك — تم استلام طلبك وسيتواصل معك فريقنا قريباً.",
-    errorTitle: "حدث خطأ ما",
+    successBody: "شكراً لك. تم تسجيل طلبك وسيتواصل معك فريقنا.",
+    errorTitle: "حدث خطأ",
     errorBody:
-      "عذراً، تعذّر إرسال طلبك. يرجى المحاولة مرة أخرى أو التواصل معنا هاتفياً أو عبر واتساب.",
+      "عذراً، تعذّر إرسال طلبك. يرجى المحاولة مرة أخرى أو مراسلتنا بالبريد الإلكتروني مباشرة.",
     invalidEmail: "يرجى إدخال بريد إلكتروني صحيح.",
     invalidName: "يرجى إدخال اسمك.",
-    invalidMessage: "يرجى إضافة رسالة قصيرة.",
-    consent:
-      "بإرسالك للطلب فإنك توافق على التواصل معك بخصوص استفسارك. راجع سياسة الخصوصية.",
+    invalidMessage: "يرجى وصف ما تحتاجه.",
+    consent: "بإرسال هذا النموذج فإنك توافق على التواصل معك بخصوص استفسارك.",
+    honeypot: "لا تكتب في هذا الحقل",
   },
+
   footer: {
-    tagline: "تأجير المعدات الثقيلة والمقاولات في جميع أنحاء قطر.",
-    quickLinks: "روابط سريعة",
-    ourServices: "خدماتنا",
-    contact: "اتصل بنا",
-    followUs: "تابعنا",
+    tagline:
+      "حلول تأجير المعدات الثقيلة والنقل في مختلف مناطق المملكة العربية السعودية منذ عام 1992.",
+    quickLinks: "الشركة",
+    equipment: "المعدات",
+    contact: "التواصل",
     rights: "جميع الحقوق محفوظة.",
     address: "العنوان",
-    phone: "الهاتف",
     email: "البريد الإلكتروني",
-    hours: "ساعات العمل",
+    website: "الموقع الإلكتروني",
     privacy: "سياسة الخصوصية",
     terms: "شروط الاستخدام",
     sitemap: "خريطة الموقع",
-    builtNote: "هذه نسخة تجريبية. اسم العلامة وبعض التفاصيل عناصر قابلة للتعديل.",
   },
+
   breadcrumb: {
     home: "الرئيسية",
+    label: "مسار التنقل",
   },
+
   notFound: {
     title: "الصفحة غير موجودة",
     body: "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
-    cta: "العودة إلى الرئيسية",
   },
 };

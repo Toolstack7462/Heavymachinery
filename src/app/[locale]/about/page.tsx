@@ -4,7 +4,7 @@ import type { Locale } from "@/config/site";
 import { site } from "@/config/site";
 import { images, unsplash } from "@/config/images";
 import { getDictionary } from "@/i18n/dictionaries";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, seoText } from "@/lib/seo";
 import { localeHref } from "@/lib/utils";
 import { PageHero } from "@/components/blocks/PageHero";
 import { Section, SectionHeader } from "@/components/Section";
@@ -12,7 +12,9 @@ import { CtaBand } from "@/components/blocks/CtaBand";
 import { ValueCard } from "@/components/blocks/Cards";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/Icon";
-import { values, visionMission } from "@/content/company";
+import { Reveal } from "@/components/motion/Reveal";
+import { overview, vision, mission, coreValues } from "@/content/company";
+import { equipmentCategories } from "@/content/equipment";
 
 export async function generateMetadata({
   params,
@@ -24,7 +26,7 @@ export async function generateMetadata({
   return buildMetadata({
     locale,
     title: dict.nav.about,
-    description: site.descriptionLong,
+    description: seoText.about[locale],
     path: "/about",
   });
 }
@@ -36,94 +38,112 @@ export default async function AboutPage({
 }) {
   const { locale } = await params;
   const dict = getDictionary(locale);
-  const yearsInQatar = 2026 - site.foundedYear;
+
+  const facts = [
+    {
+      label: dict.labels.established,
+      value: String(site.foundedYear),
+      icon: "calendar",
+    },
+    {
+      label: dict.labels.experience,
+      value: dict.labels.yearsPlus,
+      icon: "gauge",
+    },
+    {
+      label: dict.labels.location,
+      value:
+        locale === "ar"
+          ? "ينبع البحر، السعودية"
+          : `${site.contact.address.city}, ${site.contact.address.country}`,
+      icon: "mapPin",
+    },
+    {
+      label: dict.labels.coverage,
+      value: dict.hero.metaCoverage,
+      icon: "map",
+    },
+    {
+      label: dict.labels.equipmentGroups,
+      value: String(equipmentCategories.length),
+      icon: "layers",
+    },
+  ];
 
   return (
     <>
       <PageHero
         locale={locale}
         homeLabel={dict.breadcrumb.home}
+        breadcrumbLabel={dict.breadcrumb.label}
         crumbs={[{ label: dict.nav.about }]}
-        title={`Built on solid ground`}
-        lead={site.descriptionLong}
+        title={dict.pages.aboutTitle}
+        lead={dict.pages.aboutLead}
       />
 
       <Section>
         <div className="grid gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-7">
+          <Reveal className="lg:col-span-7">
             <div className="prose-article">
-              <p>
-                {site.fullName} is a Qatar-based heavy equipment rental and
-                contracting company. We deliver a single-source solution for the
-                construction, infrastructure, industrial and commercial sectors —
-                bringing together equipment rental, earthworks, heavy transport,
-                lifting, demolition and project execution under one accountable
-                partner.
-              </p>
-              <p>
-                Our extensive fleet of modern machinery — excavators, wheel and
-                backhoe loaders, dozers, graders, rollers, cranes, forklifts,
-                telehandlers, generators, compressors, dump trucks, low-bed and
-                flatbed trailers and specialised equipment — enables us to support
-                projects of all sizes and complexities.
-              </p>
-              <p>
-                Beyond equipment, we believe successful project delivery depends on
-                coordination, clear communication and an uncompromising commitment
-                to safety. We foster collaboration among project teams, operators,
-                supervisors and site personnel to keep operations smooth, productive
-                and safe.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                <strong>Brand note:</strong> {site.name} — {site.nameMeaning} The
-                name is an editable placeholder; replace it with the registered
-                brand in <code>src/config/site.ts</code>.
-              </p>
+              {overview[locale].map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
             </div>
-          </div>
+          </Reveal>
 
           <aside className="lg:col-span-5">
-            <div className="rounded-2xl bg-ink-900 p-6 text-white">
-              <div className="grid grid-cols-2 gap-4">
-                <Stat value={`${yearsInQatar}+`} label="Years in Qatar" />
-                <Stat value="20+" label="Equipment types" />
-                <Stat value="6" label="Core services" />
-                <Stat value="1" label="Accountable partner" />
+            <Reveal delay={0.08}>
+              <div className="rounded-2xl border border-ink-150 bg-surface-muted p-6">
+                <dl className="divide-y divide-ink-150">
+                  {facts.map((fact) => (
+                    <div
+                      key={fact.label}
+                      className="flex items-start gap-4 py-4 first:pt-0 last:pb-0"
+                    >
+                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-brand-700 ring-1 ring-ink-150">
+                        <Icon name={fact.icon} size={18} />
+                      </span>
+                      <div>
+                        <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          {fact.label}
+                        </dt>
+                        <dd className="mt-0.5 font-heading font-bold text-ink-900">
+                          {fact.value}
+                        </dd>
+                      </div>
+                    </div>
+                  ))}
+                </dl>
+                <Button
+                  href={localeHref(locale, "/why-choose-us")}
+                  variant="outline"
+                  className="mt-6 w-full"
+                  iconEnd="arrowRight"
+                >
+                  {dict.pages.whyTitle}
+                </Button>
               </div>
-              <p className="mt-5 text-sm text-ink-400 leading-relaxed">
-                Figures shown are verified. Additional performance statistics are
-                available once confirmed with the client.
-              </p>
-              <Button
-                href={localeHref(locale, "/why-choose-us")}
-                variant="primary"
-                className="mt-6 w-full"
-                iconEnd="arrowRight"
-              >
-                {dict.nav.whyUs}
-              </Button>
-            </div>
+            </Reveal>
           </aside>
         </div>
       </Section>
 
-      {/* Full-bleed capability image band */}
-      <section className="relative h-[280px] overflow-hidden md:h-[420px]">
+      {/* Full-bleed capability band */}
+      <section className="relative h-[260px] overflow-hidden md:h-[400px]">
         <Image
-          src={unsplash(images.fleetYard.id, 1920, 74)}
-          alt={images.fleetYard.alt}
+          src={unsplash(images.siteDusk.id, 1920, 74)}
+          alt={locale === "ar" ? images.siteDusk.altAr : images.siteDusk.alt}
           fill
           sizes="100vw"
           className="object-cover"
         />
         <div
-          className="absolute inset-0 bg-gradient-to-r from-ink-900/85 via-ink-900/40 to-transparent"
+          className="absolute inset-0 bg-gradient-to-r from-ink-950/90 via-ink-950/55 to-transparent"
           aria-hidden="true"
         />
         <div className="container-page relative flex h-full items-center">
-          <p className="max-w-md font-heading text-2xl font-bold leading-snug text-white md:text-3xl">
-            A modern fleet, trained operators, and one accountable partner from
-            mobilisation to handover.
+          <p className="max-w-lg font-heading text-xl font-bold leading-snug text-white md:text-3xl">
+            {dict.hero.tagline}
           </p>
         </div>
       </section>
@@ -131,50 +151,60 @@ export default async function AboutPage({
       {/* Vision & Mission */}
       <Section muted>
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl border border-ink-100 bg-white p-8">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100">
-              <Icon name="gauge" size={24} />
-            </span>
-            <h2 className="mt-4 text-2xl font-bold text-ink-900">Our Vision</h2>
-            <p className="mt-3 text-muted-foreground leading-relaxed">
-              {visionMission.vision}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-ink-100 bg-white p-8">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100">
-              <Icon name="medal" size={24} />
-            </span>
-            <h2 className="mt-4 text-2xl font-bold text-ink-900">Our Mission</h2>
-            <p className="mt-3 text-muted-foreground leading-relaxed">
-              {visionMission.mission}
-            </p>
-          </div>
+          {[
+            {
+              kicker: dict.pages.visionKicker,
+              title: dict.pages.visionTitle,
+              body: vision[locale],
+              icon: "gauge",
+            },
+            {
+              kicker: dict.pages.missionKicker,
+              title: dict.pages.missionTitle,
+              body: mission[locale],
+              icon: "medal",
+            },
+          ].map((block, index) => (
+            <Reveal key={block.title} delay={index * 0.06}>
+              <div className="h-full rounded-2xl border border-ink-150 bg-white p-8">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100">
+                  <Icon name={block.icon} size={24} />
+                </span>
+                <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-brand-700">
+                  {block.kicker}
+                </p>
+                <h2 className="mt-2 text-2xl">{block.title}</h2>
+                {block.body.map((paragraph) => (
+                  <p
+                    key={paragraph}
+                    className="mt-4 leading-relaxed text-muted-foreground"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </Reveal>
+          ))}
         </div>
       </Section>
 
-      {/* Values */}
+      {/* Core values */}
       <Section>
         <SectionHeader
-          title={dict.sections.valuesTitle}
+          title={dict.home.valuesTitle}
+          subtitle={dict.home.valuesSubtitle}
           align="center"
         />
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {values.map((v) => (
-            <ValueCard key={v.title} value={v} />
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {coreValues.map((value, index) => (
+            <Reveal key={value.key} delay={index * 0.06}>
+              <ValueCard locale={locale} value={value} numbered={index + 1} />
+            </Reveal>
           ))}
         </div>
       </Section>
 
       <CtaBand locale={locale} dict={dict} />
     </>
-  );
-}
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div>
-      <p className="text-3xl font-extrabold text-brand-400">{value}</p>
-      <p className="mt-1 text-sm text-ink-300">{label}</p>
-    </div>
   );
 }

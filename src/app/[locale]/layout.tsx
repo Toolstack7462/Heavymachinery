@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import { Lexend, Source_Sans_3 } from "next/font/google";
+import { Archivo, Source_Sans_3, Noto_Sans_Arabic } from "next/font/google";
 import "../globals.css";
 import { site, type Locale } from "@/config/site";
 import { isLocale, dir, locales } from "@/i18n/config";
@@ -8,21 +8,41 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getPrimaryNav } from "@/config/nav";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { FloatingCTA } from "@/components/layout/FloatingCTA";
 import { JsonLd } from "@/components/JsonLd";
+import { RevealObserver } from "@/components/motion/RevealObserver";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 
-const lexend = Lexend({
+/**
+ * Typography: two faces on a real contrast axis.
+ *
+ * Archivo, a tight industrial grotesque, carries headings and UI: engineered
+ * rather than friendly, and it holds up at the display sizes the hero needs.
+ * Source Sans 3 carries body copy; it is humanist, with open apertures, and
+ * designed for long-form UI reading. Pairing a grotesque with a humanist gives
+ * the page a genuine textural difference. Two grotesques (the obvious Archivo
+ * plus Inter default) would have read as one slightly inconsistent family.
+ *
+ * Noto Sans Arabic carries the Arabic locale, where neither Latin face has
+ * coverage. Only the weights actually used are requested.
+ */
+const archivo = Archivo({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-lexend",
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-display",
   display: "swap",
 });
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-source-sans",
+  variable: "--font-body",
+  display: "swap",
+});
+
+const notoArabic = Noto_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-arabic",
   display: "swap",
 });
 
@@ -42,31 +62,47 @@ export default async function LocaleLayout({
 
   const typedLocale = locale as Locale;
   const dict = getDictionary(typedLocale);
-  const nav = getPrimaryNav(dict);
+  const nav = getPrimaryNav(dict, typedLocale);
+  const isArabic = typedLocale === "ar";
 
   return (
     <html
       lang={typedLocale}
       dir={dir(typedLocale)}
-      className={`${lexend.variable} ${sourceSans.variable}`}
+      className={`${archivo.variable} ${sourceSans.variable} ${notoArabic.variable}`}
+      // Arabic swaps both font stacks to the Arabic face at the root, so no
+      // component needs to know which locale it is rendering in.
+      style={
+        isArabic
+          ? {
+              ["--font-body" as string]: "var(--font-arabic)",
+              ["--font-display" as string]: "var(--font-arabic)",
+            }
+          : undefined
+      }
       suppressHydrationWarning
     >
       <body>
+        {/*
+          Flags that scripting is available, before the first paint, so the
+          reveal CSS can hide sections it is about to animate. Without this
+          (no JS, or a crawler that does not run it) every section renders
+          visible. The animation is an enhancement, never a gate.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
         <JsonLd data={organizationJsonLd()} />
         <JsonLd data={websiteJsonLd()} />
         <a href="#main" className="skip-link">
-          Skip to content
+          {dict.nav.skipToContent}
         </a>
-        {/* Arabic translation-under-review notice (editable placeholder policy) */}
-        {typedLocale === "ar" && dict.meta.translationPending && (
-          <div className="bg-brand-50 text-brand-900 text-center text-xs py-1.5 px-4 border-b border-brand-100">
-            {dict.meta.translationPending}
-          </div>
-        )}
         <Header locale={typedLocale} dict={dict} nav={nav} />
         <main id="main">{children}</main>
         <Footer locale={typedLocale} dict={dict} />
-        <FloatingCTA dict={dict} />
+        <RevealObserver />
       </body>
     </html>
   );
@@ -79,9 +115,6 @@ export const metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1d21" },
-  ],
+  themeColor: "#ffffff",
   colorScheme: "light" as const,
 };

@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Locale } from "@/config/site";
 import { getDictionary } from "@/i18n/dictionaries";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, seoText, fleetJsonLd } from "@/lib/seo";
 import { localeHref, cn } from "@/lib/utils";
 import { PageHero } from "@/components/blocks/PageHero";
 import { Section } from "@/components/Section";
 import { CtaBand } from "@/components/blocks/CtaBand";
 import { EquipmentCard } from "@/components/blocks/Cards";
+import { JsonLd } from "@/components/JsonLd";
 import { Icon } from "@/components/Icon";
+import { Reveal } from "@/components/motion/Reveal";
 import {
   equipment,
   equipmentCategories,
@@ -24,9 +26,8 @@ export async function generateMetadata({
   const dict = getDictionary(locale);
   return buildMetadata({
     locale,
-    title: dict.nav.fleet,
-    description:
-      "Browse our heavy equipment fleet — excavators, loaders, dozers, graders, rollers, cranes, telehandlers, forklifts, trailers, dump trucks, generators and compressors for rent across Qatar.",
+    title: dict.pages.fleetTitle,
+    description: seoText.fleet[locale],
     path: "/fleet",
   });
 }
@@ -44,73 +45,89 @@ export default async function FleetPage({
 
   const activeCategory = equipmentCategories.find((c) => c.key === category)
     ?.key as EquipmentCategory | undefined;
-
+  const active = activeCategory
+    ? equipmentCategories.find((c) => c.key === activeCategory)
+    : undefined;
   const filtered = activeCategory
-    ? equipment.filter((e) => e.category === activeCategory)
+    ? equipment.filter((item) => item.category === activeCategory)
     : equipment;
+
+  // min-h-[44px]: the category filter is the primary control on this page and
+  // is used on site, on a phone, often with gloves on.
+  const pill =
+    "inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors";
 
   return (
     <>
+      <JsonLd data={fleetJsonLd(locale)} />
       <PageHero
         locale={locale}
         homeLabel={dict.breadcrumb.home}
+        breadcrumbLabel={dict.breadcrumb.label}
         crumbs={[{ label: dict.nav.fleet }]}
-        title={dict.nav.fleet}
-        lead={dict.sections.fleetSubtitle}
+        title={dict.pages.fleetTitle}
+        lead={dict.pages.fleetLead}
       />
 
       <Section>
-        {/* Category filter */}
-        <div className="flex flex-wrap gap-2.5" role="tablist" aria-label="Equipment categories">
+        <nav aria-label={dict.labels.categories} className="flex flex-wrap gap-2.5">
           <Link
             href={localeHref(locale, "/fleet")}
+            aria-current={!activeCategory ? "page" : undefined}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+              pill,
               !activeCategory
                 ? "border-ink-900 bg-ink-900 text-white"
-                : "border-ink-200 bg-white text-ink-700 hover:border-brand-300",
+                : "border-ink-200 bg-white text-ink-700 hover:border-brand-400 hover:text-brand-700",
             )}
           >
             {dict.actions.viewAll}
           </Link>
-          {equipmentCategories.map((c) => (
+          {equipmentCategories.map((meta) => (
             <Link
-              key={c.key}
-              href={localeHref(locale, `/fleet?category=${c.key}`)}
+              key={meta.key}
+              href={localeHref(locale, `/fleet?category=${meta.key}`)}
+              aria-current={activeCategory === meta.key ? "page" : undefined}
               className={cn(
-                "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                activeCategory === c.key
+                pill,
+                activeCategory === meta.key
                   ? "border-ink-900 bg-ink-900 text-white"
-                  : "border-ink-200 bg-white text-ink-700 hover:border-brand-300",
+                  : "border-ink-200 bg-white text-ink-700 hover:border-brand-400 hover:text-brand-700",
               )}
             >
-              <Icon name={c.icon} size={16} />
-              {c.title}
+              <Icon name={meta.icon} size={16} />
+              {meta.title[locale]}
             </Link>
           ))}
-        </div>
+        </nav>
 
-        {activeCategory && (
+        {active && (
           <p className="mt-6 max-w-2xl text-muted-foreground">
-            {equipmentCategories.find((c) => c.key === activeCategory)?.blurb}
+            {active.blurb[locale]}
           </p>
         )}
 
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((e) => (
-            <EquipmentCard
-              key={e.slug}
-              locale={locale}
-              item={e}
-              cta={dict.actions.viewDetails}
-            />
+          {filtered.map((item, index) => (
+            <Reveal key={item.slug} delay={(index % 3) * 0.05}>
+              {/* h2: on the index the cards are the page's own list. */}
+              <EquipmentCard
+                locale={locale}
+                item={item}
+                cta={dict.actions.viewDetails}
+                headingLevel={2}
+              />
+            </Reveal>
           ))}
         </div>
 
-        <p className="mt-10 rounded-xl border border-ink-100 bg-surface-muted p-4 text-sm text-muted-foreground">
-          <Icon name="clipboard" size={16} className="inline-block me-1.5 -mt-0.5 text-brand-600" />
-          Model numbers and exact capacities are confirmed on quotation. Tell us
-          your task and we will recommend the right machine.
+        <p className="measure mt-10 flex items-start gap-2.5 rounded-xl border border-ink-150 bg-surface-muted p-4 text-sm text-muted-foreground">
+          <Icon
+            name="clipboard"
+            size={18}
+            className="mt-0.5 shrink-0 text-brand-600"
+          />
+          {dict.labels.specNote}
         </p>
       </Section>
 

@@ -1,104 +1,101 @@
-import Image from "next/image";
 import type { Locale } from "@/config/site";
-import { site, telLink } from "@/config/site";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localeHref } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/Icon";
-import { images, unsplash } from "@/config/images";
+import { HeroMedia } from "@/components/home/HeroMedia";
+import { Reveal } from "@/components/motion/Reveal";
 
-export function Hero({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+/**
+ * Homepage hero — the dark industrial anchor of an otherwise light site.
+ *
+ * Reads in three seconds: who (Jowain Yanbu Est., in the header lockup above),
+ * what (heavy equipment rental & transportation), since when and from where.
+ * Copy is server-rendered; only the photograph's parallax is client-side, so
+ * the largest paint is not waiting on JavaScript.
+ */
+export function Hero({
+  locale,
+  dict,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+}) {
+  const facts = [
+    { icon: "calendar", label: dict.hero.metaEstablished },
+    { icon: "map", label: dict.hero.metaCoverage },
+    { icon: "users", label: dict.labels.operatorsShort },
+  ];
+
   return (
-    <section className="relative overflow-hidden bg-white">
-      <div
-        className="absolute inset-0 bg-grid opacity-[0.5]"
-        aria-hidden="true"
-      />
-      <div className="container-page relative py-14 md:py-20">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-          {/* Copy */}
-          <div>
-            <span className="eyebrow">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-500" />
-              {dict.hero.eyebrow}
-            </span>
-            <h1 className="mt-5 text-[2.5rem] leading-[1.04] sm:text-5xl lg:text-6xl font-extrabold text-ink-900">
+    <section className="relative isolate overflow-hidden">
+      <HeroMedia locale={locale} />
+
+      <div className="container-page relative py-16 md:py-24 lg:py-28">
+        <div className="max-w-2xl">
+          <Reveal>
+            <p className="eyebrow text-brand-200">{dict.hero.eyebrow}</p>
+          </Reveal>
+
+          <Reveal delay={0.06}>
+            <h1 className="mt-5 text-[2.1rem] leading-[1.06] text-white sm:text-5xl lg:text-[3.5rem]">
               {dict.hero.title}
-              <span className="mt-1 block text-brand-600">
-                {site.taglineSecondary}.
-              </span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-muted-foreground leading-relaxed">
+          </Reveal>
+
+          <Reveal delay={0.12}>
+            <p className="mt-5 font-heading text-lg font-semibold text-accent-300 sm:text-xl">
+              {dict.hero.tagline}
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.18}>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-200 sm:text-lg">
               {dict.hero.subtitle}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+          </Reveal>
+
+          <Reveal delay={0.24}>
+            <div className="mt-9 flex flex-wrap gap-3">
               <Button
-                href={localeHref(locale, "/request-a-quote")}
+                href={localeHref(locale, "/fleet")}
                 size="lg"
                 iconEnd="arrowRight"
               >
                 {dict.hero.primaryCta}
               </Button>
               <Button
-                href={localeHref(locale, "/fleet")}
-                variant="outline"
+                href={localeHref(locale, "/request-a-quote")}
+                variant="onDark"
                 size="lg"
               >
                 {dict.hero.secondaryCta}
               </Button>
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-ink-600">
-              <a
-                href={telLink()}
-                className="inline-flex items-center gap-2 font-semibold text-ink-900 hover:text-brand-700"
-              >
-                <Icon name="phone" size={18} className="text-brand-600" />
-                <span className="tabular-nums">{site.contact.phonePrimary}</span>
-              </a>
-              <span className="inline-flex items-center gap-2">
-                <Icon name="check" size={18} className="text-success" />
-                {dict.hero.trust}
-              </span>
-            </div>
-          </div>
+          </Reveal>
+        </div>
+      </div>
 
-          {/* Hero photograph */}
-          <div className="relative">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-ink-900 sm:aspect-[5/4] lg:aspect-[4/5]">
-              <Image
-                src={unsplash(images.hero.id, 1400, 80)}
-                alt={images.hero.alt}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 46vw"
-                className="object-cover"
-              />
-              {/* graphite gradient for text legibility */}
-              <div
-                className="absolute inset-0 bg-gradient-to-t from-ink-900/80 via-ink-900/10 to-transparent"
-                aria-hidden="true"
-              />
-              {/* Safety/operations chip anchored in the image */}
-              <div className="absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-xl bg-ink-900/70 p-3.5 backdrop-blur-sm ring-1 ring-white/10">
-                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-ink-900">
-                  <Icon name="shield" size={20} />
+      {/* Fact rail — verified claims only, no invented statistics. */}
+      <div className="relative border-t border-white/10 bg-ink-950/55 backdrop-blur-sm">
+        <div className="container-page">
+          <ul className="grid divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0 rtl:sm:divide-x-reverse">
+            {facts.map((fact) => (
+              <li
+                key={fact.label}
+                className="flex items-center gap-3 py-4 sm:justify-center sm:px-4"
+              >
+                <Icon
+                  name={fact.icon}
+                  size={18}
+                  className="shrink-0 text-accent-300"
+                />
+                <span className="text-sm font-medium text-ink-100">
+                  {fact.label}
                 </span>
-                <p className="text-sm font-medium text-white">
-                  Safety-led operations · trained operators · maintained fleet
-                </p>
-              </div>
-            </div>
-            {/* Small offset "years in Qatar" marker — factual, not a hero-metric */}
-            <div className="absolute -top-3 -start-3 hidden rounded-xl bg-white px-4 py-3 shadow-[var(--shadow-elevated)] ring-1 ring-ink-100 sm:block">
-              <p className="font-heading text-2xl font-extrabold text-ink-900">
-                {2026 - site.foundedYear}
-                <span className="text-brand-600">+</span>
-              </p>
-              <p className="text-xs font-medium text-muted-foreground">
-                years in Qatar
-              </p>
-            </div>
-          </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

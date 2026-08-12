@@ -1,42 +1,42 @@
 import Link from "next/link";
+import Image from "next/image";
 import { site } from "@/config/site";
-import { localeHref } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { brand } from "@/config/images";
+import { localeHref, cn } from "@/lib/utils";
 
 /**
- * Original RASIKH logo lockup: an angular amber "monolith" mark (three
- * ascending blades suggesting solidity + forward motion) beside the wordmark.
- * Fully SVG, theme-independent, no external assets. Replace with the client's
- * real logo by editing this component (mark) and `site.logoText`.
+ * OFFICIAL BRAND LOCKUP.
+ *
+ * The emblem is the client's official mark, extracted from the supplied
+ * Logo.pdf at native resolution with its transparency intact. It is never
+ * recoloured, redrawn, stretched or cropped — only scaled proportionally.
+ *
+ * The supplied artwork is 177×172px, so the emblem is only ever rendered
+ * small (≤56px in the header, ≤72px in the footer) where it stays crisp; the
+ * company name is set in type beside it. That is also the correct way to use a
+ * detailed circular seal: the seal carries the identity, the wordmark carries
+ * the legibility.
  */
 export function LogoMark({
+  size = 44,
   className,
-  size = 40,
+  priority = false,
 }: {
-  className?: string;
   size?: number;
+  className?: string;
+  priority?: boolean;
 }) {
+  const height = Math.round((size * brand.emblemHeight) / brand.emblemWidth);
   return (
-    <svg
+    <Image
+      src={brand.emblem}
+      alt=""
       width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
+      height={height}
+      priority={priority}
       className={className}
       aria-hidden="true"
-    >
-      <rect width="48" height="48" rx="10" fill="var(--color-ink-900)" />
-      {/* three ascending amber blades */}
-      <path d="M12 34V22l5-3v15z" fill="var(--color-brand-500)" />
-      <path d="M21.5 34V16l5-3v21z" fill="var(--color-brand-400)" />
-      <path d="M31 34V10l5-3v27z" fill="var(--color-brand-300)" />
-      <path
-        d="M11 37h26"
-        stroke="var(--color-brand-500)"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-    </svg>
+    />
   );
 }
 
@@ -44,25 +44,41 @@ export function Logo({
   locale,
   className,
   invert = false,
+  size = 42,
+  priority = false,
 }: {
   locale: string;
   className?: string;
   invert?: boolean;
+  size?: number;
+  priority?: boolean;
 }) {
   return (
     <Link
       href={localeHref(locale, "/")}
+      // min-h-[44px] so the lockup is a full-size touch target; the header is
+      // 76px tall, so this costs no layout.
       className={cn(
-        "inline-flex items-center gap-2.5 group",
+        "group inline-flex min-h-[44px] items-center gap-2.5 rounded-sm",
         className,
       )}
-      aria-label={`${site.fullName} — home`}
+      aria-label={`${site.fullName} — ${
+        locale === "ar" ? "الصفحة الرئيسية" : "home"
+      }`}
     >
-      <LogoMark size={38} className="transition-transform duration-200 group-hover:scale-105" />
-      <span className="flex flex-col leading-none">
+      <LogoMark
+        size={size}
+        priority={priority}
+        className="shrink-0 transition-transform duration-300 group-hover:scale-[1.04]"
+      />
+      {/*
+        The wordmark stays LTR even on Arabic pages: bidi reordering would move
+        the full stop in "YANBU EST." to the front of the line (".YANBU EST").
+      */}
+      <span dir="ltr" className="flex flex-col leading-none">
         <span
           className={cn(
-            "font-heading font-extrabold tracking-tight text-xl",
+            "font-heading text-[1.0625rem] font-extrabold uppercase tracking-[0.02em]",
             invert ? "text-white" : "text-ink-900",
           )}
         >
@@ -70,11 +86,11 @@ export function Logo({
         </span>
         <span
           className={cn(
-            "text-[0.62rem] font-semibold uppercase tracking-[0.18em] mt-0.5",
-            invert ? "text-brand-300" : "text-brand-700",
+            "mt-1 font-heading text-[0.6875rem] font-semibold uppercase tracking-[0.16em]",
+            invert ? "text-ink-300" : "text-ink-600",
           )}
         >
-          Heavy Equipment · Qatar
+          {site.logoSubText}
         </span>
       </span>
     </Link>

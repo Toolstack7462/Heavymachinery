@@ -1,94 +1,123 @@
-# RASIKH — Heavy Equipment & Contracting (Qatar)
+# Jowain Yanbu Est. — corporate website
 
-A premium, production-ready corporate website for a Qatar heavy-equipment rental &
-contracting business. Built with **Next.js 15 (App Router), TypeScript, Tailwind CSS v4**.
+Bilingual (English / Arabic) marketing site for **Jowain Yanbu Est.**, a heavy
+equipment rental and transportation business established in **1992** in **Yanbu
+Al Bahr, Kingdom of Saudi Arabia**.
 
-> **Brand note:** `RASIKH` (Arabic *rāsikh* — "solid / firmly established") is an
-> **original placeholder brand**. The real registered name, logo and some details
-> are meant to be swapped in via central config. See
-> [`docs/MISSING-INFO.md`](docs/MISSING-INFO.md). Contact details on the site are
-> **real and verified** from the supplied company profile.
+- Positioning: *Heavy Equipment Rental & Transportation*
+- Tagline: *Reliable Equipment. Dependable Transportation.*
+- Production domain: `https://www.jowain.net`
 
----
+## Stack
 
-## Quick start
+| Concern | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router + Turbopack, React 19, TypeScript strict) |
+| Styling | Tailwind CSS v4, CSS-first `@theme` tokens in `src/app/globals.css` |
+| Motion | `motion` (Motion for React v13) for hero parallax + card tilt; CSS + IntersectionObserver for section reveals |
+| Icons | `lucide-react` plus hand-authored equipment glyphs in `src/components/Icon.tsx` |
+| i18n | `/[locale]` routing (`en`, `ar`), full RTL, bilingual content objects |
+| Fonts | Archivo (display), Source Sans 3 (body), Noto Sans Arabic (Arabic) via `next/font` |
+
+## Commands
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000  → redirects to /en
-npm run build      # production build
-npm run start      # serve the production build
+npm run dev        # http://localhost:3000 → redirects to /en
+npm run build      # production build (94 prerendered routes)
+npm start          # serve the build
 npm run typecheck  # tsc --noEmit
-npm run lint       # eslint
+npm run lint       # eslint . (flat config; `next lint` is gone in Next 16)
 ```
 
-Requires Node 20.9+ (built and tested on Node 24).
+> **Keep the site prerendered.** Every page is static HTML. Reaching for a
+> request-time API (`headers()`, `cookies()`) in a shared boundary — the locale
+> layout, or `not-found.tsx` — turns the entire tree dynamic. That is why the
+> 404 reads its locale from `<html lang>` on the client instead of from a
+> request header.
 
----
+## Project shape
 
-## What's included
+```
+src/
+  app/
+    [locale]/            home, about, fleet, services, industries, quality,
+                         clients, why-choose-us, contact, request-a-quote,
+                         faqs, sitemap, privacy-policy, terms
+    api/{quote,contact}  enquiry endpoints (validated, provider-agnostic)
+    icon.png             favicon generated from the official logo
+    apple-icon.png       iOS icon
+    opengraph-image.tsx  social card, inlines the official emblem
+    manifest.ts robots.ts sitemap.ts
+  components/
+    blocks/              PageHero, Cards, CtaBand, ContactInfo, ClientWall
+    forms/EnquiryForm    accessible, spam-protected enquiry form
+    home/                Hero + HeroMedia (client parallax island)
+    layout/              Header, Footer, LocaleSwitcher
+    motion/              Reveal (server) + RevealObserver (client) + Tilt
+  config/
+    site.ts              ← single source of truth: brand, location, contact
+    images.ts            every photograph reference and its alt text
+    nav.ts               primary + footer navigation
+  content/               company, equipment, services, clients, faqs, legal
+  i18n/                  dictionaries (en/ar) + localized helpers
+  lib/                   seo.ts, enquiry.ts, utils.ts
+  proxy.ts               locale routing (Next 16's rename of `middleware.ts`)
+public/
+  brand/                 emblem PNGs extracted from the supplied Logo.pdf
+  clients/               25 client marks sliced from the supplied client board
+```
 
-**Pages** (all bilingual EN / AR with RTL): Home, About, Leadership, Services (+ 6
-service detail pages), Fleet catalogue (filterable) + 20 equipment detail pages,
-Industries, Projects, Safety & Quality, Why Choose Us, FAQs, Insights (+ 3 articles),
-Contact, Request a Quote, Privacy Policy, Terms, HTML Sitemap, and a custom 404.
+## Editing content
 
-**SEO & technical**
-- Per-page metadata, canonical + `hreflang` alternates (en/ar/x-default)
-- Structured data: Organization + LocalBusiness, WebSite, Service, Product,
-  FAQPage, Article, BreadcrumbList
-- `sitemap.xml` (88 URLs, locale alternates), `robots.txt`, web manifest
-- Generated favicon and Open Graph image (no external assets)
-- Security headers (CSP, HSTS, X-Frame-Options, etc.) via `next.config.ts`
-- Accessible forms with honeypot + time-trap spam protection
-- WhatsApp + click-to-call CTAs throughout; floating WhatsApp button
-- Responsive, mobile-first; respects `prefers-reduced-motion`
+Everything a non-developer usually needs to change lives in two folders:
 
-**Design system** — Industrial amber (`#F5A623`) on white/graphite. Lexend (headings)
-+ Source Sans 3 (body). Tokens live in `src/app/globals.css`.
+- **Brand, address, email** → `src/config/site.ts`
+- **Copy** → `src/content/*.ts` and `src/i18n/dictionaries/*.ts`
 
----
+Body copy is stored as `{ en, ar }` pairs, so a change must be made in both
+languages or TypeScript will complain. See `docs/CONTENT-EDITING.md`.
 
-## Editing content (no code required for most changes)
+## Content integrity rules
 
-Everything the client edits lives in a few well-commented files:
+This site is deliberately conservative about what it claims, because a heavy
+equipment buyer treats the website as a specification document:
 
-| What | File |
-|------|------|
-| Brand name, contact, address, social, domain | `src/config/site.ts` |
-| Services | `src/content/services.ts` |
-| Fleet / equipment | `src/content/equipment.ts` |
-| About, leadership, vision/mission, why-us, industries, safety, values, stats | `src/content/company.ts` |
-| FAQs | `src/content/faqs.ts` |
-| Insights / blog | `src/content/insights.ts` |
-| UI labels & Arabic translations | `src/i18n/dictionaries/{en,ar}.ts` |
-| Navigation | `src/config/nav.ts` |
-| Design tokens (colors, fonts) | `src/app/globals.css` |
+1. **The company profile is the only source of factual claims.** The only
+   capacity figures published anywhere are the three ranges it states — mobile
+   cranes 20–1200 T, rough terrain 25–120 T, crawler 55–3200 T. Every other
+   specification reads "Available on request".
+2. **No invented numbers.** No project counts, client counts, fleet unit counts,
+   staff numbers, turnover, certifications, awards or testimonials appear,
+   because none are documented. The experience claim is "over 30 years", the
+   profile's own wording.
+3. **No fabricated contact routes.** The profile supplies no telephone or
+   WhatsApp number, so `site.contact.phone` is `null` and every click-to-call
+   and WhatsApp affordance is absent rather than guessed.
+4. **No mislabelled machinery.** A photograph is only used for the equipment
+   type it actually shows; there is no category-level fallback image. Equipment
+   without a verified photograph renders an engineered panel and glyph.
+5. **Client logos keep their own trademarks.** They are sliced from artwork the
+   client supplied, never recoloured into the Jowain palette, never redrawn, and
+   never sourced from the web.
 
-Full guide: [`docs/CONTENT-EDITING.md`](docs/CONTENT-EDITING.md).
+Open questions for the client are tracked in `docs/MISSING-INFO.md`.
 
----
+## Enquiry delivery
 
-## Documentation
+`src/lib/enquiry.ts` validates submissions, blocks bots (honeypot + time-trap)
+and logs the payload server-side. Email/CRM delivery is opt-in through
+environment variables set on the host — never committed:
 
-- [`docs/COMPETITOR-AUDIT.md`](docs/COMPETITOR-AUDIT.md) — market research & findings
-- [`docs/MISSING-INFO.md`](docs/MISSING-INFO.md) — what the client must supply
-- [`docs/CONTENT-EDITING.md`](docs/CONTENT-EDITING.md) — how to edit content
-- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — how to deploy
-- [`docs/QA-RESULTS.md`](docs/QA-RESULTS.md) — test & QA results
+```
+ENQUIRY_WEBHOOK_URL=   # CRM, Zapier or Make endpoint
+```
 
----
+Until a delivery target is configured the UI says the request was *recorded*,
+and never claims an email was sent.
 
-## Honesty & integrity notes
+## Deployment
 
-This site was built to **never display invented facts**. Unverifiable material is
-disabled or clearly marked editable:
-- Performance stats ("500+ projects/clients") are **disabled** (`SHOW_STATS = false`).
-- No fake testimonials, client logos, certifications or project case studies.
-- Equipment specs use **only** capacities stated in the source profile; everything
-  else is "Available on request".
-- Arabic marketing copy shows a "translation under review" notice.
-
-## License / ownership
-
-Delivered for the client. Replace placeholder brand assets before public launch.
+See `docs/DEPLOYMENT.md`. Security headers (CSP, HSTS, frame and referrer
+policy) are defined in `next.config.ts`; the image optimiser is scoped to the
+single photography host it uses.

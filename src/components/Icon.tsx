@@ -1,84 +1,74 @@
 import type { SVGProps } from "react";
 import {
   Shield,
-  Clock,
   Medal,
   Handshake,
   Map,
   Gauge,
-  Tag,
   Calendar,
   Users,
   Layers,
   Building2,
   Factory,
-  Trees,
   Wrench,
-  Leaf,
   ClipboardCheck,
-  Phone,
   Mail,
   MapPin,
   Globe,
   Check,
-  Star,
   ChevronRight,
   ArrowRight,
-  ArrowLeft,
   Menu,
   X,
   Truck,
   Forklift,
   Zap,
-  Quote,
-  Route,
+  Wind,
+  Flame,
+  Lightbulb,
   type LucideIcon,
 } from "lucide-react";
 
 /**
  * Unified icon system.
- * - `equipmentGlyphs` are hand-authored line icons for machinery/services
- *   (Lucide has no excavator/dozer/crane), drawn on a 24×24 grid, 1.75 stroke.
- * - Everything else maps to Lucide for a single, consistent visual language.
+ * - `equipmentGlyphs` are hand-authored line icons for machinery (Lucide has
+ *   no crane, dozer, tanker or scissor lift), drawn on a 24×24 grid at 1.75
+ *   stroke so they sit in the same visual language as Lucide.
+ * - Everything else maps to Lucide.
  * Never use emoji as icons.
  */
 
 const lucideMap: Record<string, LucideIcon> = {
   shield: Shield,
-  clock: Clock,
   medal: Medal,
   handshake: Handshake,
   map: Map,
   gauge: Gauge,
-  tag: Tag,
   calendar: Calendar,
   users: Users,
   layers: Layers,
   building: Building2,
-  road: Route,
   factory: Factory,
-  tree: Trees,
   wrench: Wrench,
-  leaf: Leaf,
   clipboard: ClipboardCheck,
-  phone: Phone,
   mail: Mail,
   mapPin: MapPin,
   globe: Globe,
   check: Check,
-  star: Star,
   chevronRight: ChevronRight,
   arrowRight: ArrowRight,
-  arrowLeft: ArrowLeft,
   menu: Menu,
   close: X,
   truck: Truck,
   forklift: Forklift,
   power: Zap,
-  quote: Quote,
+  generator: Zap,
+  compressor: Wind,
+  welder: Flame,
+  towerLight: Lightbulb,
 };
 
-/** Hand-authored equipment/service glyphs. */
+/** Hand-authored equipment glyphs. */
 const equipmentGlyphs: Record<string, React.ReactNode> = {
   excavator: (
     <>
@@ -125,7 +115,6 @@ const equipmentGlyphs: Record<string, React.ReactNode> = {
   ),
   roller: (
     <>
-      <path d="M3 20a4 4 0 1 0 0-.001Z" />
       <circle cx="7" cy="16" r="4" />
       <path d="M11 13h6v-3h-5l-1 3" />
       <path d="M17 12h3v4h-3" />
@@ -142,6 +131,17 @@ const equipmentGlyphs: Record<string, React.ReactNode> = {
       <path d="M15.5 12h3" />
     </>
   ),
+  crawlerCrane: (
+    <>
+      <path d="M3 21h10" />
+      <path d="M3 19h10a2 2 0 0 0 0-2H3a2 2 0 0 0 0 2z" />
+      <path d="M7 17V9" />
+      <path d="M7 9l9-5" />
+      <path d="M9.5 11.5l4.5-2.5" />
+      <path d="M16 4v6" />
+      <path d="M14.5 10h3" />
+    </>
+  ),
   telehandler: (
     <>
       <path d="M2 19h12" />
@@ -151,6 +151,21 @@ const equipmentGlyphs: Record<string, React.ReactNode> = {
       <path d="M9 14l10-6" />
       <path d="M19 8h3" />
       <path d="M6 13V9h3" />
+    </>
+  ),
+  scissorLift: (
+    <>
+      {/* platform, guard rail, double scissor pantograph, tracked base */}
+      <path d="M4 7h13" />
+      <path d="M4 7V4" />
+      <path d="M17 7V4" />
+      <path d="M6.5 9.5l8 4" />
+      <path d="M14.5 9.5l-8 4" />
+      <path d="M6.5 13.5l8 4" />
+      <path d="M14.5 13.5l-8 4" />
+      <path d="M3.5 19.5h14" />
+      <circle cx="6.5" cy="21" r="1.1" />
+      <circle cx="14.5" cy="21" r="1.1" />
     </>
   ),
   trailer: (
@@ -163,22 +178,14 @@ const equipmentGlyphs: Record<string, React.ReactNode> = {
       <path d="M17 13h5" />
     </>
   ),
-  demolition: (
+  tanker: (
     <>
-      <path d="M3 21h12" />
-      <path d="M5 21v-6l4-1v7" />
-      <path d="M9 14l2-6" />
-      <circle cx="12" cy="6" r="2.5" />
-      <path d="M14 4l4-2" />
-      <path d="M6 15l-2 2" />
-    </>
-  ),
-  contracting: (
-    <>
-      <path d="M3 21h18" />
-      <path d="M6 21V8l6-4 6 4v13" />
-      <path d="M9 21v-5h6v5" />
-      <path d="M9 11h2M13 11h2" />
+      <path d="M2 18h20" />
+      <circle cx="7" cy="19.5" r="1.4" />
+      <circle cx="17" cy="19.5" r="1.4" />
+      <rect x="3" y="9" width="13" height="7" rx="3.5" />
+      <path d="M16 16v-5h3l2 3v2" />
+      <path d="M7.5 9v7M11.5 9v7" />
     </>
   ),
 };

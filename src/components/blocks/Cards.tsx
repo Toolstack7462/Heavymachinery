@@ -3,40 +3,72 @@ import Image from "next/image";
 import type { Locale } from "@/config/site";
 import { localeHref, cn } from "@/lib/utils";
 import { Icon } from "@/components/Icon";
+import { Tilt } from "@/components/motion/Tilt";
 import type { ServiceItem } from "@/content/services";
 import type { EquipmentItem } from "@/content/equipment";
-import type { Industry, Value } from "@/content/company";
-import type { Insight } from "@/content/insights";
-import { equipmentImage, categoryImages, unsplash } from "@/config/images";
+import { getCategoryMeta } from "@/content/equipment";
+import type { Industry, ValueItem } from "@/content/company";
+import { equipmentImage, unsplash } from "@/config/images";
 
 /**
- * Card elevation rule (avoids the "ghost card" 1px-border + wide-shadow tell):
- * resting state = solid border only; shadow appears on hover as a lift cue.
+ * Card elevation rule: resting state is a solid 1px border and no shadow —
+ * the "hairline border + wide soft shadow at rest" combination is the tell of
+ * a template. Depth appears only on hover, as a lift cue.
  */
 const cardBase =
-  "group flex flex-col rounded-2xl border border-ink-150 bg-white transition-all duration-300 hover:-translate-y-1 active:scale-[0.99] hover:border-brand-200 hover:shadow-[var(--shadow-elevated)]";
+  "group flex h-full flex-col rounded-2xl border border-ink-150 bg-white transition-[border-color,box-shadow,transform] duration-300 hover:border-brand-200 hover:shadow-[var(--shadow-lift)]";
 
-function IconTile({ name, className }: { name: string; className?: string }) {
+function IconTile({
+  name,
+  className,
+  size = 24,
+}: {
+  name: string;
+  className?: string;
+  size?: number;
+}) {
   return (
     <span
       className={cn(
-        "inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100",
+        "inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100 transition-colors duration-300 group-hover:bg-brand-100",
         className,
       )}
     >
-      <Icon name={name} size={24} />
+      <Icon name={name} size={size} />
     </span>
   );
 }
 
+/**
+ * Card headings take their level from context, because the same card appears
+ * in two places: as the page's own list (index pages, where it follows the h1
+ * and must be an h2) and inside a titled section (homepage, related equipment,
+ * where the section owns the h2 and the card is an h3). Hard-coding h3
+ * produced an h1 → h3 skip on /fleet, /services and /industries.
+ */
+type HeadingLevel = 2 | 3;
+
+function CardHeading({
+  level = 3,
+  className,
+  children,
+}: {
+  level?: HeadingLevel;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const Tag = level === 2 ? "h2" : "h3";
+  return <Tag className={className}>{children}</Tag>;
+}
+
 function CardArrow({ label }: { label: string }) {
   return (
-    <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
+    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
       {label}
       <Icon
         name="arrowRight"
         size={16}
-        className="transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+        className="transition-transform duration-200 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
       />
     </span>
   );
@@ -46,10 +78,12 @@ export function ServiceCard({
   locale,
   service,
   cta,
+  headingLevel,
 }: {
   locale: Locale;
   service: ServiceItem;
   cta: string;
+  headingLevel?: HeadingLevel;
 }) {
   return (
     <Link
@@ -57,11 +91,14 @@ export function ServiceCard({
       className={cn(cardBase, "p-6")}
     >
       <IconTile name={service.icon} />
-      <h3 className="mt-5 text-xl font-bold text-ink-900 group-hover:text-brand-700 transition-colors">
-        {service.title}
-      </h3>
-      <p className="mt-2 flex-1 text-sm text-muted-foreground leading-relaxed">
-        {service.summary}
+      <CardHeading
+        level={headingLevel}
+        className="mt-5 text-lg font-bold text-ink-900 transition-colors group-hover:text-brand-700"
+      >
+        {service.title[locale]}
+      </CardHeading>
+      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+        {service.summary[locale]}
       </p>
       <CardArrow label={cta} />
     </Link>
@@ -72,114 +109,129 @@ export function EquipmentCard({
   locale,
   item,
   cta,
+  headingLevel,
 }: {
   locale: Locale;
   item: EquipmentItem;
   cta: string;
+  headingLevel?: HeadingLevel;
 }) {
-  const photo = equipmentImage(item.slug) ?? categoryImages[item.category];
+  const photo = equipmentImage(item.slug);
+  const category = getCategoryMeta(item.category);
+
   return (
-    <Link
-      href={localeHref(locale, `/fleet/${item.slug}`)}
-      className={cn(cardBase, "overflow-hidden")}
-    >
-      <div className="relative h-44 overflow-hidden bg-ink-900">
-        {photo ? (
-          <Image
-            src={unsplash(photo.id, 640, 70)}
-            alt={photo.alt}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+    <Tilt className="h-full">
+      <Link
+        href={localeHref(locale, `/fleet/${item.slug}`)}
+        className={cn(cardBase, "overflow-hidden")}
+      >
+        <div className="relative h-44 overflow-hidden bg-ink-900">
+          {photo ? (
+            <Image
+              src={unsplash(photo.id, 640, 70)}
+              alt={locale === "ar" ? photo.altAr : photo.alt}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <div
+                className="absolute inset-0 bg-grid-dark opacity-60"
+                aria-hidden="true"
+              />
+              <Icon
+                name={item.icon}
+                size={64}
+                className="relative text-brand-300"
+              />
+            </div>
+          )}
+          <span
+            className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-ink-950/85 to-transparent"
+            aria-hidden="true"
           />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <div className="absolute inset-0 bg-grid opacity-10" aria-hidden="true" />
-            <Icon name={item.icon} size={56} className="relative text-brand-400" />
-          </div>
-        )}
-        <span className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-ink-900/70 to-transparent" aria-hidden="true" />
-        <span className="absolute bottom-2.5 start-3 inline-flex items-center gap-1.5 text-xs font-semibold text-white/90">
-          <Icon name={item.icon} size={14} />
-          {item.category}
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-lg font-bold text-ink-900 group-hover:text-brand-700 transition-colors">
-          {item.name}
-        </h3>
-        <p className="mt-1.5 flex-1 text-sm text-muted-foreground leading-relaxed">
-          {item.summary}
-        </p>
-        <CardArrow label={cta} />
-      </div>
-    </Link>
+          <span className="absolute bottom-3 start-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white/90">
+            <Icon name={category.icon} size={14} />
+            {category.title[locale]}
+          </span>
+        </div>
+        <div className="flex flex-1 flex-col p-5">
+          <CardHeading
+            level={headingLevel}
+            className="text-lg font-bold text-ink-900 transition-colors group-hover:text-brand-700"
+          >
+            {item.name[locale]}
+          </CardHeading>
+          <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
+            {item.summary[locale]}
+          </p>
+          <CardArrow label={cta} />
+        </div>
+      </Link>
+    </Tilt>
   );
 }
 
 export function IndustryCard({
   locale,
   industry,
+  headingLevel,
 }: {
   locale: Locale;
   industry: Industry;
+  headingLevel?: HeadingLevel;
 }) {
   return (
-    <Link
-      href={localeHref(locale, `/industries#${industry.slug}`)}
-      className="group flex gap-4 rounded-2xl border border-ink-150 bg-white p-5 transition-all duration-300 hover:border-brand-200 hover:shadow-[var(--shadow-elevated)]"
+    <div
+      id={industry.slug}
+      className={cn(cardBase, "scroll-mt-24 flex-row gap-5 p-6")}
     >
-      <IconTile name={industry.icon} className="shrink-0" />
+      <IconTile name={industry.icon} className="shrink-0" size={26} />
       <div>
-        <h3 className="font-bold text-ink-900 group-hover:text-brand-700 transition-colors">
-          {industry.title}
-        </h3>
-        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-          {industry.description}
+        <CardHeading
+          level={headingLevel}
+          className="text-lg font-bold text-ink-900"
+        >
+          {industry.title[locale]}
+        </CardHeading>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {industry.description[locale]}
         </p>
       </div>
-    </Link>
-  );
-}
-
-export function ValueCard({ value }: { value: Value }) {
-  return (
-    <div className="rounded-2xl border border-ink-150 bg-white p-6">
-      <IconTile name={value.icon} />
-      <h3 className="mt-4 text-lg font-bold text-ink-900">{value.title}</h3>
-      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        {value.description}
-      </p>
     </div>
   );
 }
 
-export function InsightCard({
+export function ValueCard({
   locale,
-  insight,
-  readLabel,
+  value,
+  numbered,
 }: {
   locale: Locale;
-  insight: Insight;
-  readLabel: string;
+  value: ValueItem;
+  /** 1-based index, shown as a quiet ordinal for short value sets. */
+  numbered?: number;
 }) {
   return (
-    <Link
-      href={localeHref(locale, `/insights/${insight.slug}`)}
-      className={cn(cardBase, "p-6")}
-    >
-      <span className="text-xs font-semibold uppercase tracking-wider text-brand-700">
-        {insight.category}
-      </span>
-      <h3 className="mt-3 text-lg font-bold text-ink-900 group-hover:text-brand-700 transition-colors">
-        {insight.title}
+    <div className="group flex h-full flex-col rounded-2xl border border-ink-150 bg-white p-6 transition-[border-color,box-shadow] duration-300 hover:border-brand-200 hover:shadow-[var(--shadow-card)]">
+      <div className="flex items-center justify-between gap-4">
+        <IconTile name={value.icon} />
+        {numbered !== undefined && (
+          <span
+            className="font-heading text-2xl font-extrabold text-ink-150"
+            aria-hidden="true"
+          >
+            {String(numbered).padStart(2, "0")}
+          </span>
+        )}
+      </div>
+      <h3 className="mt-5 text-lg font-bold text-ink-900">
+        {value.title[locale]}
       </h3>
-      <p className="mt-2 flex-1 text-sm text-muted-foreground leading-relaxed">
-        {insight.excerpt}
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        {value.description[locale]}
       </p>
-      <span className="mt-4 text-xs text-ink-500">
-        {insight.readMinutes} {readLabel}
-      </span>
-    </Link>
+    </div>
   );
 }

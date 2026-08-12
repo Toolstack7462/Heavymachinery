@@ -4,14 +4,26 @@ import { locales, defaultLocale } from "@/i18n/config";
 const PUBLIC_FILE = /\.[^/]+$/;
 
 /**
- * Locale routing: ensures every page path is prefixed with a supported locale.
- * `/` and any un-prefixed path redirect to the default locale. API routes,
- * Next internals and static files are skipped.
+ * Next's generated metadata routes have no file extension, so without this list
+ * the locale redirect below would send `/opengraph-image` to
+ * `/en/opengraph-image` — and every social card would 404.
  */
-export function middleware(request: NextRequest) {
+const METADATA_ROUTES = new Set([
+  "/opengraph-image",
+  "/twitter-image",
+  "/icon",
+  "/apple-icon",
+]);
+
+/**
+ * Locale routing (Next 16 renamed this file convention from `middleware` to
+ * `proxy`): every page path is prefixed with a supported locale, and
+ * un-prefixed paths redirect to the visitor's preferred one. API routes, Next
+ * internals, metadata routes and static files pass through untouched.
+ */
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip internals, API and static assets.
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -19,18 +31,18 @@ export function middleware(request: NextRequest) {
     pathname === "/sitemap.xml" ||
     pathname === "/manifest.webmanifest" ||
     pathname === "/favicon.ico" ||
+    METADATA_ROUTES.has(pathname) ||
     PUBLIC_FILE.test(pathname)
   ) {
     return NextResponse.next();
   }
 
-  // Already locale-prefixed?
   const hasLocale = locales.some(
-    (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`),
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
   );
   if (hasLocale) return NextResponse.next();
 
-  // Prefer a matching Accept-Language, else default.
+  // Prefer a matching Accept-Language, else the default locale.
   const accept = request.headers.get("accept-language") ?? "";
   const preferred = accept.toLowerCase().startsWith("ar") ? "ar" : defaultLocale;
 

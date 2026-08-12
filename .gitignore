@@ -39,3 +39,7 @@ yarn-error.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# design-tooling working notes (candid internal critique; keep out of a
+# repository the client may read)
+.impeccable/

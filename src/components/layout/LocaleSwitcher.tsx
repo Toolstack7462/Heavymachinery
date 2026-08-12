@@ -2,40 +2,60 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { locales, localeNames } from "@/i18n/config";
+import { locales } from "@/i18n/config";
 import type { Locale } from "@/config/site";
+import type { Dictionary } from "@/i18n/dictionaries";
+import { en } from "@/i18n/dictionaries/en";
+import { ar } from "@/i18n/dictionaries/ar";
 import { cn } from "@/lib/utils";
 
+const labels: Record<Locale, string> = {
+  en: en.meta.localeShort,
+  ar: ar.meta.localeLabel,
+};
+
 /**
- * Swaps the leading locale segment of the current path, preserving the rest.
- * Query strings are dropped intentionally (kept simple & robust).
+ * Swaps the leading locale segment of the current path, keeping the rest.
+ * Each option carries `hrefLang` and its name in its own language.
  */
-export function LocaleSwitcher({ locale }: { locale: Locale }) {
+export function LocaleSwitcher({
+  locale,
+  dict,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+}) {
   const pathname = usePathname();
 
   const swap = (target: Locale) => {
     const segments = pathname.split("/");
-    // segments[0] === "" , segments[1] === current locale
-    segments[1] = target;
+    segments[1] = target; // segments[0] is "", segments[1] is the locale
     return segments.join("/") || `/${target}`;
   };
 
   return (
-    <div className="inline-flex items-center rounded-lg border border-ink-200 overflow-hidden">
-      {locales.map((l) => (
+    <div
+      className="inline-flex items-center overflow-hidden rounded-lg border border-ink-200"
+      role="group"
+      aria-label={dict.meta.localeLabel}
+    >
+      {locales.map((option) => (
         <Link
-          key={l}
-          href={swap(l)}
-          hrefLang={l}
-          aria-current={l === locale ? "true" : undefined}
+          key={option}
+          href={swap(option)}
+          hrefLang={option}
+          lang={option}
+          aria-current={option === locale ? "true" : undefined}
+          // 44px minimum height: this is a primary control in the mobile
+          // header, not a desktop afterthought.
           className={cn(
-            "px-2.5 py-1.5 text-xs font-semibold transition-colors",
-            l === locale
+            "inline-flex min-h-[44px] min-w-[2.75rem] items-center justify-center px-2.5 text-xs font-semibold transition-colors",
+            option === locale
               ? "bg-ink-900 text-white"
-              : "bg-white text-ink-600 hover:bg-ink-50",
+              : "bg-white text-ink-600 hover:bg-ink-50 hover:text-ink-900",
           )}
         >
-          {l === "ar" ? localeNames.ar : "EN"}
+          {labels[option]}
         </Link>
       ))}
     </div>

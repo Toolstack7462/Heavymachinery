@@ -9,16 +9,17 @@ export interface Crumb {
   href?: string;
 }
 
-/**
- * Accessible breadcrumbs + matching BreadcrumbList JSON-LD.
- */
+/** Accessible breadcrumbs + matching BreadcrumbList JSON-LD. */
 export function Breadcrumbs({
   locale,
   homeLabel,
+  label,
   items,
 }: {
   locale: Locale;
   homeLabel: string;
+  /** Localized accessible name for the nav landmark. */
+  label: string;
   items: Crumb[];
 }) {
   const all: Crumb[] = [{ label: homeLabel, href: "/" }, ...items];
@@ -26,37 +27,41 @@ export function Breadcrumbs({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: all.map((c, i) => ({
+    itemListElement: all.map((crumb, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      name: c.label,
-      ...(c.href
-        ? { item: `${site.url}${localeHref(locale, c.href)}` }
+      name: crumb.label,
+      ...(crumb.href
+        ? { item: `${site.url}${localeHref(locale, crumb.href)}` }
         : {}),
     })),
   };
 
   return (
-    <nav aria-label="Breadcrumb" className="text-sm">
+    <nav aria-label={label} className="text-sm">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ol className="flex flex-wrap items-center gap-1.5 text-ink-500">
-        {all.map((c, i) => {
+      {/* ink-600, not ink-500: breadcrumbs sit on the muted band where
+          ink-500 drops to ~4.4:1. */}
+      <ol className="flex flex-wrap items-center gap-1.5 text-ink-600">
+        {all.map((crumb, i) => {
           const last = i === all.length - 1;
           return (
             <li key={i} className="flex items-center gap-1.5">
-              {c.href && !last ? (
+              {crumb.href && !last ? (
+                // py-3/-my-3 grows the tap target to 44px without growing the
+                // row: hit area and visual size are allowed to differ.
                 <Link
-                  href={localeHref(locale, c.href)}
-                  className="hover:text-brand-700 transition-colors"
+                  href={localeHref(locale, crumb.href)}
+                  className="-mx-2 -my-3 inline-flex min-w-[44px] items-center justify-center px-2 py-3 transition-colors hover:text-brand-700"
                 >
-                  {c.label}
+                  {crumb.label}
                 </Link>
               ) : (
-                <span className="text-ink-800 font-medium" aria-current="page">
-                  {c.label}
+                <span className="font-medium text-ink-800" aria-current="page">
+                  {crumb.label}
                 </span>
               )}
               {!last && (

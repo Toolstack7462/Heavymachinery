@@ -1,50 +1,145 @@
-# Missing / To-Confirm Information
+# Missing / to-confirm information
 
-The site is complete and deployable, but the following items are **placeholders or
-need client confirmation** before public launch. Each lists exactly where to change it.
+The site is complete and deployable. The items below are the **only** facts still
+open — everything else on the site traces to the client-supplied company profile
+(*Jowain Yanbu Est. Profile Overview*, August 2026) or the official `Logo.pdf`.
 
-## 🔴 Required before public launch (legal / brand)
+Nothing here is filled with a plausible substitute. Each row says exactly where to
+put the real value once the client confirms it.
 
-| Item | Current placeholder | Where to set |
-|---|---|---|
-| Registered company name | `RASIKH Heavy Equipment & Contracting W.L.L.` (original placeholder) | `src/config/site.ts` → `name`, `fullName`, `legalName`, `logoText` |
-| Real logo | Original SVG mark (`LogoMark`) | `src/components/Logo.tsx` + `src/app/icon.tsx` + `src/app/opengraph-image.tsx` |
-| Production domain | `https://www.rasikh-qatar.com` | `src/config/site.ts` → `url` |
-| Branded email | `info@rasikh-qatar.com` (placeholder; profile lists a gmail) | `src/config/site.ts` → `contact.email` |
-| Privacy Policy & Terms | Starter templates — need legal review for Qatar | `src/app/[locale]/privacy-policy`, `.../terms` |
+---
 
-## 🟡 Verified but confirm for the rebrand
+## 🔴 Confirm before launch
 
-| Item | Value from profile | Notes |
-|---|---|---|
-| Phone (primary/secondary) | `+974 5000 4159` / `+974 5539 3445` | Real — confirm still current |
-| Address | Zone 57, Street 509, Building 42, Doha | Real — set a precise map pin (`contact.address.mapQuery`) |
-| Founded | 2013 | Used for "years in Qatar" and schema |
-| CEO / leadership | Abid Ali Hazrat Said | `src/content/company.ts` — confirm name/title/photo/bio for rebrand |
-| Opening hours | Sat–Thu 7:00–19:00 | `src/config/site.ts` → `contact.hours` — confirm |
+### 1. The published email address
 
-## 🟢 Disabled until verified (do NOT enable with invented data)
+The profile's contact line reads, as one unbroken string:
 
-| Item | Status | How to enable |
-|---|---|---|
-| Performance stats ("500+ projects / 500+ clients") | **Disabled** | Confirm real figures, then set `SHOW_STATS = true` in `src/content/company.ts` |
-| Certifications (ISO/OSHAD/etc.) | **Omitted** | Add verified certificate details in `src/content/company.ts` (Safety page) |
-| Project case studies | **Editable empty-state** | Add real, permissioned case studies to the Projects page |
-| Testimonials / client logos | **Not present** | Add only with permission and real content |
-| Equipment exact capacities / models | Verified figures only; rest "Available on request" | Fill real specs in `src/content/equipment.ts` |
-| Photography | Real, license-free Unsplash stock (verified to depict machinery) | Replace with the client's **owned** equipment photos in `src/config/images.ts` |
-| Social media links | Empty (hidden) | `src/config/site.ts` → `social` |
+```
+Contactsul@jowain.net
+```
 
-## Arabic content
+It is published verbatim as **`contactsul@jowain.net`** rather than silently
+"corrected". Two readings are possible and only the client can settle it:
 
-- UI chrome (nav, buttons, forms) is translated (standard Arabic — safe).
-- Marketing copy is a first-pass translation; a **native-speaker review** is
-  recommended. Arabic pages show a "translation under review" notice.
-- Page **body** content (service/equipment descriptions) currently renders in English
-  on Arabic routes. Add Arabic bodies when available (see `CONTENT-EDITING.md`).
+| Reading | Resulting address |
+| --- | --- |
+| The string is the address | `contactsul@jowain.net` |
+| A "Contact" label lost its separator | `sul@jowain.net` |
 
-## Integrations to wire
+**Where:** `src/config/site.ts` → `contact.email` (and `contact.emailAsPrinted`,
+which keeps the source string for the record).
 
-- **Form delivery**: `src/lib/enquiry.ts` validates and logs enquiries but does not
-  send email. Add a provider (e.g. Resend/SendGrid) via an env var — never hard-code keys.
-- **Analytics**: none included; add a privacy-friendly analytics tag if desired.
+This is the site's only inbound route apart from the enquiry form, so it is worth
+confirming first.
+
+### 2. Telephone / WhatsApp number
+
+The profile supplies **no** telephone or WhatsApp number. Consequently:
+
+- `site.contact.phone`, `phoneE164` and `whatsapp` are `null`
+- there is **no** click-to-call, no WhatsApp button, no floating call CTA
+- the schema graph omits `telephone` rather than asserting one
+- the enquiry form treats phone as an optional field the *visitor* may supply
+
+**Where:** `src/config/site.ts` → `contact.phone` / `phoneE164` / `whatsapp`.
+Adding values there is the only change needed; the UI has no hard-coded numbers,
+but the header, footer, contact panel and CTA bands were built without a call
+affordance, so re-adding one is a deliberate design change rather than a
+configuration flip.
+
+### 3. Legal review of the website terms
+
+`src/content/legal.ts` holds a plain-language privacy policy and website terms,
+scoped to what the site actually does (collects enquiry form fields; sets no
+tracking cookies) and governed by the laws of the Kingdom of Saudi Arabia. They
+should be reviewed by the client's counsel before launch.
+
+---
+
+## 🟡 Would materially improve the site
+
+### 4. Vector or high-resolution logo
+
+The supplied `Logo.pdf` contains a single **178 × 173 px raster image** — not
+vector artwork. The emblem was extracted with its transparency intact and is used
+at 42–64px in the header, footer and favicon, where it stays crisp, paired with a
+typographic wordmark.
+
+An `.ai`, `.eps`, `.svg` or `.cdr` original (or a ≥1000px PNG) would allow larger
+display on the hero and share cards.
+
+**Where:** replace `public/brand/jowain-emblem.png`,
+`public/brand/jowain-emblem-512.png`, `src/app/icon.png`,
+`src/app/apple-icon.png`; dimensions are declared in `src/config/images.ts`
+(`brand.emblemWidth/Height`).
+
+### 5. Jowain's own equipment photography
+
+No client photography was supplied. The company profile's machinery images are
+AI-generated (impossible crane geometry, synthetic stock handshakes) and are
+therefore **not used** — publishing them would put fabricated equipment on a real
+company's site.
+
+The site currently uses six licensed Unsplash photographs, each visually verified
+against the equipment type it illustrates. The other twenty equipment types show
+an engineered navy panel with their line glyph, because no verified photograph of
+that machine type exists. Real photographs of Jowain's own cranes, trailers,
+tankers and site power would replace both.
+
+**Where:** `src/config/images.ts` → `equipmentImages` (keyed by equipment slug),
+`images` (hero and section bands).
+
+### 6. One client mark cannot be identified
+
+The supplied "Our Valued Clients" board contains a Saudi government emblem whose
+inner ring of Arabic text is not legible at the supplied resolution. Rather than
+guess the organisation, it carries a neutral accessible description ("a Kingdom of
+Saudi Arabia government organisation").
+
+**Where:** `src/content/clients.ts` → the `kingdom-of-saudi-arabia` entry.
+
+Higher-resolution or vector client marks would also sharpen the whole wall: the
+current marks are sliced from a WhatsApp-compressed JPEG at roughly 100–185px
+wide, which is adequate at the rendered size but not generous.
+
+### 7. Client list reconciliation (not an error)
+
+Two client sources were supplied and both are published:
+
+- the **logo board** — 25 marks, shown on `/clients` and the homepage
+- the **profile's printed list** — Kabbani, TCC, Abraak International (Saudi
+  Arabia); Landworx, UCC Qatar, Redco International Qatar, Petrosarve Qatar, Iris
+  Qatar, UCC PMV Qatar (Qatar)
+
+> **Note for future audits:** those Qatar-based names are current Jowain clients
+> from the 2026 profile. They are **not** residue from the previous placeholder
+> identity and must not be purged.
+
+Confirm whether both lists should stay public, and whether "Petrosarve" is spelled
+as intended (published exactly as printed).
+
+---
+
+## 🟢 Deliberately absent — do not add without a verified source
+
+| Item | Status |
+| --- | --- |
+| Project counts, client counts, fleet unit counts | Not published — no figure exists in any source |
+| Employee numbers, turnover, market share | Not published |
+| ISO or other certifications | Not published — add only with certificate numbers |
+| Awards | Not published |
+| Testimonials / case studies | Not published — need named, permissioned sources |
+| Exact models, tonnages, lift heights, payloads, kVA ratings | Only the three crane ranges from the profile are stated; everything else reads "Available on request" |
+| Opening hours | Not supplied — the hours row is absent, not guessed |
+| Social profiles | None supplied — footer icons hide while `site.social` is empty |
+| Official Arabic registered name | Not supplied — the Arabic site keeps the Latin "Jowain Yanbu Est." rather than inventing an Arabic legal entity name |
+| Street address | Profile gives the city only; the contact page links to Maps for Yanbu Al Bahr instead of pinning an unverified building |
+
+## Enquiry delivery
+
+`src/lib/enquiry.ts` validates and logs submissions but sends no email until a
+delivery target is configured (`ENQUIRY_WEBHOOK_URL`, or a provider branch added
+in that file). The success screen states the request was **recorded** — it never
+claims an email was delivered. Set this up before launch, or the form's leads will
+only exist in server logs.

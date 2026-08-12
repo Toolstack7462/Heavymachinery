@@ -13,12 +13,13 @@ import { JsonLd } from "@/components/JsonLd";
 import { EquipmentCard } from "@/components/blocks/Cards";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
+import { Reveal } from "@/components/motion/Reveal";
 import { services, getServiceBySlug } from "@/content/services";
 import { getEquipmentBySlug } from "@/content/equipment";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) =>
-    services.map((s) => ({ locale, slug: s.slug })),
+    services.map((service) => ({ locale, slug: service.slug })),
   );
 }
 
@@ -32,8 +33,8 @@ export async function generateMetadata({
   if (!service) return {};
   return buildMetadata({
     locale,
-    title: service.title,
-    description: service.summary,
+    title: service.title[locale],
+    description: service.summary[locale],
     path: `/services/${slug}`,
   });
 }
@@ -49,110 +50,109 @@ export default async function ServiceDetailPage({
   if (!service) notFound();
 
   const related = service.relatedEquipment
-    .map((s) => getEquipmentBySlug(s))
-    .filter((e): e is NonNullable<typeof e> => Boolean(e));
+    .map(getEquipmentBySlug)
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   return (
     <>
       <JsonLd
         data={serviceJsonLd(
-          service.title,
-          service.summary,
+          service.title.en,
+          service.summary.en,
           localeHref(locale, `/services/${slug}`),
         )}
       />
       <PageHero
         locale={locale}
         homeLabel={dict.breadcrumb.home}
+        breadcrumbLabel={dict.breadcrumb.label}
         crumbs={[
           { label: dict.nav.services, href: "/services" },
-          { label: service.title },
+          { label: service.title[locale] },
         ]}
-        title={service.title}
-        lead={service.summary}
+        title={service.title[locale]}
+        lead={service.summary[locale]}
       />
 
       <Section>
         <div className="grid gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-7">
+          <Reveal className="lg:col-span-7">
             <div className="prose-article">
-              {service.body.map((p, i) => (
-                <p key={i}>{p}</p>
+              {service.body[locale].map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
-          </div>
+          </Reveal>
           <aside className="lg:col-span-5">
-            <div className="rounded-2xl border border-ink-100 bg-surface-muted p-6 sticky top-24">
-              <h2 className="text-lg font-bold text-ink-900">
-                What&apos;s included
-              </h2>
-              <ul className="mt-4 space-y-3">
-                {service.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm">
-                    <Icon
-                      name="check"
-                      size={18}
-                      className="text-success mt-0.5 shrink-0"
-                    />
-                    <span className="text-ink-700">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 flex flex-col gap-2.5">
-                <Button
-                  href={localeHref(locale, "/request-a-quote")}
-                  className="w-full"
-                  iconEnd="arrowRight"
-                >
-                  {dict.actions.requestQuote}
-                </Button>
-                <Button
-                  href={localeHref(locale, "/contact")}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {dict.actions.contactUs}
-                </Button>
+            <Reveal delay={0.08}>
+              <div className="sticky top-24 rounded-2xl border border-ink-150 bg-surface-muted p-6">
+                <h2 className="font-heading text-lg font-bold text-ink-900">
+                  {dict.labels.included}
+                </h2>
+                <ul className="mt-4 space-y-3">
+                  {service.features[locale].map((feature) => (
+                    <li key={feature} className="flex items-start gap-3 text-sm">
+                      <Icon
+                        name="check"
+                        size={18}
+                        className="mt-0.5 shrink-0 text-accent-600"
+                      />
+                      <span className="text-ink-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-6 flex flex-col gap-2.5">
+                  <Button
+                    href={localeHref(locale, "/request-a-quote")}
+                    className="w-full"
+                    iconEnd="arrowRight"
+                  >
+                    {dict.actions.request}
+                  </Button>
+                  <Button
+                    href={localeHref(locale, "/contact")}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {dict.actions.contactUs}
+                  </Button>
+                </div>
               </div>
-            </div>
+            </Reveal>
           </aside>
         </div>
       </Section>
 
       {related.length > 0 && (
         <Section muted>
-          <h2 className="text-2xl font-bold text-ink-900">
-            {dict.sections.relatedEquipment}
-          </h2>
+          <h2 className="text-2xl">{dict.labels.relatedEquipment}</h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((e) => (
-              <EquipmentCard
-                key={e.slug}
-                locale={locale}
-                item={e}
-                cta={dict.actions.viewDetails}
-              />
+            {related.map((item, index) => (
+              <Reveal key={item.slug} delay={(index % 3) * 0.06}>
+                <EquipmentCard
+                  locale={locale}
+                  item={item}
+                  cta={dict.actions.viewDetails}
+                />
+              </Reveal>
             ))}
           </div>
         </Section>
       )}
 
-      {/* Other services */}
       <Section>
-        <h2 className="text-2xl font-bold text-ink-900">
-          {dict.sections.relatedServices}
-        </h2>
+        <h2 className="text-2xl">{dict.labels.otherServices}</h2>
         <div className="mt-6 flex flex-wrap gap-2.5">
           {services
-            .filter((s) => s.slug !== slug)
-            .map((s) => (
+            .filter((other) => other.slug !== slug)
+            .map((other) => (
               <Link
-                key={s.slug}
-                href={localeHref(locale, `/services/${s.slug}`)}
-                className="inline-flex items-center gap-2 rounded-full border border-ink-200 bg-white px-4 py-2 text-sm font-medium text-ink-700 hover:border-brand-300 hover:text-brand-700 transition-colors"
+                key={other.slug}
+                href={localeHref(locale, `/services/${other.slug}`)}
+                className="inline-flex items-center gap-2 rounded-full border border-ink-200 bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-400 hover:text-brand-700"
               >
-                <Icon name={s.icon} size={16} />
-                {s.title}
+                <Icon name={other.icon} size={16} />
+                {other.title[locale]}
               </Link>
             ))}
         </div>

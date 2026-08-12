@@ -1,102 +1,141 @@
-# Content Editing Guide
+# Content editing guide
 
-You can update almost everything without touching page code. All content lives in
-typed, commented files under `src/config/` and `src/content/`. After editing, run
-`npm run build` to catch any mistakes.
+Almost everything on the site can be changed without touching page code. Content
+lives in typed, commented files under `src/config/` and `src/content/`. After an
+edit, run `npm run build` — TypeScript will catch a missing translation or a
+broken reference before it reaches the site.
+
+**Golden rule:** every piece of body copy is a bilingual pair
+`{ en: "…", ar: "…" }`. If you add English you must add Arabic, or the build
+fails. That is intentional: it is what stops the Arabic site drifting into
+English.
 
 ---
 
-## 1. Rebrand in one place
-
-Open **`src/config/site.ts`** and edit:
+## 1. Brand, location, contact — `src/config/site.ts`
 
 ```ts
-name: "RASIKH",                       // short brand
-fullName: "RASIKH Heavy Equipment ...",
-legalName: "... W.L.L.",
-url: "https://www.yourdomain.com",     // production domain
+name: "Jowain Yanbu Est.",
+positioning: "Heavy Equipment Rental & Transportation",
+tagline: "Reliable Equipment. Dependable Transportation.",
+url: "https://www.jowain.net",
+foundedYear: 1992,
+
 contact: {
-  phonePrimary: "+974 ...",
-  phonePrimaryE164: "+974...",         // no spaces — used by tel:/WhatsApp
-  whatsappNumber: "974...",            // no + — used by wa.me
-  email: "info@yourdomain.com",
-  address: { line1: "...", city: "Doha", mapQuery: "precise pin here" },
-  hours: "...",
+  phone: null,        // ← set to a verified number to reintroduce call CTAs
+  whatsapp: null,
+  email: "contactsul@jowain.net",
+  address: { city: "Yanbu Al Bahr", region: "Al Madinah Province", … },
+  hours: null,        // ← set to show an opening-hours row
 },
-social: { linkedin: "https://...", instagram: "", ... },  // empty = hidden
+social: { linkedin: "", instagram: "", … },  // fill to show footer icons
 ```
 
-The header, footer, contact page, WhatsApp/phone links, metadata and structured data
-all update automatically.
+Anything `null` or `""` hides its UI instead of rendering an empty row. Filling a
+value is all that is needed to bring the corresponding element back.
 
-The logo is SVG in **`src/components/Logo.tsx`** (`LogoMark`). To use a real logo,
-replace the SVG paths there. The favicon and social image regenerate from
-`src/app/icon.tsx` and `src/app/opengraph-image.tsx`.
+## 2. Equipment catalogue — `src/content/equipment.ts`
 
----
-
-## 2. Services — `src/content/services.ts`
-
-Each service is an object. Add one by appending to the `services` array:
+Each entry drives a card on `/fleet` and its own `/fleet/<slug>` page.
 
 ```ts
 {
-  slug: "site-clearance",             // becomes /services/site-clearance
-  title: "Site Clearance",
-  tagline: "…",
-  summary: "…",                       // shown on cards
-  body: ["Paragraph 1", "Paragraph 2"],
-  features: ["…", "…"],               // "what's included" list
-  relatedEquipment: ["excavators"],   // slugs from equipment.ts
-  icon: "excavator",                  // see icon keys below
+  slug: "mobile-cranes",
+  name: { en: "Certified Mobile Cranes", ar: "رافعات متحركة معتمدة" },
+  category: "heavy-lifting",          // one of five category keys
+  summary: { en: "…", ar: "…" },      // card line
+  description: { en: "…", ar: "…" },  // detail page paragraph
+  applications: { en: ["…"], ar: ["…"] },
+  specs: craneSpecs({ en: "20 T – 1200 T", ar: "20 – 1200 طن" }),
+  icon: "crane",
 }
 ```
 
-## 3. Fleet / equipment — `src/content/equipment.ts`
+Spec rows come from shared, pre-translated helpers so the same vocabulary is not
+retranslated per item:
 
-Same idea. `category` must be one of `earthmoving | lifting | transportation | power`.
-Fill `specs` with **verified** values only; use `"Available on request"` otherwise.
+- `craneSpecs(range)` — capacity range + operator + model-on-request
+- `operatedSpecs(type)` — type + operator + model-on-request
+- `transportSpecs(type)` — type + driver + Kingdom-wide coverage
 
-## 4. Company info — `src/content/company.ts`
+**Do not invent figures.** The only tonnages in the source are the three crane
+ranges; everything else must stay "Available on request" until the client
+confirms real numbers.
 
-- `SHOW_STATS` — flip to `true` only after confirming real figures.
-- `values`, `whyChooseUs`, `industries`, `leadership`, `safetyCommitments`,
-  `visionMission` — plain arrays/objects, edit freely.
-- Add certifications here when you have verified details.
+To add an equipment type: append an object, and (optionally) add a photograph in
+`src/config/images.ts` → `equipmentImages` keyed by the same slug. With no
+photograph the card renders the navy panel and glyph, which is correct — never
+point it at a photo of a different machine.
 
-## 5. FAQs — `src/content/faqs.ts`
+## 3. Services — `src/content/services.ts`
 
-Array of `{ question, answer }`. These also power the FAQ rich-result schema.
+Five service groups mirroring the equipment categories. Each has `title`,
+`tagline`, `summary`, `body` (paragraphs), `features` (bulleted list) and
+`relatedEquipment` (equipment slugs to cross-link).
 
-## 6. Insights / blog — `src/content/insights.ts`
+## 4. Company statements — `src/content/company.ts`
 
-Each article has a `body` of blocks: `{ type: "p" | "h2", text }` or
-`{ type: "ul", items: [...] }`.
+- `overview` — About page paragraphs
+- `vision`, `mission` — About page panels
+- `coreValues` — three values (Quality & Reliability, Integrity &
+  Professionalism, Customer Commitment)
+- `whyChooseUs` — three verified reasons
+- `fleetHighlights` — readiness and coverage
+- `industries` — the four sectors
+- `qualityPhilosophy`, `qualityPractice`, `qualityCommitments` — Quality page
 
-## 7. UI labels & Arabic — `src/i18n/dictionaries/{en,ar}.ts`
+## 5. Clients — `src/content/clients.ts`
 
-Button text, form labels, section titles. `ar.ts` mirrors `en.ts`. To translate a
-page **body** into Arabic later, the cleanest approach is to make the relevant
-content field locale-aware (ask your developer) — the scaffolding is ready.
+- `clientLogos` — the 25 marks. `width`/`height` are the file's real pixel size;
+  `scale` is an optical nudge (wide-thin marks get `< 1`, near-square marks get
+  `> 1`) so the wall reads evenly.
+- `directClients` — the named client list from the profile.
 
-## 8. Navigation — `src/config/nav.ts`
+To add a mark: drop the file in `public/clients/<slug>.png`, then add an entry
+with its real dimensions. Never recolour or redraw a client's logo.
 
-Controls the header mega-menu and footer columns.
+## 6. FAQs — `src/content/faqs.ts`
 
-## 9. Design tokens — `src/app/globals.css`
+Answers are restricted to documented facts. Do **not** add rates, minimum hire
+periods, delivery charges, insurance terms or response-time promises — none of
+those are documented, and publishing them commits the company to terms it never
+agreed.
 
-Brand colors (`--color-brand-*`), ink/graphite scale, radii, shadows and fonts.
-Change the accent by editing `--color-brand-500` (and hover `-600`).
+## 7. Legal pages — `src/content/legal.ts`
+
+Section arrays for the privacy policy and terms of use, both bilingual.
+
+## 8. UI chrome and section headings — `src/i18n/dictionaries/`
+
+`en.ts` is the canonical shape; `ar.ts` must satisfy the same type. Navigation
+labels, buttons, form labels, section titles and page leads live here.
+
+## 9. Photography — `src/config/images.ts`
+
+```ts
+hero:      { id: "<unsplash id>", alt: "…", altAr: "…" },
+equipmentImages: { "<equipment slug>": { id, alt, altAr } },
+```
+
+Alt text is written as a description of what is in the frame, in both languages.
+When Jowain supplies its own photographs, replace these entries (or swap in local
+files under `public/`) and the whole site updates from one place.
+
+## 10. Navigation — `src/config/nav.ts`
+
+`getPrimaryNav()` builds the header (six top-level items so the menu fits from
+1024px up) and `getFooterNav()` builds the footer columns. Equipment and service
+children are generated from the content files, so adding a service adds its link
+automatically.
 
 ---
 
-### Icon keys
+## Checklist before publishing an edit
 
-Equipment/service glyphs: `excavator, dozer, loader, grader, roller, crane,
-telehandler, forklift, trailer, truck, demolition, contracting, power`.
-UI/value icons (Lucide): `shield, clock, medal, handshake, map, gauge, tag,
-calendar, users, layers, building, road, factory, tree, wrench, leaf, clipboard,
-phone, mail, mapPin, globe, check, star`.
+```bash
+npm run typecheck   # catches a missing ar/en half
+npm run lint
+npm run build       # catches broken links to slugs that no longer exist
+```
 
-> Never use emoji as icons — add a new SVG glyph in `src/components/Icon.tsx` if you
-> need one that isn't listed.
+Then confirm the Arabic route renders the change: `/ar/<page>`, not just `/en/`.

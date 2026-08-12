@@ -13,7 +13,9 @@ const ContentSecurityPolicy = [
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
   "connect-src 'self'",
-  "frame-src 'self' https://www.google.com https://maps.google.com",
+  // No third-party frames anywhere on the site (the contact page links to
+  // Google Maps rather than embedding it), so frames can be forbidden.
+  "frame-src 'none'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -45,7 +47,11 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    // Scoped to the one host the site actually loads photography from, so the
+    // image optimiser cannot be used as an open proxy for arbitrary URLs.
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
+    ],
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

@@ -2,492 +2,875 @@
  * ============================================================================
  *  FLEET / EQUIPMENT CATALOGUE — central data source
  * ============================================================================
- *  Drives the /fleet catalogue index AND every individual equipment page
- *  (generated from `slug`). To add a machine, append an object here.
+ *  Drives the /fleet index and every /fleet/[slug] page.
  *
- *  HONESTY RULE: capacities/specs below use ONLY figures stated in the supplied
- *  company profile (e.g. Dozer D8/D155, Roller 10T, Cranes 50/65/100T,
- *  Forklift 5/10T, Grader 14G, Mini Excavator 3.5/5.5T). Anything not verified
- *  is written as "Available on request" — DO NOT invent tonnages, model numbers,
- *  year, or counts. Fill the `specsEditable` fields once confirmed by the client.
+ *  CATEGORIES AND ITEMS come from the client's company profile: heavy lifting,
+ *  light lifting (material handling & access), construction & earthmoving,
+ *  transportation, and power & supporting equipment.
+ *
+ *  HONESTY RULE — the ONLY capacity figures published anywhere on this site are
+ *  the three ranges the profile states:
+ *      certified mobile cranes  20 T – 1200 T
+ *      rough terrain cranes     25 T – 120 T
+ *      crawler cranes           55 T – 3200 T
+ *  No other tonnage, model number, lift height, payload, kVA rating or unit
+ *  count exists in the source, so every other specification reads
+ *  "Available on request". Do not invent them.
  * ============================================================================
  */
 
+import type { L, LL } from "@/i18n/localized";
+
 export type EquipmentCategory =
+  | "heavy-lifting"
+  | "material-handling"
   | "earthmoving"
-  | "lifting"
   | "transportation"
   | "power";
 
 export interface EquipmentSpec {
-  label: string;
-  /** Verified value, or "Available on request" placeholder. */
-  value: string;
+  label: L;
+  value: L;
 }
 
 export interface EquipmentItem {
   slug: string;
-  name: string;
+  name: L;
   category: EquipmentCategory;
   /** One-line summary for cards. */
-  summary: string;
+  summary: L;
   /** Longer description for the detail page. */
-  description: string;
-  /** Typical jobs this machine handles (generic, not project claims). */
-  applications: string[];
-  /** Verified specs + editable placeholders. */
+  description: L;
+  /** Typical jobs this equipment handles — capability, not project claims. */
+  applications: LL;
   specs: EquipmentSpec[];
-  /** Lucide icon key (see components/Icon). */
   icon: string;
 }
 
 export interface CategoryMeta {
   key: EquipmentCategory;
-  title: string;
-  blurb: string;
+  title: L;
+  blurb: L;
   icon: string;
 }
 
 export const equipmentCategories: CategoryMeta[] = [
   {
-    key: "earthmoving",
-    title: "Earthmoving & Excavation",
-    blurb:
-      "Excavators, loaders, dozers, graders and compaction plant for bulk earthworks, grading and site preparation.",
-    icon: "excavator",
-  },
-  {
-    key: "lifting",
-    title: "Lifting & Material Handling",
-    blurb:
-      "Mobile cranes, telehandlers, forklifts and truck-mounted cranes for precise, safe load handling on site.",
+    key: "heavy-lifting",
+    title: { en: "Heavy Lifting", ar: "الرفع الثقيل" },
+    blurb: {
+      en: "Certified mobile, rough terrain and crawler cranes from 20 tonnes to 3200 tonnes.",
+      ar: "رافعات متحركة معتمدة ورافعات للطرق الوعرة ورافعات زاحفة من 20 طناً إلى 3200 طن.",
+    },
     icon: "crane",
   },
   {
+    key: "material-handling",
+    title: {
+      en: "Material Handling & Access",
+      ar: "مناولة المواد والوصول الآمن",
+    },
+    blurb: {
+      en: "Scissor and man lifts, forklifts and telehandlers for safe access and everyday handling.",
+      ar: "مقصّات ورافعات أفراد ورافعات شوكية ورافعات تلسكوبية للوصول الآمن والمناولة اليومية.",
+    },
+    icon: "telehandler",
+  },
+  {
+    key: "earthmoving",
+    title: { en: "Construction & Earthmoving", ar: "الإنشاء وأعمال الحفر" },
+    blurb: {
+      en: "Excavators, bulldozers, graders, loaders and rollers for civil and infrastructure works.",
+      ar: "حفّارات وجرّافات وممهّدات ولوادر ومداحل للأعمال المدنية والبنية التحتية.",
+    },
+    icon: "excavator",
+  },
+  {
     key: "transportation",
-    title: "Heavy Transport & Haulage",
-    blurb:
-      "Low-bed and flatbed trailers plus dump trucks for moving plant, aggregates and spoil across Qatar.",
-    icon: "truck",
+    title: { en: "Transportation", ar: "النقل" },
+    blurb: {
+      en: "Lowbed and flatbed trailers, boom and dump trucks, tankers and support vehicles.",
+      ar: "مقاطر منخفضة ومسطّحة، وشاحنات برافعة وقلّابات، وصهاريج ومركبات دعم.",
+    },
+    icon: "trailer",
   },
   {
     key: "power",
-    title: "Power & Site Support",
-    blurb:
-      "Generators and air compressors to keep sites energised and productive, day and night.",
+    title: { en: "Power & Support", ar: "الطاقة والمساندة" },
+    blurb: {
+      en: "Compressors, generators, welding machines and tower lights for continuous site operation.",
+      ar: "ضواغط ومولّدات وماكينات لحام وأبراج إضاءة لاستمرار العمل في الموقع.",
+    },
     icon: "power",
   },
 ];
 
-const onRequest = "Available on request";
+/* ------------------------------------------------------------------ */
+/* Shared specification vocabulary — translated once, reused          */
+/* ------------------------------------------------------------------ */
+
+const SPEC = {
+  capacityRange: { en: "Capacity range", ar: "نطاق الحمولة" },
+  type: { en: "Type", ar: "النوع" },
+  supply: { en: "Supply", ar: "طريقة التوريد" },
+  coverage: { en: "Coverage", ar: "التغطية" },
+  modelSpec: {
+    en: "Model & exact specification",
+    ar: "الطراز والمواصفات الدقيقة",
+  },
+  onRequest: { en: "Available on request", ar: "متاح عند الطلب" },
+  withOperator: {
+    en: "Qualified operator on request",
+    ar: "مشغّل مؤهّل عند الطلب",
+  },
+  withDriver: { en: "Qualified driver on request", ar: "سائق مؤهّل عند الطلب" },
+  kingdomWide: {
+    en: "Kingdom-wide, Saudi Arabia",
+    ar: "على مستوى المملكة العربية السعودية",
+  },
+} as const;
+
+/** Standard three-row spec table for operated equipment. */
+const operatedSpecs = (type: L): EquipmentSpec[] => [
+  { label: SPEC.type, value: type },
+  { label: SPEC.supply, value: SPEC.withOperator },
+  { label: SPEC.modelSpec, value: SPEC.onRequest },
+];
+
+/** Standard spec table for transportation units. */
+const transportSpecs = (type: L): EquipmentSpec[] => [
+  { label: SPEC.type, value: type },
+  { label: SPEC.supply, value: SPEC.withDriver },
+  { label: SPEC.coverage, value: SPEC.kingdomWide },
+];
+
+/** Spec table for cranes, where the profile does state a capacity range. */
+const craneSpecs = (range: L): EquipmentSpec[] => [
+  { label: SPEC.capacityRange, value: range },
+  { label: SPEC.supply, value: SPEC.withOperator },
+  { label: SPEC.modelSpec, value: SPEC.onRequest },
+];
 
 export const equipment: EquipmentItem[] = [
-  // ---------------------------- EARTHMOVING ----------------------------
+  /* ------------------------- HEAVY LIFTING ------------------------- */
   {
-    slug: "excavators",
-    name: "Tracked Excavators",
-    category: "earthmoving",
-    summary:
-      "Versatile tracked excavators for bulk digging, trenching, loading and demolition support.",
-    description:
-      "Our tracked excavators handle everything from bulk excavation and trenching to loading and structural demolition support. Paired with experienced operators, they deliver productive, precise digging across foundations, utilities and infrastructure works.",
-    applications: [
-      "Bulk excavation & cut-to-fill",
-      "Trenching for utilities & drainage",
-      "Loading trucks & material handling",
-      "Demolition support with breakers",
-    ],
-    specs: [
-      { label: "Class", value: "Multiple classes available" },
-      { label: "Attachments", value: "Bucket / breaker (on request)" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Model & capacity", value: onRequest },
-    ],
-    icon: "excavator",
+    slug: "mobile-cranes",
+    name: { en: "Certified Mobile Cranes", ar: "رافعات متحركة معتمدة" },
+    category: "heavy-lifting",
+    summary: {
+      en: "Certified mobile cranes with capacities from 20 tonnes to 1200 tonnes.",
+      ar: "رافعات متحركة معتمدة بحمولات من 20 طناً إلى 1200 طن.",
+    },
+    description: {
+      en: "Capacities ranging from 20 tonnes to 1200 tonnes for construction, industrial and infrastructure projects. Supplied certified, and with a qualified operator when the lift calls for one.",
+      ar: "حمولات تمتد من 20 طناً إلى 1200 طن لمشاريع الإنشاء والصناعة والبنية التحتية. تُوفَّر معتمدة، ومع مشغّل مؤهّل عندما تتطلّب عملية الرفع ذلك.",
+    },
+    applications: {
+      en: [
+        "Structural and steel lifting",
+        "Equipment and plant positioning",
+        "Infrastructure and industrial project lifts",
+      ],
+      ar: [
+        "رفع الهياكل والحديد الإنشائي",
+        "تركيب وتمركز المعدات والمنشآت",
+        "أعمال الرفع في مشاريع البنية التحتية والصناعة",
+      ],
+    },
+    specs: craneSpecs({ en: "20 T – 1200 T", ar: "20 – 1200 طن" }),
+    icon: "crane",
   },
   {
-    slug: "long-boom-excavators",
-    name: "Long Boom Excavators",
+    slug: "rough-terrain-cranes",
+    name: { en: "Rough Terrain Cranes", ar: "رافعات الطرق الوعرة" },
+    category: "heavy-lifting",
+    summary: {
+      en: "25 to 120 tonne cranes built for off-road and uneven ground.",
+      ar: "رافعات من 25 إلى 120 طناً مصمّمة للأراضي الوعرة وغير المستوية.",
+    },
+    description: {
+      en: "Capacities from 25 tonnes to 120 tonnes, ideal for off-road and uneven terrain on construction and industrial sites where a road-going crane cannot work safely.",
+      ar: "حمولات من 25 طناً إلى 120 طناً، مثالية للأراضي الوعرة وغير المستوية في مواقع الإنشاء والمواقع الصناعية التي لا تستطيع الرافعات المخصّصة للطرق العمل فيها بأمان.",
+    },
+    applications: {
+      en: [
+        "Off-road and uneven terrain lifting",
+        "Confined industrial site work",
+        "Pipeline and field operations support",
+      ],
+      ar: [
+        "الرفع في الأراضي الوعرة وغير المستوية",
+        "العمل في المواقع الصناعية الضيّقة",
+        "دعم عمليات خطوط الأنابيب والعمل الحقلي",
+      ],
+    },
+    specs: craneSpecs({ en: "25 T – 120 T", ar: "25 – 120 طناً" }),
+    icon: "crane",
+  },
+  {
+    slug: "crawler-cranes",
+    name: { en: "Crawler Cranes", ar: "رافعات زاحفة (كراولر)" },
+    category: "heavy-lifting",
+    summary: {
+      en: "Heavy-duty crawler cranes from 55 tonnes to 3200 tonnes.",
+      ar: "رافعات زاحفة للأحمال الثقيلة من 55 طناً إلى 3200 طن.",
+    },
+    description: {
+      en: "Heavy-duty crawler cranes from 55 tonnes to 3200 tonnes for petrochemical, oil & gas and mega projects, where sustained heavy lifting on tracks is required.",
+      ar: "رافعات زاحفة للأحمال الثقيلة من 55 طناً إلى 3200 طن لمشاريع البتروكيماويات والنفط والغاز والمشاريع الكبرى، حيث يلزم رفع ثقيل مستمر على مجنزرات.",
+    },
+    applications: {
+      en: [
+        "Petrochemical plant construction",
+        "Oil & gas module and vessel lifts",
+        "Mega-project heavy lifting",
+      ],
+      ar: [
+        "إنشاء مصانع البتروكيماويات",
+        "رفع الوحدات والأوعية في مشاريع النفط والغاز",
+        "الرفع الثقيل في المشاريع الكبرى",
+      ],
+    },
+    specs: craneSpecs({ en: "55 T – 3200 T", ar: "55 – 3200 طن" }),
+    icon: "crawlerCrane",
+  },
+
+  /* --------------------- MATERIAL HANDLING ------------------------- */
+  {
+    slug: "scissor-and-man-lifts",
+    name: { en: "Scissor & Man Lifts", ar: "مقصّات ورافعات أفراد" },
+    category: "material-handling",
+    summary: {
+      en: "Safe elevated access for maintenance and industrial facility work.",
+      ar: "وصول آمن إلى المرتفعات لأعمال الصيانة وتشغيل المرافق الصناعية.",
+    },
+    description: {
+      en: "Scissor lifts and man lifts providing safe elevated access for maintenance, construction and industrial facility operations, indoors and out.",
+      ar: "مقصّات ورافعات أفراد توفّر وصولاً آمناً إلى المرتفعات لأعمال الصيانة والإنشاء وتشغيل المرافق الصناعية، داخل المباني وخارجها.",
+    },
+    applications: {
+      en: [
+        "Plant and facility maintenance access",
+        "Installation and finishing at height",
+        "Inspection in industrial facilities",
+      ],
+      ar: [
+        "الوصول لأعمال صيانة المصانع والمرافق",
+        "التركيب والتشطيب على ارتفاع",
+        "أعمال الفحص في المرافق الصناعية",
+      ],
+    },
+    specs: operatedSpecs({
+      en: "Scissor lift / man lift",
+      ar: "مقص رفع / رافعة أفراد",
+    }),
+    icon: "scissorLift",
+  },
+  {
+    slug: "forklifts",
+    name: { en: "Forklifts", ar: "رافعات شوكية" },
+    category: "material-handling",
+    summary: {
+      en: "Reliable forklifts for warehouse, yard and project material handling.",
+      ar: "رافعات شوكية موثوقة لمناولة المواد في المستودعات والساحات والمشاريع.",
+    },
+    description: {
+      en: "Reliable forklifts for warehouse, site and project material handling across industrial and construction environments.",
+      ar: "رافعات شوكية موثوقة لمناولة المواد في المستودعات والمواقع والمشاريع في البيئات الصناعية والإنشائية.",
+    },
+    applications: {
+      en: [
+        "Warehouse and store operations",
+        "Yard and laydown area handling",
+        "Loading and unloading project materials",
+      ],
+      ar: [
+        "عمليات المستودعات والمخازن",
+        "المناولة في الساحات ومناطق تجميع المواد",
+        "تحميل وتنزيل مواد المشروع",
+      ],
+    },
+    specs: operatedSpecs({ en: "Forklift", ar: "رافعة شوكية" }),
+    icon: "forklift",
+  },
+  {
+    slug: "telehandlers",
+    name: { en: "Telehandlers", ar: "رافعات تلسكوبية" },
+    category: "material-handling",
+    summary: {
+      en: "Versatile lifting and placing of materials at height and reach.",
+      ar: "رفع ووضع المواد على ارتفاع وبمدى واسع.",
+    },
+    description: {
+      en: "Versatile telehandlers for lifting and placing materials at height across construction sites and project operations.",
+      ar: "رافعات تلسكوبية متعدّدة الاستخدام لرفع ووضع المواد على ارتفاع في مواقع الإنشاء وعمليات المشاريع.",
+    },
+    applications: {
+      en: [
+        "Placing materials at height",
+        "Distributing loads across a site",
+        "Cladding and steelwork support",
+      ],
+      ar: [
+        "وضع المواد على ارتفاع",
+        "توزيع الأحمال في أنحاء الموقع",
+        "دعم أعمال التكسية والحديد الإنشائي",
+      ],
+    },
+    specs: operatedSpecs({ en: "Telescopic handler", ar: "رافعة تلسكوبية" }),
+    icon: "telehandler",
+  },
+
+  /* ------------------------- EARTHMOVING --------------------------- */
+  {
+    slug: "excavators",
+    name: { en: "Excavators", ar: "حفّارات" },
     category: "earthmoving",
-    summary:
-      "Extended-reach excavators for deep excavation, slope work and high-reach applications.",
-    description:
-      "Long boom (long-reach) excavators extend digging depth and reach for canal work, deep excavation, slope battering and high-reach demolition where a standard machine cannot safely operate.",
-    applications: [
-      "Deep excavation & dredging support",
-      "Slope profiling & battering",
-      "High-reach demolition",
-      "Hard-to-access reach work",
-    ],
-    specs: [
-      { label: "Type", value: "Long-reach / long boom" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Reach & capacity", value: onRequest },
-    ],
+    summary: {
+      en: "Full-size excavators for excavation, trenching and earthmoving.",
+      ar: "حفّارات كاملة الحجم لأعمال الحفر وشقّ الخنادق والأعمال الترابية.",
+    },
+    description: {
+      en: "Full-size excavators for excavation, trenching and earthmoving on construction and civil works sites, working productively through bulk digging and loading cycles.",
+      ar: "حفّارات كاملة الحجم لأعمال الحفر وشقّ الخنادق والأعمال الترابية في مواقع الإنشاء والأعمال المدنية، بأداء منتج في دورات الحفر الكبير والتحميل.",
+    },
+    applications: {
+      en: [
+        "Bulk excavation and cut-to-fill",
+        "Trenching for utilities and drainage",
+        "Loading trucks and material handling",
+      ],
+      ar: [
+        "الحفر الكبير وأعمال القطع والردم",
+        "شقّ الخنادق للخدمات والصرف",
+        "تحميل الشاحنات ومناولة المواد",
+      ],
+    },
+    specs: operatedSpecs({ en: "Tracked excavator", ar: "حفّارة مجنزرة" }),
     icon: "excavator",
   },
   {
     slug: "mini-excavators",
-    name: "Mini Excavators",
+    name: { en: "Mini Excavators", ar: "حفّارات صغيرة" },
     category: "earthmoving",
-    summary:
-      "Compact 3.5T and 5.5T excavators for confined-space, precision and finishing work.",
-    description:
-      "Compact and manoeuvrable, our mini excavators are ideal for confined sites, landscaping, precision trenching and finishing work where larger plant cannot reach.",
-    applications: [
-      "Confined-space excavation",
-      "Landscaping & finishing",
-      "Precision trenching",
-      "Interior & access-restricted works",
-    ],
-    specs: [
-      { label: "Operating weight", value: "3.5 T & 5.5 T classes" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Attachments", value: onRequest },
-    ],
+    summary: {
+      en: "Compact excavators for confined-space and precision work.",
+      ar: "حفّارات صغيرة للأماكن الضيّقة والأعمال الدقيقة.",
+    },
+    description: {
+      en: "Compact and manoeuvrable mini excavators for confined sites, precision trenching and finishing work where larger plant cannot reach.",
+      ar: "حفّارات صغيرة سهلة الحركة للمواقع الضيّقة وشقّ الخنادق الدقيق وأعمال التشطيب حيث لا تستطيع المعدات الأكبر الوصول.",
+    },
+    applications: {
+      en: [
+        "Confined-space excavation",
+        "Precision trenching",
+        "Access-restricted works",
+      ],
+      ar: [
+        "الحفر في الأماكن الضيّقة",
+        "شقّ الخنادق الدقيق",
+        "الأعمال محدودة الوصول",
+      ],
+    },
+    specs: operatedSpecs({ en: "Mini excavator", ar: "حفّارة صغيرة" }),
     icon: "excavator",
   },
   {
-    slug: "wheel-excavators",
-    name: "Wheel Excavators",
+    slug: "bulldozers",
+    name: { en: "Bulldozers", ar: "جرّافات (بلدوزر)" },
     category: "earthmoving",
-    summary:
-      "Wheeled excavators for fast repositioning across paved and urban work sites.",
-    description:
-      "Wheel excavators combine excavation performance with road mobility, moving quickly between work fronts on paved and urban sites without a low-bed transfer.",
-    applications: [
-      "Urban & roadside works",
-      "Utility maintenance",
-      "Multi-front site work",
-      "Loading & clean-up",
-    ],
-    specs: [
-      { label: "Type", value: "Rubber-tyred / wheeled" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Model & capacity", value: onRequest },
-    ],
-    icon: "excavator",
+    summary: {
+      en: "Heavy bulldozers for site clearing and bulk pushing.",
+      ar: "جرّافات ثقيلة لإزالة عوائق المواقع ودفع الأتربة بكميات كبيرة.",
+    },
+    description: {
+      en: "Heavy bulldozers for site clearing and bulk earth pushing across civil and infrastructure projects, forming platforms and haul roads as work progresses.",
+      ar: "جرّافات ثقيلة لإزالة عوائق المواقع ودفع الأتربة بكميات كبيرة في المشاريع المدنية والبنية التحتية، مع تشكيل المنصات وطرق النقل مع تقدّم العمل.",
+    },
+    applications: {
+      en: [
+        "Site clearing and grubbing",
+        "Bulk earth pushing and spreading",
+        "Haul-road and platform formation",
+      ],
+      ar: [
+        "إزالة عوائق المواقع وتنظيفها",
+        "دفع الأتربة وتوزيعها بكميات كبيرة",
+        "تشكيل طرق النقل والمنصات",
+      ],
+    },
+    specs: operatedSpecs({ en: "Tracked bulldozer", ar: "جرّافة مجنزرة" }),
+    icon: "dozer",
+  },
+  {
+    slug: "motor-graders",
+    name: { en: "Motor Graders", ar: "ممهّدات (جريدر)" },
+    category: "earthmoving",
+    summary: {
+      en: "Motor graders for accurate grading and road construction.",
+      ar: "ممهّدات لأعمال التمهيد الدقيق وإنشاء الطرق.",
+    },
+    description: {
+      en: "Motor graders for grading and road construction across civil and infrastructure projects, delivering accurate levels, cambers and finished surfaces.",
+      ar: "ممهّدات لأعمال التمهيد وإنشاء الطرق في المشاريع المدنية والبنية التحتية، بمناسيب دقيقة وميول وأسطح نهائية مستوية.",
+    },
+    applications: {
+      en: [
+        "Road and haul-road grading",
+        "Sub-base and camber formation",
+        "Fine levelling and surface finishing",
+      ],
+      ar: [
+        "تمهيد الطرق وطرق النقل",
+        "تشكيل طبقة الأساس والميول",
+        "التسوية الدقيقة وتشطيب الأسطح",
+      ],
+    },
+    specs: operatedSpecs({ en: "Motor grader", ar: "ممهّدة" }),
+    icon: "grader",
   },
   {
     slug: "wheel-loaders",
-    name: "Wheel Loaders",
+    name: { en: "Wheel Loaders", ar: "لوادر بعجل" },
     category: "earthmoving",
-    summary:
-      "High-output wheel loaders for loading, stockpiling and material handling.",
-    description:
-      "Wheel loaders move and load aggregates, sand and spoil at high volume, keeping haulage cycles and material handling productive across quarries and construction sites.",
-    applications: [
-      "Loading trucks & hoppers",
-      "Stockpiling aggregates",
-      "Site clean-up & backfilling",
-      "Material handling",
-    ],
-    specs: [
-      { label: "Type", value: "Front wheel loader" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Bucket capacity", value: onRequest },
-    ],
+    summary: {
+      en: "Wheel loaders for loading, material handling and site preparation.",
+      ar: "لوادر بعجل للتحميل ومناولة المواد وتهيئة المواقع.",
+    },
+    description: {
+      en: "Wheel loaders for material handling, loading and site preparation on industrial and construction projects, keeping haulage cycles fed and stockpiles managed.",
+      ar: "لوادر بعجل لمناولة المواد والتحميل وتهيئة المواقع في المشاريع الصناعية والإنشائية، بما يُبقي دورات النقل مغذّاة والمخزون منظّماً.",
+    },
+    applications: {
+      en: [
+        "Loading trucks and hoppers",
+        "Stockpiling aggregates",
+        "Backfilling and site clean-up",
+      ],
+      ar: [
+        "تحميل الشاحنات والقوادس",
+        "تجميع الركام في مخزون",
+        "الردم وتنظيف الموقع",
+      ],
+    },
+    specs: operatedSpecs({ en: "Wheel loader", ar: "لودر بعجل" }),
+    icon: "loader",
+  },
+  {
+    slug: "skid-steer-loaders",
+    name: { en: "Skid Steer Loaders", ar: "لوادر انزلاقية" },
+    category: "earthmoving",
+    summary: {
+      en: "Compact skid loaders for tight sites and finishing work.",
+      ar: "لوادر انزلاقية صغيرة للمواقع الضيّقة وأعمال التشطيب.",
+    },
+    description: {
+      en: "Skid loaders for material handling, loading and site preparation where space is tight and manoeuvrability matters more than bucket size.",
+      ar: "لوادر انزلاقية لمناولة المواد والتحميل وتهيئة المواقع حيث تكون المساحة ضيّقة وتكون خفّة الحركة أهم من حجم القادوس.",
+    },
+    applications: {
+      en: [
+        "Confined-site loading",
+        "Clean-up and finishing work",
+        "Attachment-based site tasks",
+      ],
+      ar: [
+        "التحميل في المواقع الضيّقة",
+        "أعمال التنظيف والتشطيب",
+        "المهام التي تعتمد على الملحقات",
+      ],
+    },
+    specs: operatedSpecs({ en: "Skid steer loader", ar: "لودر انزلاقي" }),
     icon: "loader",
   },
   {
     slug: "backhoe-loaders",
-    name: "Backhoe Loaders",
+    name: { en: "Backhoe Loaders", ar: "لوادر حفّارة (باكهو)" },
     category: "earthmoving",
-    summary:
-      "All-round backhoe loaders combining a loading bucket and excavating arm in one machine.",
-    description:
-      "The versatile workhorse of any site — a loading bucket up front and an excavating backhoe at the rear — ideal for utilities, small excavation, loading and general-purpose tasks.",
-    applications: [
-      "Utility & trench works",
-      "Loading & backfilling",
-      "General site duties",
-      "Small excavation",
-    ],
-    specs: [
-      { label: "Type", value: "Loader + backhoe" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Model & capacity", value: onRequest },
-    ],
+    summary: {
+      en: "Versatile backhoe loaders for digging and loading in one machine.",
+      ar: "لوادر حفّارة متعدّدة الاستخدام تجمع الحفر والتحميل في آلة واحدة.",
+    },
+    description: {
+      en: "Backhoe loaders for versatile digging and loading tasks across site preparation and civil works: a loading bucket at the front and an excavating arm at the rear.",
+      ar: "لوادر حفّارة لأعمال الحفر والتحميل المتنوّعة في تهيئة المواقع والأعمال المدنية: قادوس تحميل في المقدّمة وذراع حفر في الخلف.",
+    },
+    applications: {
+      en: [
+        "Utility and trench works",
+        "Loading and backfilling",
+        "General site duties",
+      ],
+      ar: [
+        "أعمال الخدمات والخنادق",
+        "التحميل والردم",
+        "المهام العامة في الموقع",
+      ],
+    },
+    specs: operatedSpecs({ en: "Backhoe loader", ar: "لودر حفّار" }),
     icon: "loader",
-  },
-  {
-    slug: "dozers",
-    name: "Bulldozers (D8 / D155)",
-    category: "earthmoving",
-    summary:
-      "Heavy dozers including D8 and D155 classes for pushing, spreading and land clearing.",
-    description:
-      "High-traction bulldozers for bulk pushing, spreading, ripping and land clearing on large earthworks and infrastructure projects. Available in D8 and D155 classes.",
-    applications: [
-      "Bulk earth pushing & spreading",
-      "Land clearing & grubbing",
-      "Ripping hard ground",
-      "Haul-road formation",
-    ],
-    specs: [
-      { label: "Classes", value: "D8 & D155" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Blade & ripper", value: onRequest },
-    ],
-    icon: "dozer",
-  },
-  {
-    slug: "graders",
-    name: "Motor Graders (14G)",
-    category: "earthmoving",
-    summary:
-      "Motor graders including the 14G class for fine grading and road formation.",
-    description:
-      "Motor graders deliver accurate levelling, cambering and fine grading for road formation, sub-base preparation and large flat surfaces. 14G class available.",
-    applications: [
-      "Road & haul-road grading",
-      "Sub-base & camber formation",
-      "Fine levelling",
-      "Surface maintenance",
-    ],
-    specs: [
-      { label: "Class", value: "14G" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Blade width", value: onRequest },
-    ],
-    icon: "grader",
   },
   {
     slug: "rollers",
-    name: "Compaction Rollers (10T)",
+    name: { en: "Road Rollers", ar: "مداحل طرق" },
     category: "earthmoving",
-    summary:
-      "10-tonne compaction rollers for sub-base, asphalt and embankment compaction.",
-    description:
-      "Vibratory compaction rollers (10 T class) achieve target density on sub-base, embankments and asphalt, delivering durable, well-compacted surfaces.",
-    applications: [
-      "Sub-base compaction",
-      "Embankment & fill compaction",
-      "Asphalt rolling",
-      "Trench reinstatement",
-    ],
-    specs: [
-      { label: "Operating weight", value: "10 T class" },
-      { label: "Type", value: "Vibratory roller" },
-      { label: "Operated / bare rental", value: "Both available" },
-    ],
+    summary: {
+      en: "Road rollers for compaction across site prep and civil works.",
+      ar: "مداحل طرق لأعمال الدمك في تهيئة المواقع والأعمال المدنية.",
+    },
+    description: {
+      en: "Road rollers for compaction tasks across site preparation and civil works, achieving target density on sub-base, fill and finished surfaces.",
+      ar: "مداحل طرق لأعمال الدمك في تهيئة المواقع والأعمال المدنية، للوصول إلى الكثافة المطلوبة في طبقة الأساس والردم والأسطح النهائية.",
+    },
+    applications: {
+      en: [
+        "Sub-base and fill compaction",
+        "Embankment compaction",
+        "Trench reinstatement",
+      ],
+      ar: [
+        "دمك طبقة الأساس والردم",
+        "دمك الجسور الترابية",
+        "إعادة تأهيل الخنادق",
+      ],
+    },
+    specs: operatedSpecs({ en: "Road roller", ar: "مدحلة طرق" }),
     icon: "roller",
   },
-  {
-    slug: "skid-steer-loaders",
-    name: "Skid Steer Loaders",
-    category: "earthmoving",
-    summary:
-      "Compact, agile skid steers with quick-change attachments for tight sites.",
-    description:
-      "Highly manoeuvrable skid steer loaders take a wide range of attachments for loading, sweeping, breaking and grading in confined and finishing environments.",
-    applications: [
-      "Confined-site loading",
-      "Sweeping & clean-up",
-      "Attachment-based tasks",
-      "Landscaping & finishing",
-    ],
-    specs: [
-      { label: "Type", value: "Skid steer" },
-      { label: "Attachments", value: "Multiple (on request)" },
-      { label: "Operated / bare rental", value: "Both available" },
-    ],
-    icon: "loader",
-  },
 
-  // ----------------------------- LIFTING -------------------------------
+  /* ------------------------ TRANSPORTATION ------------------------- */
   {
-    slug: "mobile-cranes",
-    name: "Mobile Cranes (50T · 65T · 100T)",
-    category: "lifting",
-    summary:
-      "50, 65 and 100-tonne mobile cranes with certified operators for safe lifting.",
-    description:
-      "Our mobile crane fleet covers 50 T, 65 T and 100 T capacities for structural lifts, equipment placement and precast handling. Supplied with trained operators and a focus on lift planning and safety.",
-    applications: [
-      "Structural & steel lifts",
-      "Precast & panel placement",
-      "Equipment & plant positioning",
-      "General site lifting",
-    ],
-    specs: [
-      { label: "Capacities", value: "50 T · 65 T · 100 T" },
-      { label: "Supply", value: "Operated with certified crew" },
-      { label: "Lift study", value: "Provided on request" },
-    ],
-    icon: "crane",
-  },
-  {
-    slug: "truck-mounted-cranes",
-    name: "Truck-Mounted Cranes (5T · 7T · 10T)",
-    category: "lifting",
-    summary:
-      "Trucks with cranes (5T, 7T, 10T) combining transport and self-loading lift.",
-    description:
-      "Truck-mounted cranes combine haulage and lifting in one unit (5 T, 7 T and 10 T), ideal for self-loading deliveries, pipe handling and medium lifts where a full mobile crane is not required.",
-    applications: [
-      "Self-loading deliveries",
-      "Pipe & material handling",
-      "Medium lifts",
-      "Site logistics",
-    ],
-    specs: [
-      { label: "Crane capacities", value: "5 T · 7 T · 10 T" },
-      { label: "Supply", value: "Operated" },
-      { label: "Bed length", value: onRequest },
-    ],
-    icon: "crane",
-  },
-  {
-    slug: "telehandlers",
-    name: "Telehandlers",
-    category: "lifting",
-    summary:
-      "Telescopic handlers for lifting and placing loads at height and reach.",
-    description:
-      "Telehandlers combine forklift and crane capability with extended reach, placing loads at height across construction, steel and finishing works.",
-    applications: [
-      "Placing loads at height",
-      "Material distribution",
-      "Steel & cladding support",
-      "General site handling",
-    ],
-    specs: [
-      { label: "Type", value: "Telescopic handler" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Lift height & capacity", value: onRequest },
-    ],
-    icon: "telehandler",
-  },
-  {
-    slug: "forklifts",
-    name: "Forklifts (5T & 10T)",
-    category: "lifting",
-    summary:
-      "5-tonne and 10-tonne forklifts for yard, warehouse and site material handling.",
-    description:
-      "Diesel forklifts in 5 T and 10 T capacities handle palletised and heavy loads across yards, laydown areas and warehouses.",
-    applications: [
-      "Yard & laydown handling",
-      "Container loading/unloading",
-      "Warehouse operations",
-      "Heavy palletised loads",
-    ],
-    specs: [
-      { label: "Capacities", value: "5 T & 10 T" },
-      { label: "Fuel", value: "Diesel" },
-      { label: "Operated / bare rental", value: "Both available" },
-    ],
-    icon: "forklift",
-  },
-
-  // -------------------------- TRANSPORTATION ---------------------------
-  {
-    slug: "low-bed-trailers",
-    name: "Low-Bed Trailers",
+    slug: "lowbed-trailers",
+    name: { en: "Lowbed Trailers", ar: "مقاطر منخفضة (لوبد)" },
     category: "transportation",
-    summary:
-      "Low-bed trailers for transporting tracked plant and oversized loads.",
-    description:
-      "Low-bed (lowboy) trailers move heavy tracked machinery and oversized loads safely and legally across Qatar, with experienced transport crews handling loading and securing.",
-    applications: [
-      "Plant & machinery transfer",
-      "Oversized load transport",
-      "Inter-site mobilisation",
-      "Project logistics",
-    ],
-    specs: [
-      { label: "Type", value: "Low-bed / lowboy" },
-      { label: "Supply", value: "With prime mover & crew" },
-      { label: "Deck capacity", value: onRequest },
-    ],
+    summary: {
+      en: "Lowbed trailers for moving heavy machinery.",
+      ar: "مقاطر منخفضة لنقل المعدات الثقيلة.",
+    },
+    description: {
+      en: "Lowbed trailers for transporting heavy machinery between sites, with qualified drivers and coverage across the Kingdom of Saudi Arabia.",
+      ar: "مقاطر منخفضة لنقل المعدات الثقيلة بين المواقع، مع سائقين مؤهّلين وتغطية في مختلف مناطق المملكة العربية السعودية.",
+    },
+    applications: {
+      en: [
+        "Moving tracked and oversized plant",
+        "Inter-site mobilisation",
+        "Project equipment logistics",
+      ],
+      ar: [
+        "نقل المعدات المجنزرة وذات الأبعاد الكبيرة",
+        "الانتقال بين المواقع",
+        "الخدمات اللوجستية لمعدات المشروع",
+      ],
+    },
+    specs: transportSpecs({ en: "Lowbed trailer", ar: "مقطورة منخفضة" }),
     icon: "trailer",
   },
   {
     slug: "flatbed-trailers",
-    name: "Flatbed Trailers (40ft)",
+    name: { en: "Flatbed Trailers", ar: "مقاطر مسطّحة (فلاتبد)" },
     category: "transportation",
-    summary:
-      "40ft flatbed trailers for general heavy haulage and material transport.",
-    description:
-      "40ft flatbed trailers handle general heavy haulage — steel, pipes, precast and containers — with reliable scheduling and trained drivers.",
-    applications: [
-      "General heavy haulage",
-      "Steel, pipe & precast transport",
-      "Container movement",
-      "Material delivery",
-    ],
-    specs: [
-      { label: "Deck length", value: "40 ft" },
-      { label: "Supply", value: "With prime mover & crew" },
-      { label: "Payload", value: onRequest },
-    ],
+    summary: {
+      en: "Flatbed trailers for project cargo.",
+      ar: "مقاطر مسطّحة لشحنات المشاريع.",
+    },
+    description: {
+      en: "Flatbed trailers for steel, pipe, precast and containerised project cargo, with qualified drivers and Kingdom-wide coverage.",
+      ar: "مقاطر مسطّحة لنقل الحديد والأنابيب والعناصر مسبقة الصب والحمولات في حاويات، مع سائقين مؤهّلين وتغطية على مستوى المملكة.",
+    },
+    applications: {
+      en: [
+        "Steel, pipe and precast transport",
+        "Containerised cargo movement",
+        "General project haulage",
+      ],
+      ar: [
+        "نقل الحديد والأنابيب والعناصر مسبقة الصب",
+        "نقل الحمولات في حاويات",
+        "النقل العام لشحنات المشاريع",
+      ],
+    },
+    specs: transportSpecs({ en: "Flatbed trailer", ar: "مقطورة مسطّحة" }),
     icon: "trailer",
   },
   {
-    slug: "dump-trucks",
-    name: "Dump Trucks",
+    slug: "boom-trucks",
+    name: { en: "Boom Trucks", ar: "شاحنات برافعة (بوم ترك)" },
     category: "transportation",
-    summary:
-      "Tipper/dump trucks for hauling aggregates, sand, spoil and demolition waste.",
-    description:
-      "Our dump (tipper) trucks move aggregates, sand, excavated spoil and demolition waste efficiently between load points, disposal sites and stockpiles.",
-    applications: [
-      "Aggregate & sand haulage",
-      "Spoil & muck-away",
-      "Demolition waste removal",
-      "Bulk material transport",
-    ],
-    specs: [
-      { label: "Type", value: "Tipper / dump truck" },
-      { label: "Supply", value: "With driver" },
-      { label: "Capacity", value: onRequest },
-    ],
+    summary: {
+      en: "Boom trucks combining transport with self-loading lift.",
+      ar: "شاحنات برافعة تجمع النقل مع الرفع والتحميل الذاتي.",
+    },
+    description: {
+      en: "Boom trucks for versatile site operations, combining transport with a self-loading lift for deliveries that would otherwise need a separate crane.",
+      ar: "شاحنات برافعة للعمليات المتنوّعة في الموقع، تجمع النقل مع رافعة للتحميل الذاتي في التوريدات التي تحتاج عادةً إلى رافعة منفصلة.",
+    },
+    applications: {
+      en: [
+        "Self-loading site deliveries",
+        "Pipe and material handling",
+        "Medium lifts on site",
+      ],
+      ar: [
+        "التوريد مع التحميل الذاتي في الموقع",
+        "مناولة الأنابيب والمواد",
+        "أعمال الرفع المتوسّطة في الموقع",
+      ],
+    },
+    specs: transportSpecs({
+      en: "Truck-mounted boom",
+      ar: "رافعة مثبّتة على شاحنة",
+    }),
+    icon: "crane",
+  },
+  {
+    slug: "dump-trucks",
+    name: { en: "Dump Trucks", ar: "قلّابات" },
+    category: "transportation",
+    summary: {
+      en: "Dump trucks for versatile site haulage.",
+      ar: "قلّابات لأعمال النقل المتنوّعة في الموقع.",
+    },
+    description: {
+      en: "Dump trucks for versatile site operations, hauling aggregates, sand and excavated material between load points, stockpiles and disposal areas.",
+      ar: "قلّابات للعمليات المتنوّعة في الموقع، لنقل الركام والرمل والمواد المحفورة بين نقاط التحميل والمخزون ومناطق التخلّص.",
+    },
+    applications: {
+      en: [
+        "Aggregate and sand haulage",
+        "Excavated material removal",
+        "Bulk material transport on site",
+      ],
+      ar: [
+        "نقل الركام والرمل",
+        "إزالة المواد المحفورة",
+        "نقل المواد السائبة داخل الموقع",
+      ],
+    },
+    specs: transportSpecs({ en: "Tipper / dump truck", ar: "شاحنة قلّابة" }),
+    icon: "truck",
+  },
+  {
+    slug: "water-tankers",
+    name: { en: "Water Tankers", ar: "صهاريج مياه" },
+    category: "transportation",
+    summary: {
+      en: "Water tankers for site supply and dust suppression.",
+      ar: "صهاريج مياه لتزويد المواقع وتخفيف الغبار.",
+    },
+    description: {
+      en: "Water tankers supplying construction and industrial sites, with qualified drivers and coverage across the Kingdom of Saudi Arabia.",
+      ar: "صهاريج مياه لتزويد مواقع الإنشاء والمواقع الصناعية، مع سائقين مؤهّلين وتغطية في مختلف مناطق المملكة العربية السعودية.",
+    },
+    applications: {
+      en: [
+        "Site water supply",
+        "Dust suppression on haul roads",
+        "Compaction and earthworks support",
+      ],
+      ar: [
+        "تزويد الموقع بالمياه",
+        "تخفيف الغبار على طرق النقل",
+        "دعم أعمال الدمك والأعمال الترابية",
+      ],
+    },
+    specs: transportSpecs({ en: "Water tanker", ar: "صهريج مياه" }),
+    icon: "tanker",
+  },
+  {
+    slug: "fuel-tankers",
+    name: { en: "Fuel Tankers", ar: "صهاريج وقود" },
+    category: "transportation",
+    summary: {
+      en: "Fuel tankers keeping plant and generators supplied.",
+      ar: "صهاريج وقود تُبقي المعدات والمولّدات مزوَّدة.",
+    },
+    description: {
+      en: "Fuel tankers keeping plant, generators and site equipment supplied, operated by qualified drivers with Kingdom-wide coverage.",
+      ar: "صهاريج وقود تُبقي المعدات والمولّدات وأجهزة الموقع مزوَّدة، يشغّلها سائقون مؤهّلون مع تغطية على مستوى المملكة.",
+    },
+    applications: {
+      en: [
+        "Refuelling plant and equipment",
+        "Generator fuel supply",
+        "Remote site fuel logistics",
+      ],
+      ar: [
+        "تزويد المعدات والآليات بالوقود",
+        "تغذية المولّدات بالوقود",
+        "الخدمات اللوجستية للوقود في المواقع النائية",
+      ],
+    },
+    specs: transportSpecs({ en: "Fuel tanker", ar: "صهريج وقود" }),
+    icon: "tanker",
+  },
+  {
+    slug: "vacuum-tankers",
+    name: { en: "Vacuum Tankers", ar: "صهاريج شفط" },
+    category: "transportation",
+    summary: {
+      en: "Vacuum tankers for site drainage and liquid waste removal.",
+      ar: "صهاريج شفط لتصريف المواقع وإزالة النفايات السائلة.",
+    },
+    description: {
+      en: "Vacuum tankers for removing liquids and slurry from construction and industrial sites, with qualified drivers and Kingdom-wide coverage.",
+      ar: "صهاريج شفط لإزالة السوائل والحمأة من مواقع الإنشاء والمواقع الصناعية، مع سائقين مؤهّلين وتغطية على مستوى المملكة.",
+    },
+    applications: {
+      en: [
+        "Excavation dewatering support",
+        "Liquid waste removal",
+        "Industrial facility clean-up",
+      ],
+      ar: [
+        "دعم نزح المياه من الحفريات",
+        "إزالة النفايات السائلة",
+        "تنظيف المرافق الصناعية",
+      ],
+    },
+    specs: transportSpecs({ en: "Vacuum tanker", ar: "صهريج شفط" }),
+    icon: "tanker",
+  },
+  {
+    slug: "pickup-support-vehicles",
+    name: { en: "Pickup Support Vehicles", ar: "مركبات دعم (بيك أب)" },
+    category: "transportation",
+    summary: {
+      en: "Pickup support vehicles for crews, tools and light loads.",
+      ar: "مركبات دعم لنقل الطواقم والعدد والأحمال الخفيفة.",
+    },
+    description: {
+      en: "Pickup support vehicles moving crews, tools and light loads around and between sites, keeping maintenance and supervision mobile.",
+      ar: "مركبات دعم لنقل الطواقم والعدد والأحمال الخفيفة داخل المواقع وبينها، بما يُبقي أعمال الصيانة والإشراف متحرّكة.",
+    },
+    applications: {
+      en: [
+        "Crew and supervision transport",
+        "Tool and spares delivery",
+        "Light load movement between sites",
+      ],
+      ar: [
+        "نقل الطواقم والمشرفين",
+        "توصيل العدد وقطع الغيار",
+        "نقل الأحمال الخفيفة بين المواقع",
+      ],
+    },
+    specs: transportSpecs({ en: "Pickup support vehicle", ar: "مركبة دعم" }),
     icon: "truck",
   },
 
-  // ------------------------------ POWER --------------------------------
-  {
-    slug: "generators",
-    name: "Diesel Generators",
-    category: "power",
-    summary:
-      "Diesel generators for temporary and standby power on site.",
-    description:
-      "Reliable diesel generators supply temporary and standby power for site offices, plant and equipment, keeping work productive where grid power is unavailable.",
-    applications: [
-      "Temporary site power",
-      "Standby / backup power",
-      "Powering plant & tools",
-      "Events & remote sites",
-    ],
-    specs: [
-      { label: "Type", value: "Diesel genset" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "kVA rating", value: onRequest },
-    ],
-    icon: "power",
-  },
+  /* --------------------------- POWER ------------------------------ */
   {
     slug: "air-compressors",
-    name: "Air Compressors",
+    name: { en: "Air Compressors", ar: "ضواغط هواء" },
     category: "power",
-    summary:
-      "Portable air compressors for breakers, tools and pneumatic equipment.",
-    description:
-      "Portable diesel air compressors drive breakers, pneumatic tools and site equipment, delivering steady airflow for demolition and construction tasks.",
-    applications: [
-      "Powering breakers & tools",
-      "Pneumatic equipment",
-      "Demolition support",
-      "General site air supply",
-    ],
-    specs: [
-      { label: "Type", value: "Portable diesel compressor" },
-      { label: "Operated / bare rental", value: "Both available" },
-      { label: "Airflow (cfm)", value: onRequest },
-    ],
-    icon: "power",
+    summary: {
+      en: "High-capacity air compressors for pneumatic tools and blasting.",
+      ar: "ضواغط هواء عالية السعة للعدد الهوائية وأعمال التجليخ.",
+    },
+    description: {
+      en: "High-capacity air compressors for pneumatic tools, blasting and site operations across all project types, delivering steady airflow through the shift.",
+      ar: "ضواغط هواء عالية السعة للعدد الهوائية وأعمال التجليخ وعمليات الموقع في جميع أنواع المشاريع، بتدفّق هواء ثابت خلال الوردية.",
+    },
+    applications: {
+      en: [
+        "Driving pneumatic tools and breakers",
+        "Blasting and surface preparation",
+        "General site air supply",
+      ],
+      ar: [
+        "تشغيل العدد الهوائية والمطارق",
+        "التجليخ وتهيئة الأسطح",
+        "تغذية الموقع بالهواء المضغوط",
+      ],
+    },
+    specs: operatedSpecs({
+      en: "Portable air compressor",
+      ar: "ضاغط هواء متنقّل",
+    }),
+    icon: "compressor",
+  },
+  {
+    slug: "power-generators",
+    name: { en: "Power Generators", ar: "مولّدات كهرباء" },
+    category: "power",
+    summary: {
+      en: "Generators ensuring continuous electrical supply on site.",
+      ar: "مولّدات تضمن تغذية كهربائية مستمرة في الموقع.",
+    },
+    description: {
+      en: "Reliable power generators ensuring continuous electrical supply for construction and industrial sites where grid power is unavailable or unreliable.",
+      ar: "مولّدات كهرباء موثوقة تضمن تغذية كهربائية مستمرة لمواقع الإنشاء والمواقع الصناعية حيث لا تتوفّر الشبكة أو لا يُعتمد عليها.",
+    },
+    applications: {
+      en: [
+        "Temporary site power",
+        "Standby and backup supply",
+        "Powering plant, offices and tools",
+      ],
+      ar: [
+        "تغذية مؤقتة للموقع بالكهرباء",
+        "تغذية احتياطية وطوارئ",
+        "تشغيل المعدات والمكاتب والعدد",
+      ],
+    },
+    specs: operatedSpecs({ en: "Power generator", ar: "مولّد كهرباء" }),
+    icon: "generator",
+  },
+  {
+    slug: "welding-machines",
+    name: { en: "Welding Machines", ar: "ماكينات لحام" },
+    category: "power",
+    summary: {
+      en: "Professional welding machines for fabrication and maintenance.",
+      ar: "ماكينات لحام احترافية لأعمال التصنيع والصيانة.",
+    },
+    description: {
+      en: "Professional welding machines supporting fabrication and maintenance work on construction and industrial sites.",
+      ar: "ماكينات لحام احترافية تدعم أعمال التصنيع والصيانة في مواقع الإنشاء والمواقع الصناعية.",
+    },
+    applications: {
+      en: [
+        "On-site fabrication",
+        "Plant and structural maintenance",
+        "Pipe and steel repair work",
+      ],
+      ar: [
+        "التصنيع في الموقع",
+        "صيانة المعدات والهياكل",
+        "أعمال إصلاح الأنابيب والحديد",
+      ],
+    },
+    specs: operatedSpecs({ en: "Welding machine", ar: "ماكينة لحام" }),
+    icon: "welder",
+  },
+  {
+    slug: "tower-lights",
+    name: { en: "Tower Lights", ar: "أبراج إضاءة" },
+    category: "power",
+    summary: {
+      en: "Tower lights supporting safe night operations.",
+      ar: "أبراج إضاءة تدعم العمل الليلي بأمان.",
+    },
+    description: {
+      en: "Tower lights supporting night operations, giving crews the light levels they need to work safely after dark.",
+      ar: "أبراج إضاءة تدعم العمل الليلي، وتمنح الطواقم مستويات الإضاءة اللازمة للعمل بأمان بعد الغروب.",
+    },
+    applications: {
+      en: [
+        "Night-shift construction work",
+        "Maintenance shutdown lighting",
+        "Yard and laydown area lighting",
+      ],
+      ar: [
+        "أعمال الإنشاء في الورديات الليلية",
+        "إضاءة أعمال الصيانة والإيقاف المجدول",
+        "إضاءة الساحات ومناطق تجميع المواد",
+      ],
+    },
+    specs: operatedSpecs({ en: "Mobile tower light", ar: "برج إضاءة متنقّل" }),
+    icon: "towerLight",
   },
 ];
 
