@@ -64,8 +64,14 @@ confirms real numbers.
 
 To add an equipment type: append an object, and (optionally) add a photograph in
 `src/config/images.ts` → `equipmentImages` keyed by the same slug. With no
-photograph the card renders the navy panel and glyph, which is correct — never
-point it at a photo of a different machine.
+photograph the card renders an information panel showing the item's capacity
+range or type — never point it at a photo of a different machine.
+
+**`quoteChecklists`** in the same file holds the per-category "what to tell us
+for a fast quote" list shown on every equipment page. These describe information
+the *customer* supplies (load weight, radius, ground conditions, dates). Keep
+them that way: never turn them into statements about what Jowain provides, how
+fast it responds, or what it charges.
 
 ## 3. Services — `src/content/services.ts`
 

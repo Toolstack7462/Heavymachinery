@@ -38,7 +38,11 @@ export function EnquiryForm({
 }) {
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [reference, setReference] = useState<string | null>(null);
   const isRequest = variant === "request";
+  const formRef = useRef<HTMLFormElement>(null);
+  const draftNoticeRef = useRef<HTMLParagraphElement>(null);
+  const draftKey = `jowain:enquiry:${variant}`;
 
   /**
    * Time-trap reference: recorded after mount rather than rendered into a
@@ -48,6 +52,101 @@ export function EnquiryForm({
   useEffect(() => {
     mountedAt.current = Date.now();
   }, []);
+
+  /**
+   * Restore an interrupted draft. This form is filled on site, one-handed,
+   * between other jobs; losing six fields to a phone call or a tab switch is
+   * how an enquiry silently becomes a non-enquiry.
+   *
+   * The whole restore path is deliberately imperative: values go straight into
+   * the DOM and the notice is unhidden by ref. Routing it through state would
+   * mean either a setState inside an effect or reading sessionStorage during
+   * render, and the latter hydrates differently on server and client.
+   */
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+    let saved: Record<string, string> | null = null;
+    try {
+      saved = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
+    } catch {
+      saved = null;
+    }
+    if (!saved) return;
+    let restoredAny = false;
+    for (const [key, value] of Object.entries(saved)) {
+      const field = form.elements.namedItem(key);
+      if (field instanceof HTMLInputElement && field.type === "hidden") continue;
+      if (
+        (field instanceof HTMLInputElement ||
+          field instanceof HTMLTextAreaElement ||
+          field instanceof HTMLSelectElement) &&
+        value
+      ) {
+        field.value = value;
+        restoredAny = true;
+      }
+    }
+    if (restoredAny && draftNoticeRef.current) {
+      draftNoticeRef.current.hidden = false;
+    }
+  }, [draftKey]);
+
+  /** Persist on every edit; skip the honeypot and machinery fields. */
+  function saveDraft() {
+    const form = formRef.current;
+    if (!form) return;
+    const entries = Object.fromEntries(
+      Array.from(new FormData(form).entries())
+        .filter(
+          ([key, value]) =>
+            typeof value === "string" &&
+            value !== "" &&
+            !["company_url", "_ts", "locale"].includes(key),
+        )
+        .map(([key, value]) => [key, String(value)]),
+    );
+    try {
+      sessionStorage.setItem(draftKey, JSON.stringify(entries));
+    } catch {
+      // Private mode or a full quota: the draft is a convenience, not a
+      // requirement. Never let it break submission.
+    }
+  }
+
+  /** One field's rule, shared by blur-time and submit-time validation. */
+  function fieldError(name: string, value: string): string | undefined {
+    const trimmed = value.trim();
+    if (name === "name" && !trimmed) return dict.form.invalidName;
+    if (name === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed))
+      return dict.form.invalidEmail;
+    if (name === "message" && !trimmed) return dict.form.invalidMessage;
+    return undefined;
+  }
+
+  /**
+   * Validate on blur, not on keystroke: flagging an email as invalid while it
+   * is still being typed is noise. Once a field has an error it clears as soon
+   * as the value becomes valid.
+   */
+  function handleBlur(event: React.FocusEvent<HTMLFormElement>) {
+    const target = event.target;
+    if (
+      !(target instanceof HTMLInputElement) &&
+      !(target instanceof HTMLTextAreaElement)
+    )
+      return;
+    const { name, value } = target;
+    if (!["name", "email", "message"].includes(name)) return;
+    if (!value.trim() && !errors[name]) return; // don't scold an untouched field
+    const message = fieldError(name, value);
+    setErrors((current) => {
+      const next = { ...current };
+      if (message) next[name] = message;
+      else delete next[name];
+      return next;
+    });
+  }
 
   const defaultSelection = defaultEquipment
     ? equipment.find((item) => item.slug === defaultEquipment)?.name[locale]
@@ -59,13 +158,10 @@ export function EnquiryForm({
     const data = new FormData(form);
 
     const next: Record<string, string> = {};
-    const name = String(data.get("name") ?? "").trim();
-    const email = String(data.get("email") ?? "").trim();
-    const message = String(data.get("message") ?? "").trim();
-    if (!name) next.name = dict.form.invalidName;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      next.email = dict.form.invalidEmail;
-    if (!message) next.message = dict.form.invalidMessage;
+    for (const field of ["name", "email", "message"]) {
+      const message = fieldError(field, String(data.get(field) ?? ""));
+      if (message) next[field] = message;
+    }
     setErrors(next);
     if (Object.keys(next).length > 0) {
       form
@@ -88,8 +184,17 @@ export function EnquiryForm({
         },
       );
       if (!response.ok) throw new Error("Request failed");
+      const result = (await response.json().catch(() => ({}))) as {
+        reference?: string;
+      };
+      setReference(result.reference ?? null);
       setStatus("success");
       form.reset();
+      try {
+        sessionStorage.removeItem(draftKey);
+      } catch {
+        // Nothing to clean up if storage was unavailable in the first place.
+      }
     } catch {
       setStatus("error");
     }
@@ -109,12 +214,48 @@ export function EnquiryForm({
           {dict.form.successTitle}
         </h3>
         <p className="mt-2 text-muted-foreground">{dict.form.successBody}</p>
+        {reference && (
+          /*
+           * A reference the sender can quote. The company publishes no phone
+           * number, so email is the only follow-up channel; handing over
+           * something concrete to quote is the difference between "did that
+           * send?" and a traceable enquiry.
+           */
+          <div className="mt-6 rounded-xl border border-ink-150 bg-white p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {dict.form.successReference}
+            </p>
+            <p
+              dir="ltr"
+              className="mt-1 font-heading text-2xl font-extrabold tracking-tight text-ink-900 tabular-nums"
+            >
+              {reference}
+            </p>
+            <p className="mt-3 text-sm text-muted-foreground">
+              {dict.form.successFollowUp}{" "}
+              <a
+                href={mailtoLink(`${site.positioning} — ${reference}`)}
+                className="font-semibold text-brand-700 underline underline-offset-2"
+              >
+                {site.contact.email}
+              </a>
+            </p>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      onBlur={handleBlur}
+      onInput={saveDraft}
+      onChange={saveDraft}
+      noValidate
+      className="space-y-6"
+    >
       {/* Honeypot — off-screen for users, irresistible to bots. */}
       <div className="absolute -start-[9999px] top-0" aria-hidden="true">
         <label htmlFor="company_url">{dict.form.honeypot}</label>
@@ -127,6 +268,15 @@ export function EnquiryForm({
         />
       </div>
       <input type="hidden" name="locale" value={locale} />
+
+      <p
+        ref={draftNoticeRef}
+        hidden
+        role="status"
+        className="rounded-lg border border-ink-150 bg-surface-muted px-4 py-3 text-sm text-ink-700"
+      >
+        {dict.form.draftRestored}
+      </p>
 
       <fieldset className="space-y-5">
         <legend className="font-heading text-sm font-semibold uppercase tracking-wider text-ink-600">

@@ -8,12 +8,14 @@ import { PageHero } from "@/components/blocks/PageHero";
 import { Section } from "@/components/Section";
 import { CtaBand } from "@/components/blocks/CtaBand";
 import { EquipmentCard } from "@/components/blocks/Cards";
+import { FleetFilter } from "@/components/blocks/FleetFilter";
 import { JsonLd } from "@/components/JsonLd";
 import { Icon } from "@/components/Icon";
 import { Reveal } from "@/components/motion/Reveal";
 import {
   equipment,
   equipmentCategories,
+  getCategoryMeta,
   type EquipmentCategory,
 } from "@/content/equipment";
 
@@ -107,19 +109,36 @@ export default async function FleetPage({
           </p>
         )}
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((item, index) => (
-            <Reveal key={item.slug} delay={(index % 3) * 0.05}>
-              {/* h2: on the index the cards are the page's own list. */}
-              <EquipmentCard
-                locale={locale}
-                item={item}
-                cta={dict.actions.viewDetails}
-                headingLevel={2}
-              />
-            </Reveal>
-          ))}
-        </div>
+        {/*
+          Cards are rendered here on the server and handed to the filter island
+          as children, so search costs an input and a `hidden` toggle rather
+          than a client-side copy of the catalogue.
+        */}
+        <FleetFilter
+          dict={dict}
+          items={filtered.map((item, index) => ({
+            slug: item.slug,
+            haystack: [
+              item.name[locale],
+              item.summary[locale],
+              getCategoryMeta(item.category).title[locale],
+              ...item.specs.map((spec) => spec.value[locale]),
+            ]
+              .join(" ")
+              .toLowerCase(),
+            card: (
+              <Reveal delay={(index % 3) * 0.05} className="h-full">
+                {/* h2: on the index the cards are the page's own list. */}
+                <EquipmentCard
+                  locale={locale}
+                  item={item}
+                  cta={dict.actions.viewDetails}
+                  headingLevel={2}
+                />
+              </Reveal>
+            ),
+          }))}
+        />
 
         <p className="measure mt-10 flex items-start gap-2.5 rounded-xl border border-ink-150 bg-surface-muted p-4 text-sm text-muted-foreground">
           <Icon

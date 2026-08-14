@@ -133,7 +133,9 @@ export function Footer({
               <Link
                 key={link.href}
                 href={localeHref(locale, link.href)}
-                className="inline-flex min-h-[44px] items-center transition-colors hover:text-ink-200 md:min-h-0"
+                // -mx-1/px-1 widens the shortest label ("Sitemap", 42px) past
+                // the 44px minimum without spacing the row differently.
+                className="-mx-1 inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-1 transition-colors hover:text-ink-200 md:min-h-0"
               >
                 {link.label}
               </Link>

@@ -874,6 +874,102 @@ export const equipment: EquipmentItem[] = [
   },
 ];
 
+/* ------------------------------------------------------------------ */
+/* What a buyer should send us, per category                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Buying guidance, not company claims. These lists say what information a
+ * quotation needs — facts the *customer* holds — so an equipment page carries
+ * something useful even where the profile documents no specifications. Nothing
+ * here asserts anything about Jowain's fleet, terms or availability.
+ */
+export const quoteChecklists: Record<EquipmentCategory, LL> = {
+  "heavy-lifting": {
+    en: [
+      "Weight and dimensions of the load",
+      "Lift radius and the height it must reach",
+      "Ground conditions and the space available for set-up",
+      "Dates, and how many lifts are planned",
+    ],
+    ar: [
+      "وزن الحمل وأبعاده",
+      "نصف دوران الرفع والارتفاع المطلوب الوصول إليه",
+      "طبيعة الأرض والمساحة المتاحة للتجهيز",
+      "التواريخ وعدد عمليات الرفع المخطّطة",
+    ],
+  },
+  "material-handling": {
+    en: [
+      "Load weight and the working height needed",
+      "Indoor or outdoor use, and the floor or ground surface",
+      "Access width and any restrictions on site",
+      "How long the unit is needed",
+    ],
+    ar: [
+      "وزن الحمل وارتفاع العمل المطلوب",
+      "الاستخدام داخل المبنى أو خارجه، وطبيعة الأرضية",
+      "عرض مسار الوصول وأي قيود في الموقع",
+      "المدة المطلوبة للوحدة",
+    ],
+  },
+  earthmoving: {
+    en: [
+      "Volume of material and the type of ground",
+      "Site access and the working space available",
+      "Whether an operator is required",
+      "Start date and expected duration",
+    ],
+    ar: [
+      "كمية المواد وطبيعة الأرض",
+      "إمكانية الوصول إلى الموقع ومساحة العمل المتاحة",
+      "هل يلزم توفير مشغّل",
+      "تاريخ البدء والمدة المتوقعة",
+    ],
+  },
+  transportation: {
+    en: [
+      "What is being moved, with weight and dimensions",
+      "Collection and delivery points",
+      "Any permits or escorts already arranged",
+      "Required dates",
+    ],
+    ar: [
+      "ما المطلوب نقله، مع الوزن والأبعاد",
+      "نقطتا التحميل والتسليم",
+      "أي تصاريح أو مرافقة تم ترتيبها مسبقاً",
+      "التواريخ المطلوبة",
+    ],
+  },
+  power: {
+    en: [
+      "The load to be powered, in kVA or by the tools in use",
+      "Continuous running or standby duty",
+      "Fuel supply arrangements on site",
+      "How long the unit is needed",
+    ],
+    ar: [
+      "الحمل المطلوب تغذيته بالكيلو فولت أمبير أو حسب العدد المستخدمة",
+      "تشغيل مستمر أم احتياطي",
+      "ترتيبات تزويد الوقود في الموقع",
+      "المدة المطلوبة للوحدة",
+    ],
+  },
+};
+
+/**
+ * The single most useful verified fact about an item, used as the visual
+ * subject where no photograph of that machine type exists. Cranes carry the
+ * capacity range the profile states; everything else carries its type. This is
+ * why a photo-less card is an information panel rather than an empty frame.
+ */
+export function equipmentHighlight(item: EquipmentItem): EquipmentSpec | undefined {
+  return (
+    item.specs.find((spec) => spec.label.en === SPEC.capacityRange.en) ??
+    item.specs.find((spec) => spec.label.en === SPEC.type.en)
+  );
+}
+
 /** Lookup helpers. */
 export function getEquipmentBySlug(slug: string): EquipmentItem | undefined {
   return equipment.find((e) => e.slug === slug);

@@ -23,8 +23,25 @@ import { NextResponse } from "next/server";
  * *recorded*, and never claims an email was delivered.
  */
 
+/**
+ * Human-quotable reference, e.g. "JY-8QK3R2". Short enough to read down a
+ * phone line, unique enough to find in a log. It is generated server-side and
+ * returned to the browser so the sender has something concrete to quote when
+ * following up — which matters more than usual here, because the company
+ * publishes no telephone number and email is the only fallback channel.
+ */
+function makeReference(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I/O/0/1
+  let out = "";
+  for (let i = 0; i < 6; i += 1) {
+    out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return `JY-${out}`;
+}
+
 export interface EnquiryPayload {
   kind: "quote" | "contact";
+  reference: string;
   name: string;
   email: string;
   company?: string;
@@ -76,6 +93,7 @@ export async function handleEnquiry(
 
   const payload: EnquiryPayload = {
     kind,
+    reference: makeReference(),
     name,
     email,
     company: text(body.company) || undefined,
@@ -104,5 +122,5 @@ export async function handleEnquiry(
 
   console.info(`[enquiry:${kind}]`, JSON.stringify(payload));
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, reference: payload.reference });
 }

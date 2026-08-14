@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/config/site";
 import { locales } from "@/i18n/config";
@@ -20,7 +21,10 @@ import {
   getEquipmentBySlug,
   getEquipmentByCategory,
   getCategoryMeta,
+  equipmentHighlight,
+  quoteChecklists,
 } from "@/content/equipment";
+import { services } from "@/content/services";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) =>
@@ -63,6 +67,11 @@ export default async function EquipmentDetailPage({
     .filter((other) => other.slug !== slug)
     .slice(0, 3);
   const photo = equipmentImage(item.slug);
+  const highlight = equipmentHighlight(item);
+  const checklist = quoteChecklists[item.category];
+  const parentService = services.find((service) =>
+    service.relatedEquipment.includes(item.slug),
+  );
 
   return (
     <>
@@ -106,16 +115,30 @@ export default async function EquipmentDetailPage({
                 />
               </div>
             ) : (
-              <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-2xl bg-ink-900">
+              /* Information panel, not an empty frame — see EquipmentCard. */
+              <div className="relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl bg-ink-900 p-7">
                 <div
                   className="absolute inset-0 bg-grid-dark opacity-70"
                   aria-hidden="true"
                 />
                 <Icon
                   name={item.icon}
-                  size={112}
+                  size={44}
                   className="relative text-brand-300"
                 />
+                {highlight && (
+                  <>
+                    <p className="relative mt-auto pt-6 text-xs font-semibold uppercase tracking-wider text-ink-400">
+                      {highlight.label[locale]}
+                    </p>
+                    <p
+                      dir="ltr"
+                      className="relative mt-1 font-heading text-4xl font-extrabold leading-none tracking-tight text-white tabular-nums rtl:text-end"
+                    >
+                      {highlight.value[locale]}
+                    </p>
+                  </>
+                )}
               </div>
             )}
             {photo && (
@@ -177,7 +200,35 @@ export default async function EquipmentDetailPage({
               </p>
             </Reveal>
 
+            {/*
+              Buying guidance rather than filler: what the *customer* needs to
+              send for a quotation. It makes the page useful without asserting
+              a single specification the company profile does not document.
+            */}
             <Reveal delay={0.14}>
+              <div className="mt-8 rounded-2xl border border-ink-150 bg-surface-muted p-6">
+                <h2 className="font-heading text-lg font-bold text-ink-900">
+                  {dict.labels.quoteChecklist}
+                </h2>
+                <ul className="mt-4 space-y-2.5">
+                  {checklist[locale].map((line) => (
+                    <li key={line} className="flex items-start gap-3 text-sm">
+                      <Icon
+                        name="arrowRight"
+                        size={16}
+                        className="mt-0.5 shrink-0 text-brand-600 rtl:rotate-180"
+                      />
+                      <span className="text-ink-700">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="measure mt-4 text-xs text-muted-foreground">
+                  {dict.labels.quoteChecklistNote}
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.18}>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button
                   href={localeHref(
@@ -192,6 +243,17 @@ export default async function EquipmentDetailPage({
                   {dict.actions.contactUs}
                 </Button>
               </div>
+              {parentService && (
+                <p className="mt-5 text-sm text-muted-foreground">
+                  {dict.labels.relatedService}{" "}
+                  <Link
+                    href={localeHref(locale, `/services/${parentService.slug}`)}
+                    className="-my-3 inline-flex items-center py-3 font-semibold text-brand-700 underline underline-offset-2"
+                  >
+                    {parentService.title[locale]}
+                  </Link>
+                </p>
+              )}
             </Reveal>
           </div>
         </div>

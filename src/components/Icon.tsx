@@ -26,6 +26,7 @@ import {
   Wind,
   Flame,
   Lightbulb,
+  Search,
   type LucideIcon,
 } from "lucide-react";
 
@@ -59,6 +60,7 @@ const lucideMap: Record<string, LucideIcon> = {
   arrowRight: ArrowRight,
   menu: Menu,
   close: X,
+  search: Search,
   truck: Truck,
   forklift: Forklift,
   power: Zap,

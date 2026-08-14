@@ -96,10 +96,18 @@ equipment buyer treats the website as a specification document:
    and WhatsApp affordance is absent rather than guessed.
 4. **No mislabelled machinery.** A photograph is only used for the equipment
    type it actually shows; there is no category-level fallback image. Equipment
-   without a verified photograph renders an engineered panel and glyph.
-5. **Client logos keep their own trademarks.** They are sliced from artwork the
+   without a verified photograph renders an information panel carrying its
+   capacity range or type, so the card still tells the buyer something true.
+5. **Guidance, not claims.** The "what to tell us for a fast quote" checklist on
+   each equipment page lists facts the *customer* holds. It makes a thin page
+   useful without asserting anything about Jowain's fleet, terms or lead times.
+6. **Client logos keep their own trademarks.** They are sliced from artwork the
    client supplied, never recoloured into the Jowain palette, never redrawn, and
    never sourced from the web.
+7. **No promises the company has not made.** There is no response-time claim
+   anywhere, because none is documented. Instead each enquiry returns a
+   quotable reference (`JY-XXXXXX`) so the sender has something concrete to
+   follow up with.
 
 Open questions for the client are tracked in `docs/MISSING-INFO.md`.
 

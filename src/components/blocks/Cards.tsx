@@ -6,7 +6,7 @@ import { Icon } from "@/components/Icon";
 import { Tilt } from "@/components/motion/Tilt";
 import type { ServiceItem } from "@/content/services";
 import type { EquipmentItem } from "@/content/equipment";
-import { getCategoryMeta } from "@/content/equipment";
+import { getCategoryMeta, equipmentHighlight } from "@/content/equipment";
 import type { Industry, ValueItem } from "@/content/company";
 import { equipmentImage, unsplash } from "@/config/images";
 
@@ -118,6 +118,7 @@ export function EquipmentCard({
 }) {
   const photo = equipmentImage(item.slug);
   const category = getCategoryMeta(item.category);
+  const highlight = equipmentHighlight(item);
 
   return (
     <Tilt className="h-full">
@@ -135,16 +136,31 @@ export function EquipmentCard({
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             />
           ) : (
-            <div className="flex h-full items-center justify-center">
+            /*
+             * No verified photograph of this machine type exists, so the panel
+             * carries the item's most useful documented fact instead of a
+             * decorative glyph: the capacity range for cranes, the equipment
+             * type for everything else. An empty frame says "no inventory";
+             * "55 T – 3200 T" says the opposite.
+             */
+            <div className="flex h-full flex-col justify-center px-5">
               <div
                 className="absolute inset-0 bg-grid-dark opacity-60"
                 aria-hidden="true"
               />
               <Icon
                 name={item.icon}
-                size={64}
-                className="relative text-brand-300"
+                size={26}
+                className="relative mb-3 text-brand-300"
               />
+              {highlight && (
+                <p
+                  dir="ltr"
+                  className="relative font-heading text-[1.75rem] font-extrabold leading-none tracking-tight text-white tabular-nums rtl:text-end"
+                >
+                  {highlight.value[locale]}
+                </p>
+              )}
             </div>
           )}
           <span

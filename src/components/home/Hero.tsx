@@ -38,7 +38,14 @@ export function Hero({
           </Reveal>
 
           <Reveal delay={0.06}>
-            <h1 className="mt-5 text-[2.1rem] leading-[1.06] text-white sm:text-5xl lg:text-[3.5rem]">
+            {/*
+              `pretty` rather than the global `balance`: balancing this
+              headline on a narrow viewport left "Rental" alone on its own
+              line. `pretty` protects against orphans without equalising line
+              lengths, which is the right trade for a three-word-plus-ampersand
+              headline.
+            */}
+            <h1 className="mt-5 text-[2.1rem] leading-[1.06] text-white [text-wrap:pretty] sm:text-5xl lg:text-[3.5rem]">
               {dict.hero.title}
             </h1>
           </Reveal>

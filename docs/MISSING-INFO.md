@@ -82,10 +82,11 @@ therefore **not used** — publishing them would put fabricated equipment on a r
 company's site.
 
 The site currently uses six licensed Unsplash photographs, each visually verified
-against the equipment type it illustrates. The other twenty equipment types show
-an engineered navy panel with their line glyph, because no verified photograph of
-that machine type exists. Real photographs of Jowain's own cranes, trailers,
-tankers and site power would replace both.
+against the equipment type it illustrates. The other twenty show an information
+panel carrying that item's capacity range or type instead — deliberately built so
+the catalogue reads as specified rather than empty. Real photographs of Jowain's
+own cranes, trailers, tankers and site power would still be a significant
+upgrade: **one frame per equipment group would improve twenty pages.**
 
 **Where:** `src/config/images.ts` → `equipmentImages` (keyed by equipment slug),
 `images` (hero and section bands).
@@ -138,8 +139,20 @@ as intended (published exactly as printed).
 
 ## Enquiry delivery
 
-`src/lib/enquiry.ts` validates and logs submissions but sends no email until a
-delivery target is configured (`ENQUIRY_WEBHOOK_URL`, or a provider branch added
-in that file). The success screen states the request was **recorded** — it never
-claims an email was delivered. Set this up before launch, or the form's leads will
-only exist in server logs.
+`src/lib/enquiry.ts` validates each submission, assigns a quotable reference
+(`JY-XXXXXX`) and logs it, but sends no email until a delivery target is
+configured (`ENQUIRY_WEBHOOK_URL`, or a provider branch added in that file). The
+success screen states the request was **recorded** and shows the reference; it
+never claims an email was delivered.
+
+**Set this up before launch.** Until then every lead exists only in server logs,
+and combined with the unconfirmed email address above that means the site has no
+verified inbound channel at all. This is the highest-risk item on this page.
+
+### Response time
+
+No response-time commitment appears anywhere on the site, because none is
+documented. If the client will commit to one ("we reply within one working day"),
+it belongs beside the submit button and in the success state — it is the single
+most reassuring sentence the site could add, and the only thing missing from the
+enquiry flow that code cannot supply.

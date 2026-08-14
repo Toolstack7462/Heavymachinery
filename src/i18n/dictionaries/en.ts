@@ -149,6 +149,18 @@ export const en = {
     operatorsNote: "Qualified operators and drivers provided on request.",
     /** Short form for the hero fact rail, where the three cells share a row. */
     operatorsShort: "Qualified operators & drivers",
+    searchEquipment: "Search equipment",
+    searchEquipmentPlaceholder: "Search by name, type or capacity",
+    resultSingular: "match",
+    resultPlural: "matches",
+    noResults: "No equipment matches that search",
+    noResultsHint:
+      "Try a broader term, or browse by category. If you need something not listed here, send us the requirement and we will tell you what we can supply.",
+    clearSearch: "Clear search",
+    quoteChecklist: "What to tell us for a fast quote",
+    quoteChecklistNote:
+      "Send what you know. We will come back on anything missing.",
+    relatedService: "Part of",
     established: "Established",
     coverage: "Coverage",
     experience: "Industry experience",
@@ -177,6 +189,9 @@ export const en = {
     successTitle: "Request received",
     successBody:
       "Thank you. Your request has been recorded and our team will get back to you.",
+    successReference: "Your reference",
+    successFollowUp: "Quote this reference if you follow up by email:",
+    draftRestored: "We kept what you had already typed.",
     errorTitle: "Something went wrong",
     errorBody:
       "Sorry, we couldn't send your request. Please try again, or email us directly.",

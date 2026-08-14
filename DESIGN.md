@@ -86,10 +86,17 @@ not carry text** — the footer's small print uses `ink-400` for that reason.
 ## Imagery
 
 Photography is licensed Unsplash stock, each frame opened and checked against the
-label it carries. There is **no category-level fallback image**: equipment
-without a verified photograph of that exact machine type renders a navy panel
-with the fine grid and its line glyph. That keeps the catalogue honest — a
-procurement engineer reads a wrong photo as a specification error.
+label it carries. There is **no category-level fallback image**: a wrong photo
+reads to a procurement engineer as a specification error, so a crawler crane
+card never borrows the mobile-crane frame.
+
+Where no verified photograph of that machine type exists (20 of 26 items), the
+card and detail page render an **information panel**, not an empty one: the navy
+ground and fine grid carry the item's most useful documented fact, set large —
+the capacity range for cranes (`55 T – 3200 T`), the equipment type for
+everything else (`Telescopic handler`). The rule is `equipmentHighlight()` in
+`src/content/equipment.ts`. An empty frame implies no inventory; a tonnage range
+says the opposite, and it is the fact a buyer came for.
 
 Client marks in `public/clients/` are sliced from the client-supplied board at
 native resolution, keep their own trademark colours, and are optically balanced
