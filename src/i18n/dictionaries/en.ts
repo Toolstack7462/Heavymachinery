@@ -188,11 +188,13 @@ export const en = {
     optional: "Optional",
     successTitle: "Request received",
     successBody:
-      "Thank you. Your request has been recorded and our team will get back to you.",
+      "Thank you. Your request has been sent to our team and we will get back to you.",
     successReference: "Your reference",
     successFollowUp: "Quote this reference if you follow up by email:",
     draftRestored: "We kept what you had already typed.",
-    errorTitle: "Something went wrong",
+    errorTitle: "We could not send your request",
+    errorTooMany:
+      "Too many requests from this connection. Please wait a few minutes and try again.",
     errorBody:
       "Sorry, we couldn't send your request. Please try again, or email us directly.",
     invalidEmail: "Please enter a valid email address.",

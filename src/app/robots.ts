@@ -11,6 +11,8 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${site.url}/sitemap.xml`,
-    host: site.url,
+    // `host:` is a legacy Yandex directive that Google ignores; the canonical
+    // host is already asserted by the canonical tags and the redirect rules.
+
   };
 }

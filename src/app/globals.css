@@ -389,3 +389,43 @@
 .animate-rise {
   animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* ---------------------------------------------------------------------------
+ * Pointer-driven micro-motion — card tilt and hero parallax.
+ *
+ * Both effects are driven by CSS custom properties that a small client
+ * component writes on pointermove (see components/motion/Tilt.tsx and
+ * components/home/HeroMedia.tsx). Everything else — the easing, and the two
+ * opt-outs — lives here rather than in JavaScript.
+ *
+ * Gating in CSS is deliberate:
+ *   - the transform only applies inside `hover: hover and pointer: fine`, so a
+ *     touch device can never tilt even if a stray mouse event arrives
+ *   - `prefers-reduced-motion: reduce` never matches this block at all, so the
+ *     element simply stays flat
+ *   - server-rendered markup is already correct; nothing is re-decided after
+ *     hydration, so there is no flash and no layout work on load
+ *
+ * These replaced a ~120 KB animation library that shipped to every visitor for
+ * two effects only desktop pointers could ever see.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .tilt {
+    transform: perspective(1000px) rotateX(var(--tilt-x, 0deg))
+      rotateY(var(--tilt-y, 0deg));
+    /* Long, soft settle when the pointer leaves. */
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  /* While tracking, follow the pointer closely instead of trailing it. */
+  .tilt[data-tilting="true"] {
+    transition: transform 0.12s ease-out;
+  }
+
+  .hero-parallax {
+    transform: translate3d(var(--parallax-x, 0px), var(--parallax-y, 0px), 0);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+}

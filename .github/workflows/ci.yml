@@ -1,0 +1,43 @@
+name: CI
+
+# Validation only. Nothing here deploys: production credentials are entered in
+# the hosting platform, not stored in this repository.
+on:
+  push:
+    branches: [main, production-hostinger]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: typecheck · lint · test · build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Matches package.json engines and the Node runtime available on the
+          # deployment targets documented in docs/DEPLOYMENT.md.
+          node-version: 22.x
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          # The build only needs the canonical origin; enquiry delivery is a
+          # runtime concern, so no secret is required to verify a build.
+          SITE_URL: https://jowainyanbu.com

@@ -6,7 +6,9 @@ Al Bahr, Kingdom of Saudi Arabia**.
 
 - Positioning: *Heavy Equipment Rental & Transportation*
 - Tagline: *Reliable Equipment. Dependable Transportation.*
-- Production domain: `https://www.jowain.net`
+- Production domain: **`https://jowainyanbu.com`** — set via the `SITE_URL` environment
+  variable, which controls every absolute URL the site emits. The company profile PDF
+  prints a different domain (`www.jowain.net`); see `docs/CLIENT-INPUT-REQUIRED.md` §3.
 
 ## Stack
 
@@ -14,7 +16,7 @@ Al Bahr, Kingdom of Saudi Arabia**.
 | --- | --- |
 | Framework | Next.js 16 (App Router + Turbopack, React 19, TypeScript strict) |
 | Styling | Tailwind CSS v4, CSS-first `@theme` tokens in `src/app/globals.css` |
-| Motion | `motion` (Motion for React v13) for hero parallax + card tilt; CSS + IntersectionObserver for section reveals |
+| Motion | **No animation library.** CSS custom properties + one rAF handler for hero parallax and card tilt; CSS + IntersectionObserver for section reveals |
 | Icons | `lucide-react` plus hand-authored equipment glyphs in `src/components/Icon.tsx` |
 | i18n | `/[locale]` routing (`en`, `ar`), full RTL, bilingual content objects |
 | Fonts | Archivo (display), Source Sans 3 (body), Noto Sans Arabic (Arabic) via `next/font` |
@@ -22,12 +24,13 @@ Al Bahr, Kingdom of Saudi Arabia**.
 ## Commands
 
 ```bash
-npm install
+npm ci             # install exactly what the lockfile pins
 npm run dev        # http://localhost:3000 → redirects to /en
-npm run build      # production build (94 prerendered routes)
+npm run build      # production build (100 prerendered routes)
 npm start          # serve the build
-npm run typecheck  # tsc --noEmit
+npm run typecheck  # tsc --noEmit, strict
 npm run lint       # eslint . (flat config; `next lint` is gone in Next 16)
+npm test           # node --test — 33 tests, no test framework
 ```
 
 > **Keep the site prerendered.** Every page is static HTML. Reaching for a
@@ -44,7 +47,7 @@ src/
     [locale]/            home, about, fleet, services, industries, quality,
                          clients, why-choose-us, contact, request-a-quote,
                          faqs, sitemap, privacy-policy, terms
-    api/{quote,contact}  enquiry endpoints (validated, provider-agnostic)
+    api/{quote,contact}  enquiry endpoints — validated, rate limited, Resend delivery
     icon.png             favicon generated from the official logo
     apple-icon.png       iOS icon
     opengraph-image.tsx  social card, inlines the official emblem
@@ -61,7 +64,7 @@ src/
     nav.ts               primary + footer navigation
   content/               company, equipment, services, clients, faqs, legal
   i18n/                  dictionaries (en/ar) + localized helpers
-  lib/                   seo.ts, enquiry.ts, utils.ts
+  lib/                   seo.ts, enquiry.ts + enquiry-core.ts, utils.ts
   proxy.ts               locale routing (Next 16's rename of `middleware.ts`)
 public/
   brand/                 emblem PNGs extracted from the supplied Logo.pdf
@@ -76,7 +79,7 @@ Everything a non-developer usually needs to change lives in two folders:
 - **Copy** → `src/content/*.ts` and `src/i18n/dictionaries/*.ts`
 
 Body copy is stored as `{ en, ar }` pairs, so a change must be made in both
-languages or TypeScript will complain. See `docs/CONTENT-EDITING.md`.
+languages or TypeScript will complain. See `docs/CONTENT-GUIDE.md`.
 
 ## Content integrity rules
 
@@ -113,19 +116,59 @@ Open questions for the client are tracked in `docs/MISSING-INFO.md`.
 
 ## Enquiry delivery
 
-`src/lib/enquiry.ts` validates submissions, blocks bots (honeypot + time-trap)
-and logs the payload server-side. Email/CRM delivery is opt-in through
-environment variables set on the host — never committed:
+**A 200 from `/api/contact` or `/api/quote` means the enquiry reached the sales inbox.**
+Nothing weaker. The company publishes no telephone number, so email is the only channel a
+customer has — a false success is a permanently lost customer.
+
+- `src/lib/enquiry-core.ts` — validation, spam filtering (honeypot + time trap), rate
+  limiting, email rendering, Resend delivery. Imports nothing from Next, so it is
+  unit-tested directly by `tests/enquiry.test.ts`.
+- `src/lib/enquiry.ts` — the Next adapter: status-code mapping and PII-free logging.
+
+Status codes: `200` delivered · `415` wrong content type · `413` too large · `422` invalid
+input · `429` rate limited · `502` provider failed · `503` not configured. It never returns
+a fake success, and the form UI shows the email fallback when delivery fails.
+
+Requires three environment variables — see `docs/ENVIRONMENT.md`:
 
 ```
-ENQUIRY_WEBHOOK_URL=   # CRM, Zapier or Make endpoint
+RESEND_API_KEY=      # secret; server-side only, never NEXT_PUBLIC_
+EMAIL_FROM=          # must be on a Resend-verified domain
+ENQUIRY_TO_EMAIL=    # destination inbox, comma-separated for several
 ```
 
-Until a delivery target is configured the UI says the request was *recorded*,
-and never claims an email was sent.
+Without them both endpoints return **503** and the forms surface their email fallback.
 
 ## Deployment
 
-See `docs/DEPLOYMENT.md`. Security headers (CSP, HSTS, frame and referrer
-policy) are defined in `next.config.ts`; the image optimiser is scoped to the
-single photography host it uses.
+Target host is **Hostinger**. Note that **Hostinger Premium does not officially support
+Node.js** — Node apps need Business, Cloud or VPS — so read
+**`docs/HOSTINGER-DEPLOYMENT.md`** before deploying. The app is a Next.js server and must
+not be converted to a static export: that would delete the API routes, and with them the
+only lead channel.
+
+`output: "standalone"` is enabled, so production hosting needs no `node_modules`.
+`SITE_URL` must be set **at build time** — absolute URLs are baked into the prerendered
+HTML.
+
+Security headers (CSP, HSTS, frame and referrer policy) are in `next.config.ts`;
+`unsafe-eval` is development-only, and the image optimiser is scoped to the single
+photography host it uses.
+
+## Documentation
+
+| File | What it covers |
+| --- | --- |
+| `CLAUDE.md` | Rules for AI sessions: business facts, geography, performance budget |
+| `docs/PRODUCTION-AUDIT.md` | Full audit with P0–P3 severities |
+| `docs/ARCHITECTURE.md` | File map, request flow, conventions |
+| `docs/DEPLOYMENT.md` | cPanel/Passenger, VPS, Docker, Vercel |
+| `docs/HOSTINGER-DEPLOYMENT.md` | The actual account, the actual constraint, the exact steps |
+| `docs/ENVIRONMENT.md` | Every environment variable |
+| `docs/SECURITY.md` | Headers, CSP decisions, enquiry hardening |
+| `docs/PERFORMANCE.md` | Budget, measurements, remaining limitations |
+| `docs/SEO.md` | Metadata, structured data, and the lines not crossed |
+| `docs/CONTENT-GUIDE.md` | Editing copy without touching page code |
+| `docs/MISSING-INFO.md` | Business facts still to confirm |
+| `docs/CLIENT-INPUT-REQUIRED.md` | What is blocked and why |
+| `docs/LAUNCH-CHECKLIST.md` | Everything that must be green before launch |

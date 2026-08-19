@@ -1,17 +1,39 @@
 import type { NextConfig } from "next";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 /**
- * Security headers applied to every route.
- * CSP is intentionally strict but allows Google Fonts and inline styles
- * required by Next.js. Adjust `connect-src`/`img-src` when adding analytics,
- * a maps embed, or a form backend.
+ * Content Security Policy.
+ *
+ * Two deliberate decisions worth reading before editing:
+ *
+ * 1. `'unsafe-eval'` is DEVELOPMENT ONLY. The Next.js dev server needs it for
+ *    React Refresh; a production build never evaluates strings. Shipping it to
+ *    production would blunt the main XSS control for no benefit.
+ *
+ * 2. `'unsafe-inline'` in `script-src` stays, and is a considered trade rather
+ *    than an oversight. Next emits small inline bootstrap scripts, and the
+ *    alternative — a per-request nonce — requires every page to render
+ *    dynamically. This site prerenders 100 static pages, so nonces would trade
+ *    a real, measurable performance win for a marginal security one on a site
+ *    that renders no user-generated content and has no authenticated session
+ *    to steal. Revisit if either of those ever changes.
+ *
+ * Font CDNs are deliberately absent: `next/font` self-hosts Archivo, Source
+ * Sans 3 and Noto Sans Arabic at build time, so the browser never contacts
+ * fonts.googleapis.com or fonts.gstatic.com. Allowing them would widen the
+ * policy for origins that are never used.
  */
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https:",
+  `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"}`,
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
+  // Optimised images are served same-origin from /_next/image; the Unsplash
+  // host is listed because it is the one remote source `remotePatterns`
+  // permits, so the two stay in step. `data:`/`blob:` cover inline SVG glyphs
+  // and the blur placeholder.
+  "img-src 'self' data: blob: https://images.unsplash.com",
   "connect-src 'self'",
   // No third-party frames anywhere on the site (the contact page links to
   // Google Maps rather than embedding it), so frames can be forbidden.
@@ -42,6 +64,13 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  /*
+   * Self-contained server bundle. `next build` emits .next/standalone with only
+   * the modules the server actually requires, so production hosting does not
+   * need node_modules or any devDependency present. That matters on the target
+   * hosting, where the deploy is a file copy rather than an install.
+   */
+  output: "standalone",
   // Pin the tracing root to this project (a parent lockfile exists on the dev
   // machine); prevents Next from inferring the wrong workspace root.
   outputFileTracingRoot: __dirname,
@@ -54,7 +83,24 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      /*
+       * Build output is content-hashed, so it can be cached permanently. Next
+       * sets this itself on Vercel; stating it here means the same behaviour
+       * on Passenger, Nginx and any other origin that simply proxies to the
+       * Node server.
+       */
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
   },
 };
 

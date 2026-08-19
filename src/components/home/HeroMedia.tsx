@@ -1,13 +1,7 @@
 "use client";
 
+import { useRef, type CSSProperties } from "react";
 import Image from "next/image";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  useReducedMotion,
-} from "motion/react";
 import { images, unsplash } from "@/config/images";
 import type { Locale } from "@/config/site";
 
@@ -18,53 +12,57 @@ import type { Locale } from "@/config/site";
  * exposing an edge. Fine-pointer devices only, off under reduced motion, and
  * transform-only so it never triggers layout. The scrim is a sibling so the
  * text contrast never moves with the picture.
+ *
+ * IMPLEMENTATION NOTE — this and `Tilt` were the only consumers of the
+ * `motion` package, a ~120 KB chunk shipped to every visitor for two effects
+ * that only fine-pointer devices ever see. The offsets are now two CSS custom
+ * properties written from one rAF-throttled handler; `.hero-parallax` in
+ * globals.css owns the easing and the reduced-motion and coarse-pointer
+ * opt-outs. Identical result, no dependency, nothing shipped to phones.
  */
 export function HeroMedia({ locale }: { locale: Locale }) {
-  const reduce = useReducedMotion();
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const spring = { stiffness: 90, damping: 24, mass: 0.6 };
-  const x = useSpring(useTransform(px, [-0.5, 0.5], [-10, 10]), spring);
-  const y = useSpring(useTransform(py, [-0.5, 0.5], [-6, 6]), spring);
-
-  const picture = (
-    <Image
-      src={unsplash(images.hero.id, 1920, 78)}
-      alt={locale === "ar" ? images.hero.altAr : images.hero.alt}
-      fill
-      priority
-      sizes="100vw"
-      className="scale-[1.04] object-cover object-center"
-    />
-  );
+  const ref = useRef<HTMLDivElement>(null);
+  const frame = useRef(0);
 
   return (
     <div
       className="absolute inset-0 overflow-hidden bg-ink-950"
-      onPointerMove={
-        reduce
-          ? undefined
-          : (event) => {
-              if (event.pointerType !== "mouse") return;
-              if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
-                return;
-              const rect = event.currentTarget.getBoundingClientRect();
-              px.set((event.clientX - rect.left) / rect.width - 0.5);
-              py.set((event.clientY - rect.top) / rect.height - 0.5);
-            }
-      }
+      onPointerMove={(event) => {
+        if (event.pointerType !== "mouse") return;
+        const node = ref.current;
+        if (!node) return;
+        const rect = event.currentTarget.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width - 0.5;
+        const py = (event.clientY - rect.top) / rect.height - 0.5;
+
+        if (frame.current) cancelAnimationFrame(frame.current);
+        frame.current = requestAnimationFrame(() => {
+          node.style.setProperty("--parallax-x", `${(px * 20).toFixed(2)}px`);
+          node.style.setProperty("--parallax-y", `${(py * 12).toFixed(2)}px`);
+        });
+      }}
       onPointerLeave={() => {
-        px.set(0);
-        py.set(0);
+        if (frame.current) cancelAnimationFrame(frame.current);
+        const node = ref.current;
+        if (!node) return;
+        node.style.setProperty("--parallax-x", "0px");
+        node.style.setProperty("--parallax-y", "0px");
       }}
     >
-      {reduce ? (
-        <div className="absolute inset-0">{picture}</div>
-      ) : (
-        <motion.div className="absolute inset-0" style={{ x, y }}>
-          {picture}
-        </motion.div>
-      )}
+      <div
+        ref={ref}
+        className="hero-parallax absolute inset-0"
+        style={{ "--parallax-x": "0px", "--parallax-y": "0px" } as CSSProperties}
+      >
+        <Image
+          src={unsplash(images.hero.id, 1920, 78)}
+          alt={locale === "ar" ? images.hero.altAr : images.hero.alt}
+          fill
+          priority
+          sizes="100vw"
+          className="scale-[1.04] object-cover object-center"
+        />
+      </div>
 
       {/*
         Legibility scrim: strongest at the copy edge, clearing over the machine.

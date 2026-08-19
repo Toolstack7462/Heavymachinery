@@ -39,11 +39,27 @@ const sourceSans = Source_Sans_3({
   display: "swap",
 });
 
+/*
+ * `preload: false` is deliberate and is the single largest saving on the
+ * English critical path.
+ *
+ * next/font emits its preload links per module graph, not per rendered
+ * element, so declaring all three faces in this one layout made EVERY English
+ * page issue a high-priority preload for the Arabic face — 166 KB of glyphs no
+ * English page can draw. Opting out removes that.
+ *
+ * Arabic pages are not meaningfully slower for it: the @font-face still ships
+ * in the render-blocking stylesheet, so the browser discovers and fetches it
+ * during CSS parse, and `display: "swap"` keeps text visible throughout. The
+ * preload link would have bought a few milliseconds there; it was costing
+ * 166 KB on every English request.
+ */
 const notoArabic = Noto_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-arabic",
   display: "swap",
+  preload: false,
 });
 
 export function generateStaticParams() {
@@ -69,7 +85,21 @@ export default async function LocaleLayout({
     <html
       lang={typedLocale}
       dir={dir(typedLocale)}
-      className={`${archivo.variable} ${sourceSans.variable} ${notoArabic.variable}`}
+      /*
+       * Only the faces this locale actually renders are attached.
+       *
+       * Arabic overrides both stacks to the Arabic face below, so Archivo and
+       * Source Sans are never used on an Arabic page; and Noto Sans Arabic has
+       * no Latin coverage, so it is never used on an English one. Attaching all
+       * three unconditionally made every English page preload four weights of
+       * Arabic — and every Arabic page preload seven weights of Latin — on the
+       * critical path, for glyphs that could not be drawn.
+       */
+      className={
+        isArabic
+          ? notoArabic.variable
+          : `${archivo.variable} ${sourceSans.variable}`
+      }
       // Arabic swaps both font stacks to the Arabic face at the root, so no
       // component needs to know which locale it is rendering in.
       style={

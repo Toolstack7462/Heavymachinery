@@ -20,10 +20,10 @@ type Status = "idle" | "sending" | "success" | "error";
  *  - semantic input types so mobile keyboards are right first time
  *  - phone is optional, since the company publishes no number of its own
  *
- * Posts to /api/quote or /api/contact. Those handlers validate and record the
- * enquiry; email delivery is wired by setting a provider key (see
- * src/lib/enquiry.ts). The success screen states that the request was
- * *recorded* rather than claiming an email has been delivered.
+ * Posts to /api/quote or /api/contact. A 200 from those handlers means the
+ * enquiry reached the sales inbox — they return 502/503 rather than a fake
+ * success if delivery fails — so the success screen can honestly say the
+ * request was sent. See src/lib/enquiry.ts for the contract.
  */
 export function EnquiryForm({
   locale,
@@ -39,6 +39,8 @@ export function EnquiryForm({
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [reference, setReference] = useState<string | null>(null);
+  /** Server-supplied error text, when it is more useful than the generic one. */
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const isRequest = variant === "request";
   const formRef = useRef<HTMLFormElement>(null);
   const draftNoticeRef = useRef<HTMLParagraphElement>(null);
@@ -171,6 +173,7 @@ export function EnquiryForm({
     }
 
     setStatus("sending");
+    setErrorMessage(null);
     try {
       const response = await fetch(
         `/api/${isRequest ? "quote" : "contact"}`,
@@ -183,7 +186,28 @@ export function EnquiryForm({
           }),
         },
       );
-      if (!response.ok) throw new Error("Request failed");
+      /*
+       * The endpoint distinguishes its failures, so the UI does too:
+       *   422 — the visitor can fix it, so show the field message
+       *   429 — rate limited, so tell them to wait rather than retry-spam
+       *   5xx — delivery genuinely failed; offer the email fallback
+       * A non-ok response is never treated as success. That is the whole
+       * point of the enquiry rewrite.
+       */
+      if (!response.ok) {
+        const detail = (await response.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        if (response.status === 429) {
+          setErrorMessage(dict.form.errorTooMany);
+        } else if (response.status === 422 && detail.error) {
+          setErrorMessage(detail.error);
+        } else {
+          setErrorMessage(null);
+        }
+        setStatus("error");
+        return;
+      }
       const result = (await response.json().catch(() => ({}))) as {
         reference?: string;
       };
@@ -196,6 +220,9 @@ export function EnquiryForm({
         // Nothing to clean up if storage was unavailable in the first place.
       }
     } catch {
+      // Network-level failure (offline, DNS, TLS). Generic copy plus the
+      // email fallback is the honest response.
+      setErrorMessage(null);
       setStatus("error");
     }
   }
@@ -415,7 +442,9 @@ export function EnquiryForm({
           className="rounded-lg border border-danger/30 bg-danger/5 p-4 text-sm"
         >
           <p className="font-semibold text-danger">{dict.form.errorTitle}</p>
-          <p className="mt-1 text-ink-700">{dict.form.errorBody}</p>
+          <p className="mt-1 text-ink-700">
+            {errorMessage ?? dict.form.errorBody}
+          </p>
           <a
             href={mailtoLink(site.positioning)}
             className="mt-2 inline-block font-semibold text-brand-700 underline"

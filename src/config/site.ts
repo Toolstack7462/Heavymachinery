@@ -17,6 +17,35 @@
  * ============================================================================
  */
 
+/** Domain serving the site today. Used when `SITE_URL` is not set. */
+const FALLBACK_ORIGIN = "https://jowainyanbu.com";
+
+/**
+ * Resolve the canonical origin from the environment, tolerating the shapes
+ * people actually paste into a hosting control panel: a bare hostname, a
+ * trailing slash, or a full URL. Anything unparseable falls back rather than
+ * shipping a malformed `metadataBase`, which would throw at build time.
+ *
+ * `NEXT_PUBLIC_SITE_URL` is accepted as an alias because some platforms (and
+ * Vercel's own UI) nudge users toward the `NEXT_PUBLIC_` prefix. Neither value
+ * is a secret — the canonical domain is public by definition.
+ */
+function resolveSiteUrl(): string {
+  const raw = (
+    process.env.SITE_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    ""
+  ).trim();
+  if (!raw) return FALLBACK_ORIGIN;
+
+  const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    return new URL(withProtocol).origin;
+  } catch {
+    return FALLBACK_ORIGIN;
+  }
+}
+
 export const site = {
   /** Short public-facing brand name. */
   name: "Jowain Yanbu Est.",
@@ -34,8 +63,20 @@ export const site = {
   /** Primary tagline from the profile. */
   tagline: "Reliable Equipment. Dependable Transportation.",
 
-  /** Production domain, from the profile ("www.jowain.net"). */
-  url: "https://www.jowain.net",
+  /**
+   * Canonical production origin — no trailing slash.
+   *
+   * Read from `SITE_URL` so one environment variable controls every absolute
+   * URL the site emits: canonical tags, hreflang alternates, Open Graph and
+   * Twitter URLs, sitemap.xml, robots.txt and every JSON-LD `@id`. Set it once
+   * in the hosting platform and the whole site follows.
+   *
+   * The fallback is the domain actually purchased and serving on Hostinger
+   * (`jowainyanbu.com`, verified live with a valid certificate). Note that the
+   * company profile PDF prints a *different* domain, "www.jowain.net" — the
+   * client should confirm which is canonical; see docs/CLIENT-INPUT-REQUIRED.md.
+   */
+  url: resolveSiteUrl(),
 
   /** Year of establishment (profile: "EST. 1992"). */
   foundedYear: 1992,
