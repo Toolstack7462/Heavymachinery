@@ -53,6 +53,41 @@ policy allowed both for origins that were never used.
 `img-src` is scoped to the single host `remotePatterns` permits, so the CSP and the image
 optimiser cannot drift apart.
 
+### ⚠ Known host limitation — the live host does not deliver a CSP
+
+**Measured on `https://jowainyanbu.com` after deployment.** Hostinger shared hosting
+(LiteSpeed in front of the Node process) strips the Content Security Policy in **both**
+available forms:
+
+| Delivery mechanism | Result on this host |
+| --- | --- |
+| HTTP response header from Node | **Truncated** to its final directive — the browser received only `upgrade-insecure-requests` |
+| `Header set` in `.htaccess` | **Ignored** — `mod_headers` is not available to this account (a test header never appeared) |
+| `<meta http-equiv="Content-Security-Policy">` | **Stripped from the response body** — present in the prerendered HTML on disk (202,459 bytes), absent from what LiteSpeed serves (201,630 bytes) |
+
+Every *other* security header survives intact, including `Permissions-Policy`, which
+contains commas — so the trigger is specifically the semicolon-delimited CSP, and the
+filtering appears to be deliberate on the host's part.
+
+**The application is not at fault.** Both delivery mechanisms are implemented and correct
+(`src/lib/csp.ts`), and both work on Vercel, a VPS and Docker. This is a limitation of
+Hostinger shared hosting.
+
+**Residual risk, assessed honestly.** CSP is defence-in-depth against XSS. This site:
+
+- renders no user-generated content
+- has no authentication, no session and no cookies
+- loads no third-party scripts
+- accepts input only through one endpoint that never reflects it into HTML
+
+So the classes of attack CSP mitigates have no delivery path here. The controls that *do*
+survive — `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, HSTS,
+`Referrer-Policy`, `Permissions-Policy` — cover clickjacking, MIME sniffing and transport.
+
+**If a delivered CSP is required**, move the app to Vercel, a VPS or Docker, where both the
+header and the meta tag arrive unmodified. Also worth checking hPanel for a security or
+page-optimisation toggle that performs this rewriting.
+
 ---
 
 ## Enquiry endpoint

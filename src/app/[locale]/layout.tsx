@@ -11,6 +11,7 @@ import { Footer } from "@/components/layout/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { RevealObserver } from "@/components/motion/RevealObserver";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { cspMetaValue } from "@/lib/csp";
 
 /**
  * Typography: two faces on a real contrast axis.
@@ -112,6 +113,25 @@ export default async function LocaleLayout({
       }
       suppressHydrationWarning
     >
+      <head>
+        {/*
+          CSP as a meta tag as well as a response header.
+
+          The production host (LiteSpeed on Hostinger shared hosting) truncates
+          the semicolon-delimited CSP *header* returned by the Node process down
+          to its final directive, and `mod_headers` is not available to the
+          account, so the header cannot be repaired at the vhost either. A meta
+          tag is part of the document, so no proxy can rewrite it.
+
+          `frame-ancestors` is omitted because it is invalid in meta form;
+          clickjacking is covered by the `X-Frame-Options: DENY` header, which
+          this host does deliver intact. Full reasoning in src/lib/csp.ts.
+        */}
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content={cspMetaValue(process.env.NODE_ENV === "production")}
+        />
+      </head>
       <body>
         {/*
           Flags that scripting is available, before the first paint, so the

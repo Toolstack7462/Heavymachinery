@@ -24,6 +24,7 @@ decision.
 - [x] HTTPS enabled, valid certificate
 - [x] HTTP → HTTPS redirect working
 - [ ] ⚠ **BLOCKER — canonical host decided: www or non-www**, with the other 301ing to it
+      (currently non-www is canonical and serving)
 - [ ] ⚠ **BLOCKER — `jowainyanbu.com` vs `www.jowain.net` confirmed** (the profile prints
       the latter; the former is what was bought). See
       [`CLIENT-INPUT-REQUIRED.md`](./CLIENT-INPUT-REQUIRED.md) §3
@@ -32,17 +33,18 @@ decision.
 - [x] Canonical URLs verified in the build output
 - [x] hreflang `en` / `ar` / `x-default` reciprocal and correct
 
-## Hosting
+## Hosting — DEPLOYED
 
-- [ ] ⚠ **BLOCKER — hosting path chosen.** Hostinger **Premium does not officially support
-      Node.js**; Node apps need Business, Cloud or VPS. Four options analysed in
-      [`HOSTINGER-DEPLOYMENT.md`](./HOSTINGER-DEPLOYMENT.md)
-- [ ] If staying on Premium: Passenger probe run against the live docroot (Option A step 1)
-- [ ] Application deployed and serving the domain
-- [ ] `NODE_ENV=production`
-- [ ] Node 22.x
-- [ ] Process restarts automatically after a crash or reboot
-- [ ] Rollback path tested once
+- [x] Hosting path chosen and proven. Hostinger documents Node.js as Business/Cloud/VPS
+      only, but the assigned server carries Node 22 and Passenger, and the vhost **does**
+      honour Passenger directives. Verified live: `PASSENGER_OK node=v22.18.0`
+- [x] **Application deployed and serving `https://jowainyanbu.com`**
+- [x] `NODE_ENV=production`, Node 22.18.0
+- [x] `SITE_URL` set in `~/app/.env` (mode 600)
+- [x] Previous release retained at `~/app-previous` for rollback
+- [ ] Process auto-restart after a server reboot confirmed (Passenger starts on first
+      request, so this is expected to be automatic — verify after the next reboot)
+- [ ] Rollback path exercised once end-to-end
 
 ## Email — BLOCKER
 
@@ -65,7 +67,7 @@ decision.
 
 ## Search
 
-- [x] `sitemap.xml` accessible and correct (~270 URLs, both locales)
+- [x] `sitemap.xml` accessible and correct (90 URLs, both locales)
 - [x] `robots.txt` accessible, allows crawl, disallows `/api/`
 - [x] Structured data present — Organization + LocalBusiness, WebSite, Service, FAQPage,
       ItemList, BreadcrumbList
@@ -109,7 +111,8 @@ decision.
 - [ ] `/sitemap.xml` · `/robots.txt`
 - [ ] A deliberately invalid URL returns a branded 404 **with a 404 status**
 
-*(All verified against the production build locally; repeat on the live domain.)*
+*(All 23 routes verified **live** on `https://jowainyanbu.com` — every one 200 except the
+deliberately invalid URL, which correctly returns 404.)*
 
 ### Behaviour
 
@@ -136,7 +139,14 @@ decision.
 
 ### Infrastructure
 
-- [ ] SSL valid, no mixed content
+- [x] SSL valid on the live domain, HTTP → HTTPS redirect working
+- [x] Security headers verified live: `X-Frame-Options: DENY`, `X-Content-Type-Options`,
+      HSTS, `Referrer-Policy`, `Permissions-Policy`
+- [x] No `unsafe-eval` in production
+- [ ] ⚠ **CSP is not delivered by this host** — LiteSpeed truncates the header and strips
+      the meta tag. Application-side implementation is correct and works on Vercel / VPS /
+      Docker. Assessed and documented in [`SECURITY.md`](./SECURITY.md#-known-host-limitation--the-live-host-does-not-deliver-a-csp)
+- [ ] No mixed content
 - [ ] Security headers present on the live domain —
       `curl -sI https://<domain>/en | grep -i "content-security\|strict-transport\|x-frame"`
 - [ ] CSP contains **no** `unsafe-eval` in production

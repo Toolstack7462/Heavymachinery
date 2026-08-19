@@ -16,8 +16,8 @@ src/
       about · services · fleet · industries · quality · clients
       why-choose-us · faqs · contact · request-a-quote
       privacy-policy · terms · sitemap
-      services/[slug]          11 service detail pages
-      fleet/[slug]             52 equipment detail pages
+      services/[slug]          5 service detail pages
+      fleet/[slug]             26 equipment detail pages
       not-found.tsx            branded 404 (client — has a back control)
       [...unmatched]/page.tsx  calls notFound() so 404s keep the locale chrome
     api/
@@ -42,7 +42,7 @@ src/
 
   content/      company · services · equipment · clients · faqs · legal
   i18n/         config · dictionaries/{en,ar} · dictionaries.ts · localized.ts
-  lib/          enquiry.ts · enquiry-core.ts · seo.ts · utils.ts
+  lib/          enquiry.ts · enquiry-core.ts · csp.ts · seo.ts · utils.ts
   proxy.ts      locale redirect (Next 16 renamed `middleware` → `proxy`)
 
 tests/          enquiry.test.ts — node:test, no framework

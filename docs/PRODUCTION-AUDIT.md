@@ -135,7 +135,7 @@ empirical findings, which are more favourable than the documentation.
 **Where:** `src/config/site.ts:41` — `url: "https://www.jowain.net"`
 
 Consumed by `lib/seo.ts` (canonical, hreflang, OG, Twitter, all JSON-LD `@id` values),
-`app/sitemap.ts` (every one of roughly 200 entries), and `app/robots.ts` (`sitemap:` and
+`app/sitemap.ts` (all 90 entries), and `app/robots.ts` (`sitemap:` and
 `host:`).
 
 The live, purchased, SSL-active domain is **`jowainyanbu.com`** — confirmed: resolves to
@@ -167,7 +167,7 @@ identical canonicals.
 ## Medium priority issues (P2)
 
 - **P2-1** `sitemap.ts` hardcodes `lastModified: new Date("2026-08-12")` for every URL, so
-  the signal is frozen and identical across roughly 200 entries. It should track build time.
+  the signal is frozen and identical across all 90 entries. It should track build time.
 - **P2-2** `robots.ts` sets `host:` — a legacy Yandex directive Google ignores; harmless
   but noise.
 - **P2-3** The reference generator uses `Math.random()`. Fine for a human-quotable tag,
@@ -212,10 +212,10 @@ is intact and should be refined, not replaced. Findings:
   a code defect** (see `docs/CLIENT-INPUT-REQUIRED.md`).
 - **Hero** answers what / where / capability within the first viewport and avoids inflated
   claims. The "over 30 years" figure is profile-sourced, not computed — correct.
-- **Fleet** browsing is strong: 52 equipment detail pages, category filter, honest
+- **Fleet** browsing is strong: 26 equipment detail pages, category filter, honest
   per-item photography with a glyph fallback where no verified photo exists. Specification
   hierarchy is readable by a procurement engineer.
-- **Services** (11 detail pages) follow service, capability, equipment, process, enquiry.
+- **Services** (5 detail pages) follow service, capability, equipment, process, enquiry.
   Appropriate for the audience.
 - **Contact / Quote** ask for the right fields and nothing more; `requirement` is a
   grouped `<select>` of real services and equipment, which is the correct affordance.
@@ -438,6 +438,32 @@ because it writes to a production docroot and requires explicit authorisation.
 **Explicitly rejected:** converting the application to a static export to force it onto
 Premium. That would delete the API routes, therefore the enquiry system, therefore the
 site's only lead channel — trading the P0 for a worse one.
+
+### RESOLUTION — deployed to Hostinger Premium, 20 August 2026
+
+The Passenger test was run against the live docroot and **passed**:
+
+```
+$ curl -s https://jowainyanbu.com/
+PASSENGER_OK node=v22.18.0 url=/
+```
+
+So Hostinger **Premium does run Node.js applications** via `.htaccess` Passenger
+directives, despite the documentation listing Node.js as Business/Cloud/VPS only. The
+application is deployed there and serving: standalone build at `~/app`, config in
+`~/app/.env` (mode 600), previous release retained at `~/app-previous` for rollback.
+
+All 23 representative routes verified live — every one 200, and a deliberately invalid URL
+correctly returns 404. Locale proxy, RTL, canonical URLs, hreflang, sitemap and robots all
+confirmed correct on the live domain.
+
+**One host limitation surfaced by deployment (P1, not fixable in code):** LiteSpeed does
+not deliver a Content Security Policy in any available form — it truncates the response
+header to its final directive, ignores `.htaccess` `Header` directives (`mod_headers` is
+unavailable on this plan), and strips `<meta http-equiv="Content-Security-Policy">` from
+the response body. Every other security header survives. Both delivery mechanisms are
+implemented correctly in `src/lib/csp.ts` and work on Vercel, VPS and Docker. Residual risk
+assessed in `docs/SECURITY.md`.
 
 **Build gate status at audit time:** `npm ci` pass · `npm run typecheck` pass (0 errors) ·
 `npm run lint` pass (0 errors, 0 warnings) · `npm run build` pass (100 pages).

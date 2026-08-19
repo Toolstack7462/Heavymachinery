@@ -7,7 +7,7 @@ What is implemented, where it lives, and the lines this project does not cross.
 ## The one variable that controls everything
 
 `SITE_URL` drives every absolute URL: canonical tags, hreflang alternates, `metadataBase`,
-Open Graph and Twitter URLs, all ~270 sitemap entries, the `Sitemap:` line in `robots.txt`,
+Open Graph and Twitter URLs, all 90 sitemap entries, the `Sitemap:` line in `robots.txt`,
 and every JSON-LD `@id`.
 
 **It is required at build time.** Absolute URLs are baked into 100 prerendered pages, so
@@ -37,8 +37,9 @@ The OG image is generated at `/opengraph-image` from `src/app/opengraph-image.ts
 
 ## Sitemap — `src/app/sitemap.ts`
 
-~270 URLs: 14 static paths plus 11 services plus 52 equipment pages, each in both locales,
-every entry carrying `alternates.languages`.
+90 `<loc>` entries: 14 static paths plus 5 services plus 26 equipment pages, each in
+both locales, every entry carrying `alternates.languages` (so 270 `jowainyanbu.com`
+occurrences in the file overall — 90 locations plus 180 hreflang alternates).
 
 `lastModified` is **build time**, resolved once per build. It was previously a hardcoded
 date, so every URL claimed the same frozen `lastmod` — a signal crawlers learn to ignore.
@@ -59,8 +60,8 @@ canonical tags and the redirect rules.
 | --- | --- |
 | `Organization` + `LocalBusiness` | every page, via the layout |
 | `WebSite` | every page |
-| `Service` | each of the 11 service pages |
-| `Service` (for equipment) | each of the 52 fleet pages |
+| `Service` | each of the 5 service pages |
+| `Service` (for equipment) | each of the 26 fleet pages |
 | `FAQPage` | `/faqs` |
 | `ItemList` | `/fleet` |
 | `BreadcrumbList` | via `components/Breadcrumbs.tsx` |

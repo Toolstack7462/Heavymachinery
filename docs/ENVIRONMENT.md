@@ -36,7 +36,7 @@ One variable controls every absolute URL the site emits:
 - `hreflang` alternates for `en`, `ar` and `x-default`
 - `metadataBase`
 - Open Graph and Twitter card URLs
-- every entry in `sitemap.xml` (about 270 URLs)
+- every entry in `sitemap.xml` (90 URLs)
 - the `Sitemap:` line in `robots.txt`
 - every JSON-LD `@id`, plus `url` and `logo` in the Organization graph
 
