@@ -28,7 +28,7 @@ export const en = {
     openMenu: "Open menu",
     closeMenu: "Close menu",
     primaryLabel: "Primary",
-    mobileLabel: "Mobile",
+    mobileLabel: "Mobile menu",
     skipToContent: "Skip to content",
   },
 

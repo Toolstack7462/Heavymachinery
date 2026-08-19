@@ -336,29 +336,29 @@ export function renderHtml(payload: EnquiryPayload): string {
     .map(
       ([label, value]) => `
         <tr>
-          <td style="padding:8px 16px 8px 0;color:#5b6472;font-size:13px;white-space:nowrap;vertical-align:top">${escapeHtml(label)}</td>
-          <td style="padding:8px 0;color:#12161c;font-size:14px;font-weight:600">${escapeHtml(value)}</td>
+          <td style="padding:8px 16px 8px 0;color:#4b5876;font-size:13px;white-space:nowrap;vertical-align:top">${escapeHtml(label)}</td>
+          <td style="padding:8px 0;color:#14203a;font-size:14px;font-weight:600">${escapeHtml(value)}</td>
         </tr>`,
     )
     .join("");
 
   return `<!doctype html>
-<html lang="en"><body style="margin:0;background:#f4f5f7;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f7;padding:24px 12px">
+<html lang="en"><body style="margin:0;background:#f5f7fb;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fb;padding:24px 12px">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #e3e6ea;border-radius:12px;overflow:hidden">
-        <tr><td style="background:#12161c;padding:20px 24px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #e4e9f2;border-radius:12px;overflow:hidden">
+        <tr><td style="background:#14203a;padding:20px 24px">
           <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:.02em">JOWAIN YANBU EST.</div>
-          <div style="color:#f0b429;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">${escapeHtml(KIND_LABEL[payload.kind])}</div>
+          <div style="color:#9bb2e9;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">${escapeHtml(KIND_LABEL[payload.kind])}</div>
         </td></tr>
         <tr><td style="padding:24px">
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%">${cells}</table>
-          <div style="margin-top:20px;padding-top:20px;border-top:1px solid #e3e6ea">
-            <div style="color:#5b6472;font-size:13px;margin-bottom:8px">Message</div>
-            <div style="color:#12161c;font-size:14px;line-height:1.65;white-space:pre-wrap">${escapeHtml(payload.message)}</div>
+          <div style="margin-top:20px;padding-top:20px;border-top:1px solid #e4e9f2">
+            <div style="color:#4b5876;font-size:13px;margin-bottom:8px">Message</div>
+            <div style="color:#14203a;font-size:14px;line-height:1.65;white-space:pre-wrap">${escapeHtml(payload.message)}</div>
           </div>
         </td></tr>
-        <tr><td style="background:#f9fafb;padding:16px 24px;border-top:1px solid #e3e6ea;color:#5b6472;font-size:12px">
+        <tr><td style="background:#f5f7fb;padding:16px 24px;border-top:1px solid #e4e9f2;color:#4b5876;font-size:12px">
           Reply directly to this email to reach ${escapeHtml(payload.name)}.
         </td></tr>
       </table>

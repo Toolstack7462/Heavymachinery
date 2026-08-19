@@ -25,6 +25,9 @@ export function Header({
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  /** Focus management for the mobile drawer (see the effect below). */
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,6 +49,69 @@ export function Header({
     setMobileOpen(false);
     setOpenMenu(null);
   }
+
+  /**
+   * Focus containment for the mobile drawer.
+   *
+   * The drawer is a modal overlay: it covers the page and the backdrop is
+   * inert. Without this, Tab walked straight out of the open drawer and into
+   * the page behind it — a keyboard or screen-reader user ended up on the hero
+   * buttons they could not see, with no way to tell they had left the menu.
+   *
+   * On open, focus moves into the drawer; Tab and Shift+Tab cycle within it;
+   * on close, focus returns to the button that opened it, which is where a
+   * keyboard user expects to land.
+   */
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const panel = drawerRef.current;
+    if (!panel) return;
+    // Captured now so the cleanup does not read a ref that may have changed.
+    const trigger = menuButtonRef.current;
+
+    const focusable = () =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetWidth > 0 || el.offsetHeight > 0);
+
+    focusable()[0]?.focus();
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !panel!.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      /*
+       * Return focus to the button that opened the drawer.
+       *
+       * By cleanup time React may already have detached the panel, which
+       * leaves `document.activeElement` as <body> rather than a node inside
+       * it — so testing `panel.contains(...)` alone silently skipped the
+       * restore and dropped keyboard users at the top of the document. Treat
+       * "focus is nowhere" as "focus was in the drawer", and leave it alone
+       * only when something else has legitimately taken it.
+       */
+      const active = document.activeElement;
+      const focusLost = !active || active === document.body;
+      if (focusLost || panel.contains(active)) trigger?.focus();
+    };
+  }, [mobileOpen]);
 
   // Lock scroll while the mobile drawer is open.
   useEffect(() => {
@@ -198,11 +264,14 @@ export function Header({
         <div className="flex items-center gap-1 lg:hidden">
           <LocaleSwitcher locale={locale} dict={dict} />
           <button
+            ref={menuButtonRef}
             type="button"
             className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-ink-900 transition-colors hover:bg-ink-50 active:bg-ink-100"
             onClick={() => setMobileOpen(true)}
             aria-label={dict.nav.openMenu}
             aria-expanded={mobileOpen}
+            aria-haspopup="dialog"
+            aria-controls="mobile-drawer"
           >
             <Icon name="menu" size={24} />
           </button>
@@ -217,7 +286,14 @@ export function Header({
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="animate-rise absolute inset-y-0 end-0 flex w-[88%] max-w-sm flex-col bg-white shadow-2xl">
+          <div
+            id="mobile-drawer"
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={dict.nav.mobileLabel}
+            className="animate-rise absolute inset-y-0 end-0 flex w-[88%] max-w-sm flex-col bg-white shadow-2xl"
+          >
             <div className="flex h-[76px] items-center justify-between border-b border-ink-150 px-5">
               <Logo locale={locale} size={38} />
               <button

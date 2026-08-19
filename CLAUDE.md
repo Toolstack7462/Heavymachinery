@@ -188,8 +188,9 @@ and Passenger, so Premium may work in practice, but that needs one live test.
   API routes, therefore the enquiry system, therefore the only lead channel.
 - `SITE_URL` must be set **at build time** — absolute URLs are baked into 100 prerendered
   pages.
-- `output: "standalone"` is enabled. `.next/static` and `public` sit outside the trace and
-  must be copied alongside the server.
+- `output: "standalone"` is enabled. `.next/static` and `public` sit outside the trace.
+  **Always package with `npm run build:deploy`** — never `cp -r public .next/standalone/public`,
+  which nests the directory and 404s every asset while routes still return 200.
 
 Full procedure: `docs/HOSTINGER-DEPLOYMENT.md`.
 
@@ -197,8 +198,18 @@ Full procedure: `docs/HOSTINGER-DEPLOYMENT.md`.
 
 ## Design direction
 
-Premium industrial · heavy equipment · serious corporate · graphite and white · amber
-accent · high contrast · rugged · trustworthy · mobile-first.
+Premium **light** industrial corporate. White and cool blue-grey surfaces, **deep navy**
+anchors (`--color-ink-900` `#14203a`), one **blue** primary (`--color-brand-600` `#2c47a6`)
+and one **green** support accent (`--color-accent-500` `#22955d`). High contrast, engineered,
+trustworthy, mobile-first.
+
+The blue and green hue families are derived from the official emblem, which is drawn in
+`#0000FF` / `#00FF00` — correct for the trademark, unusable as interface colour. The system
+keeps the hues and fixes the saturation; it never recolours the emblem itself.
+
+**There is no amber, orange or gold in this system.** Tokens live in
+`src/app/globals.css` (`@theme`); the full rationale is in `DESIGN.md`, which is the
+authority. Read it before changing any colour.
 
 **Refine it. Do not replace it.** Specifically do not turn it into a SaaS landing page,
 pastel site, glassmorphism, heavy gradients, over-rounded cards, a startup layout, or a

@@ -28,14 +28,22 @@ server and only the modules it traced — no `node_modules`, no devDependencies.
 
 ```bash
 npm ci
-SITE_URL=https://your-domain.com npm run build
-
-# static/ and public/ sit outside the standalone trace by design
-cp -r .next/static .next/standalone/.next/static
-cp -r public       .next/standalone/public
+SITE_URL=https://your-domain.com npm run build:deploy
 
 node .next/standalone/server.js     # listens on PORT, default 3000
 ```
+
+`build:deploy` = `next build` followed by `scripts/package-standalone.mjs`, which copies
+`public/` and `.next/static/` into the bundle (both sit outside the standalone trace by
+design) and then verifies known assets resolve.
+
+> **Never assemble the bundle by hand.** `next build` already creates
+> `.next/standalone/public`, so `cp -r public .next/standalone/public` *nests* it as
+> `public/public/` — the server then 404s the company logo and all 25 partner logos while
+> every route still returns 200. That shipped to production once. Use
+> `npm run build:deploy`, which copies directory *contents* and then verifies known assets
+> resolve, failing the build if they do not.
+
 
 ---
 

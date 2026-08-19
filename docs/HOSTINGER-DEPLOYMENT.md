@@ -92,17 +92,20 @@ Costs nothing to try and keeps the purchased plan. **Requires a live test.**
 
    ```bash
    npm ci
-   SITE_URL=https://jowainyanbu.com npm run build
+   SITE_URL=https://jowainyanbu.com npm run build:deploy
    ```
 
    `output: "standalone"` is already enabled, so `.next/standalone` contains the server
    and only the modules it actually needs — no `node_modules` install on the server.
+   `build:deploy` runs the build and then `scripts/package-standalone.mjs`, which copies
+   `public/` and `.next/static/` into the bundle and verifies they resolve.
 
-   ```bash
-   # from the project root
-   cp -r .next/static .next/standalone/.next/static
-   cp -r public       .next/standalone/public
-   ```
+> **Never assemble the bundle by hand.** `next build` already creates
+> `.next/standalone/public`, so `cp -r public .next/standalone/public` *nests* it as
+> `public/public/` — the server then 404s the company logo and all 25 partner logos while
+> every route still returns 200. That shipped to production once. Use
+> `npm run build:deploy`, which copies directory *contents* and then verifies known assets
+> resolve, failing the build if they do not.
 
    Upload the contents of `.next/standalone/` to `~/app/` (SFTP on port 65002, or
    hPanel → File Manager).
@@ -279,8 +282,8 @@ name, email, phone or message body. Shared-host logs are readable and retained.
 1. Make the change and commit it.
 2. `npm run typecheck && npm run lint && npm test && npm run build` — all four must pass.
 3. Deploy:
-   - **A:** rebuild locally, re-upload `.next/standalone` (plus `.next/static` and
-     `public`), `touch ~/app/tmp/restart.txt`
+   - **A:** `npm run build:deploy`, re-upload `.next/standalone`, then
+     `touch ~/app/tmp/restart.txt`
    - **B / C:** `git push` — the platform builds and deploys automatically
    - **D:** `git pull && npm ci && npm run build && pm2 restart jowain`
 
@@ -307,5 +310,5 @@ Git is the safety net in every case: every deploy corresponds to a commit.
 | Forms return 502 | Provider rejected the send | Domain not verified in Resend, or `EMAIL_FROM` is not on the verified domain |
 | Canonical URLs show the wrong domain | `SITE_URL` absent **at build time** | Rebuild with `SITE_URL` set — it is baked into prerendered HTML |
 | Arabic pages render left-to-right | Stale build | Rebuild; `dir="rtl"` is server-rendered from the locale |
-| CSS or JS 404s | `.next/static` not copied alongside the standalone server | Copy `.next/static` into `.next/standalone/.next/static` — it is deliberately outside the standalone trace |
+| CSS, images or JS 404 while pages still return 200 | `public/` or `.next/static` missing from the bundle, usually nested as `public/public/` | Rebuild with `npm run build:deploy`; it verifies assets and refuses to produce a broken bundle |
 | Rate limit fires too readily | All visitors sharing one proxy IP | Raise the limit in `src/lib/enquiry.ts` (`new RateLimiter(5, ...)`) |

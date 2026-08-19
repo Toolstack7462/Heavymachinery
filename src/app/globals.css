@@ -429,3 +429,43 @@
     will-change: transform;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Print.
+ *
+ * The section-reveal system hides [data-reveal] blocks until an
+ * IntersectionObserver marks them revealed. That is correct for a scrolling
+ * visitor, but a print or PDF render never scrolls: without this rule the
+ * printed document comes out with a hero and a footer and blank space in
+ * between. Procurement staff print equipment pages, so this matters.
+ *
+ * Everything is forced visible and flat, dark bands are dropped to save toner,
+ * and link URLs are expanded so a printed page stays useful off-screen.
+ * ------------------------------------------------------------------------- */
+@media print {
+  .js [data-reveal],
+  .js [data-reveal].is-revealed {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .tilt,
+  .hero-parallax {
+    transform: none !important;
+  }
+
+  /* Chrome that carries no information on paper. */
+  header,
+  footer nav,
+  .skip-link {
+    display: none !important;
+  }
+
+  a[href^="http"]::after,
+  a[href^="mailto"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.75em;
+    word-break: break-all;
+  }
+}
