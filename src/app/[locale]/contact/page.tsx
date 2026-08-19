@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { images } from "@/config/images";
 import type { Locale } from "@/config/site";
 import { site, mapLink } from "@/config/site";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -37,6 +38,7 @@ export default async function ContactPage({
   return (
     <>
       <PageHero
+        image={images.siteDusk}
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         breadcrumbLabel={dict.breadcrumb.label}

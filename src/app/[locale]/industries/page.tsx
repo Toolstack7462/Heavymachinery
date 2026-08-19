@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { images } from "@/config/images";
 import type { Locale } from "@/config/site";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata, seoText } from "@/lib/seo";
@@ -35,6 +36,7 @@ export default async function IndustriesPage({
   return (
     <>
       <PageHero
+        image={images.earthworks}
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         breadcrumbLabel={dict.breadcrumb.label}

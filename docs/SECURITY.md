@@ -53,40 +53,50 @@ policy allowed both for origins that were never used.
 `img-src` is scoped to the single host `remotePatterns` permits, so the CSP and the image
 optimiser cannot drift apart.
 
-### ⚠ Known host limitation — the live host does not deliver a CSP
+### ⚠ Known host limitation — the CDN truncates the CSP header
 
-**Measured on `https://jowainyanbu.com` after deployment.** Hostinger shared hosting
-(LiteSpeed in front of the Node process) strips the Content Security Policy in **both**
-available forms:
+**Measured against production.** Two separate layers sit in front of the Node app:
+LiteSpeed on the origin, and **Hostinger's own CDN** (`Server: hcdn`,
+`x-hcdn-cache-status`). Together they mean the CSP *header* does not survive:
 
-| Delivery mechanism | Result on this host |
+| Delivery mechanism | Result |
 | --- | --- |
-| HTTP response header from Node | **Truncated** to its final directive — the browser received only `upgrade-insecure-requests` |
-| `Header set` in `.htaccess` | **Ignored** — `mod_headers` is not available to this account (a test header never appeared) |
-| `<meta http-equiv="Content-Security-Policy">` | **Stripped from the response body** — present in the prerendered HTML on disk (202,459 bytes), absent from what LiteSpeed serves (201,630 bytes) |
+| HTTP response header | **Truncated** to its final directive — the browser receives only `upgrade-insecure-requests`. Confirmed at the origin itself, so this is the origin server, not the CDN. |
+| `Header set` in `.htaccess` | **Ignored** — `mod_headers` is not available to this account (a test header never appeared). |
+| `<meta http-equiv="Content-Security-Policy">` | **Delivered correctly by the origin.** Verified by requesting the origin directly and bypassing the CDN: the meta tag is present in the 202,517-byte response. |
 
-Every *other* security header survives intact, including `Permissions-Policy`, which
-contains commas — so the trigger is specifically the semicolon-delimited CSP, and the
-filtering appears to be deliberate on the host's part.
+> **Correction.** An earlier revision of this document stated that the host also strips the
+> meta tag. That was wrong: the page being measured was a CDN cache HIT predating the
+> release that added the tag. Always bypass the CDN before concluding anything about what
+> the server emits — see the cache note below.
 
-**The application is not at fault.** Both delivery mechanisms are implemented and correct
-(`src/lib/csp.ts`), and both work on Vercel, a VPS and Docker. This is a limitation of
-Hostinger shared hosting.
+**Net effect:** the policy reaches the browser through the meta tag, minus `frame-ancestors`
+(invalid in meta form), which `X-Frame-Options: DENY` covers and which the host does deliver.
 
-**Residual risk, assessed honestly.** CSP is defence-in-depth against XSS. This site:
+**Residual risk.** CSP is defence-in-depth against XSS. This site renders no user-generated
+content, has no authentication, session or cookies, loads no third-party scripts, and
+accepts input through one endpoint that never reflects it into HTML — so the attacks CSP
+mitigates have no delivery path here. The surviving headers (`X-Frame-Options`,
+`X-Content-Type-Options`, HSTS, `Referrer-Policy`, `Permissions-Policy`) cover clickjacking,
+MIME sniffing and transport.
 
-- renders no user-generated content
-- has no authentication, no session and no cookies
-- loads no third-party scripts
-- accepts input only through one endpoint that never reflects it into HTML
+### ⚠ The CDN caches HTML and does not purge on deploy
 
-So the classes of attack CSP mitigates have no delivery path here. The controls that *do*
-survive — `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, HSTS,
-`Referrer-Policy`, `Permissions-Policy` — cover clickjacking, MIME sniffing and transport.
+Hostinger's CDN honoured Next's `s-maxage=31536000` on prerendered routes and pinned a
+one-year copy of every page. After a deploy it kept serving HTML that referenced build
+chunks the new release no longer contained — an unstyled site — while a request with a
+cache-buster returned the correct page, which is what made it invisible to status checks.
 
-**If a delivered CSP is required**, move the app to Vercel, a VPS or Docker, where both the
-header and the meta tag arrive unmodified. Also worth checking hPanel for a security or
-page-optimisation toggle that performs this rewriting.
+The origin now sends `public, max-age=0, must-revalidate` for HTML (hashed
+`/_next/static` output keeps `immutable`), so this cannot recur. **An existing stale entry
+must still be purged once, in hPanel → Performance / CDN → Purge cache** — the CDN ignores
+client `Cache-Control: no-cache`, and it cannot be purged over SSH.
+
+When diagnosing anything about response headers on this site, bypass the CDN first:
+
+```bash
+ssh -p 65002 <user>@<host> 'curl -sk -H "Host: jowainyanbu.com" https://127.0.0.1/en -D - -o /dev/null'
+```
 
 ---
 

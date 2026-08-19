@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { images } from "@/config/images";
 import type { Locale } from "@/config/site";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata, seoText } from "@/lib/seo";
@@ -36,6 +37,7 @@ export default async function WhyChooseUsPage({
   return (
     <>
       <PageHero
+        image={images.siteDusk}
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         breadcrumbLabel={dict.breadcrumb.label}

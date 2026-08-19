@@ -73,6 +73,7 @@ export default async function AboutPage({
   return (
     <>
       <PageHero
+        image={images.siteDusk}
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         breadcrumbLabel={dict.breadcrumb.label}

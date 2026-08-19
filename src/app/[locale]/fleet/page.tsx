@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { images } from "@/config/images";
 import Link from "next/link";
 import type { Locale } from "@/config/site";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -63,6 +64,7 @@ export default async function FleetPage({
     <>
       <JsonLd data={fleetJsonLd(locale)} />
       <PageHero
+        image={images.fleetLineup}
         locale={locale}
         homeLabel={dict.breadcrumb.home}
         breadcrumbLabel={dict.breadcrumb.label}

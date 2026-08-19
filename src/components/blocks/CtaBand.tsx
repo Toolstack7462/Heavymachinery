@@ -24,7 +24,19 @@ export function CtaBand({
   subtitle?: string;
 }) {
   return (
-    <section className="section">
+    /*
+     * The band sits on the muted surface, not on white.
+     *
+     * Previously this was a navy box on white, directly above the navy footer:
+     * white -> navy -> thin white strip -> navy, which reads as two disconnected
+     * blocks rather than a close. On the muted ground the page steps
+     * white -> grey -> navy, and the band belongs to the sequence.
+     *
+     * Top padding is also reduced. Section padding above plus section padding
+     * here put 9rem of empty white between the last card and the band on every
+     * page that ends this way.
+     */
+    <section className="border-t border-ink-150 bg-surface-muted pb-12 pt-10 md:pb-16 md:pt-12">
       <div className="container-page">
         <Reveal>
           <div className="relative overflow-hidden rounded-2xl bg-ink-900 px-6 py-12 md:px-12 md:py-14">

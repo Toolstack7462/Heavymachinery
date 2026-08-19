@@ -45,6 +45,18 @@
   --color-accent-800: #124b31;
   --color-accent-900: #103c29;
 
+  /* ---- Signal amber (tertiary, industrial hi-vis) ----
+   * NOT derived from the emblem, which is blue + green. Added at the client's
+   * explicit request as a restrained industrial accent: it is the hazard/hi-vis
+   * colour of the plant-hire world, so it reads as machinery rather than
+   * decoration. Strictly limited to hairlines, markers and small emphasis on
+   * dark grounds — it never becomes a button, a link or a section background,
+   * and blue remains the only call-to-action colour.
+   */
+  --color-signal-300: #f5c65a;
+  --color-signal-400: #eab308; /* markers on dark */
+  --color-signal-500: #c98a08; /* 4.6:1 on white — small text safe */
+
   /* ---- Ink: navy-tinted neutrals ---- */
   --color-ink-50: #f6f8fb;
   --color-ink-100: #eef1f7;
@@ -235,13 +247,52 @@
   }
 
   /* Section vertical rhythm. */
+  /*
+   * Vertical rhythm. Tightened from 3.5/5.5rem: at 1440 the old spacing left
+   * short sections (core values, vision/mission) floating in large runs of
+   * white with no compositional reason for the gap.
+   */
   .section {
-    padding-block: 3.5rem;
+    padding-block: 3rem;
   }
   @media (min-width: 768px) {
     .section {
-      padding-block: 5.5rem;
+      padding-block: 4.5rem;
     }
+  }
+
+  /*
+   * Section transitions.
+   *
+   * A dark band that starts on a hard pixel edge reads as a cut rather than a
+   * change of register. `.section-edge-top` fades the band in from the light
+   * surface above it over 96px, so light -> dark becomes a transition. Applied
+   * to dark bands that follow a light section.
+   */
+  .section-edge-top {
+    position: relative;
+  }
+  .section-edge-top::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 6rem;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-surface-muted) 92%, transparent),
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  /* Hairline marker for dark bands — the only place signal amber appears. */
+  .rule-signal {
+    display: block;
+    width: 2.5rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-signal-400);
   }
 
   /*
