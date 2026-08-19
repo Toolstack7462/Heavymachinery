@@ -70,6 +70,31 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      /*
+       * HTML must revalidate on every request.
+       *
+       * Next marks fully prerendered routes `s-maxage=31536000`, which is
+       * correct on a platform that purges its edge cache on deploy. This site
+       * runs behind LiteSpeed, which purges nothing: measured on production,
+       * `/en` came back with `Age: 4908` and a one-year shared TTL, still
+       * pointing at a CSS chunk that the current build no longer contains. The
+       * result is a page that loads completely unstyled after a deploy, and
+       * stays that way until the cache expires — a year later.
+       *
+       * `max-age=0, must-revalidate` keeps the response cacheable but forces a
+       * conditional request, so the ETag does the work and a deploy takes
+       * effect immediately. Hashed build output above is exempt, because its
+       * URL changes whenever its content does.
+       */
+      {
+        source: "/((?!_next/static|_next/image).*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
+          },
+        ],
+      },
     ];
   },
 };
