@@ -64,7 +64,7 @@ while the diagnostic goes to the server log.
 The envelope sender. **Must be on a domain verified in Resend**, or every send is rejected.
 
 ```
-EMAIL_FROM=Jowain Yanbu Est. <website@jowainyanbu.com>
+EMAIL_FROM=Jowain Yanbu Est. <noreply@jowainyanbu.com>
 ```
 
 It is never the customer's address — that would fail SPF and DKIM and land in spam. The
@@ -79,7 +79,7 @@ header-injection guard, not a formatting nicety.
 Where enquiries are delivered. Comma-separate for several recipients:
 
 ```
-ENQUIRY_TO_EMAIL=sales@jowainyanbu.com, ops@jowainyanbu.com
+ENQUIRY_TO_EMAIL=contact@jowainyanbu.com, ops@jowainyanbu.com
 ```
 
 Independent of the address *published* on the site — that comes from

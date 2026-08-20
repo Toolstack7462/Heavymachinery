@@ -87,7 +87,7 @@ export default async function OgImage() {
         </div>
 
         <span style={{ color: "#b8c2d6", fontSize: 24 }}>
-          {`Est. ${site.foundedYear}  ·  ${site.contact.address.city}, ${site.contact.address.country}  ·  www.jowain.net`}
+          {`Est. ${site.foundedYear}  ·  ${site.contact.address.city}, ${site.contact.address.country}  ·  ${site.contact.website}`}
         </span>
       </div>
     ),

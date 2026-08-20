@@ -71,10 +71,10 @@ export const site = {
    * Twitter URLs, sitemap.xml, robots.txt and every JSON-LD `@id`. Set it once
    * in the hosting platform and the whole site follows.
    *
-   * The fallback is the domain actually purchased and serving on Hostinger
-   * (`jowainyanbu.com`, verified live with a valid certificate). Note that the
-   * company profile PDF prints a *different* domain, "www.jowain.net" — the
-   * client should confirm which is canonical; see docs/CLIENT-INPUT-REQUIRED.md.
+   * The fallback is the domain the client confirmed on 20 August 2026 and
+   * which is serving on Hostinger with a valid certificate. The company
+   * profile PDF printed a different domain, "www.jowain.net"; that is
+   * superseded.
    */
   url: resolveSiteUrl(),
 
@@ -97,15 +97,16 @@ export const site = {
     whatsapp: null as string | null,
 
     /**
-     * EXACTLY as printed in the company profile, where the contact line reads
-     * "Contactsul@jowain.net" (one unbroken string). It is published verbatim
-     * rather than silently "corrected" — the client should confirm whether the
-     * intended address is this, or "sul@jowain.net" with a "Contact" label that
-     * lost its separator. Tracked in docs/MISSING-INFO.md.
+     * Published enquiry inbox, confirmed by the client on 20 August 2026.
+     *
+     * This SUPERSEDES the company profile, which printed the contact line as
+     * one unbroken string, "Contactsul@jowain.net". That was carried verbatim
+     * for a while rather than silently "corrected", and the ambiguity is now
+     * resolved: the address is `contact@jowainyanbu.com`, on the same domain
+     * the site is served from. Keeping the inbox and the site on one domain is
+     * also what makes SPF and DKIM straightforward for enquiry delivery.
      */
-    email: "contactsul@jowain.net",
-    /** The raw string as it appears in the source document. */
-    emailAsPrinted: "Contactsul@jowain.net",
+    email: "contact@jowainyanbu.com",
 
     address: {
       /** The profile gives a city only — no street address. */
@@ -114,6 +115,17 @@ export const site = {
       country: "Saudi Arabia",
       countryCode: "SA",
       mapQuery: "Yanbu Al Bahr, Saudi Arabia",
+    },
+
+    /**
+     * The company website as printed for a human: no protocol, no trailing
+     * slash. Derived from `url` so the footer, the contact page and the social
+     * card can never drift from the domain the site is actually served on.
+     * Previously all three hardcoded "www.jowain.net", which told a visitor
+     * already on jowainyanbu.com that the site lived somewhere else.
+     */
+    get website(): string {
+      return resolveSiteUrl().replace(/^https?:\/\//, "");
     },
 
     /** Not supplied — the hours row hides while this is null. */

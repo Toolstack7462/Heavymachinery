@@ -219,7 +219,7 @@ chmod 600 ~/app/.env
   loser to the winner. Do not let both index.
 - `SITE_URL` must match the canonical host exactly. It drives canonical tags, hreflang,
   `sitemap.xml`, `robots.txt`, Open Graph URLs and every JSON-LD `@id`.
-- The published email address is on a *different* domain (`contactsul@jowain.net`). That is
+- The published email address is on a *different* domain (`contact@jowainyanbu.com`). That is
   deliberate and taken from the company profile — see `MISSING-INFO.md` §1.
 
 ## DNS

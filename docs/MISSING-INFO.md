@@ -11,27 +11,18 @@ put the real value once the client confirms it.
 
 ## 🔴 Confirm before launch
 
-### 1. The published email address
+### 1. The published email address — RESOLVED
 
-The profile's contact line reads, as one unbroken string:
+The profile's contact line read as one unbroken string, `Contactsul@jowain.net`, and was
+published verbatim rather than silently "corrected" while the reading was uncertain.
 
-```
-Contactsul@jowain.net
-```
+**Confirmed by the client on 20 August 2026: the address is `contact@jowainyanbu.com`.**
+It now sits on the same domain the site is served from, which is also what makes SPF and
+DKIM straightforward for enquiry delivery. `www.jowain.net` no longer appears anywhere on
+the site; the footer, contact page and social card all derive the displayed website from
+`site.url`.
 
-It is published verbatim as **`contactsul@jowain.net`** rather than silently
-"corrected". Two readings are possible and only the client can settle it:
-
-| Reading | Resulting address |
-| --- | --- |
-| The string is the address | `contactsul@jowain.net` |
-| A "Contact" label lost its separator | `sul@jowain.net` |
-
-**Where:** `src/config/site.ts` → `contact.email` (and `contact.emailAsPrinted`,
-which keeps the source string for the record).
-
-This is the site's only inbound route apart from the enquiry form, so it is worth
-confirming first.
+**Where:** `src/config/site.ts` → `contact.email` and the derived `contact.website`.
 
 ### 2. Telephone / WhatsApp number
 

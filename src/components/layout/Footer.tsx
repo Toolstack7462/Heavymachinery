@@ -70,7 +70,7 @@ export function Footer({
                   className="mt-3 shrink-0 text-accent-300 lg:mt-0.5"
                 />
                 <span className="flex min-h-[44px] items-center text-ink-300 lg:min-h-0">
-                  www.jowain.net
+                  {site.contact.website}
                 </span>
               </li>
             </ul>

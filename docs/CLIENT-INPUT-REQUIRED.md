@@ -6,9 +6,11 @@ Each row says exactly where the value goes and what happens until it arrives. **
 here is filled with a plausible substitute** — a fabricated phone number or address on a
 real company's website is worse than an absent one.
 
-For business *facts* still open (email spelling, phone, address, hours, logo), the
-authoritative list is [`MISSING-INFO.md`](./MISSING-INFO.md). This file covers what the
-**deployment** needs.
+For business *facts* still open (phone, address, hours, logo), the authoritative list is
+[`MISSING-INFO.md`](./MISSING-INFO.md). This file covers what the **deployment** needs.
+
+**Resolved 20 August 2026:** the published email is `contact@jowainyanbu.com` and the
+canonical domain is `jowainyanbu.com`. Both were open questions; neither is any longer.
 
 ---
 
@@ -32,7 +34,7 @@ false success — but it means the forms do not deliver.
 
 ```
 RESEND_API_KEY=re_...
-EMAIL_FROM=Jowain Yanbu Est. <website@jowainyanbu.com>
+EMAIL_FROM=Jowain Yanbu Est. <noreply@jowainyanbu.com>
 ENQUIRY_TO_EMAIL=<the inbox that should receive enquiries>
 ```
 
@@ -42,21 +44,17 @@ ENQUIRY_TO_EMAIL=<the inbox that should receive enquiries>
 
 ### 2. Which inbox should receive enquiries
 
-`ENQUIRY_TO_EMAIL`. Can be more than one, comma-separated. Note this is the *destination*
-and is independent of the address published on the site (see `MISSING-INFO.md` §1, which
-is still unresolved).
+`ENQUIRY_TO_EMAIL`. Can be more than one, comma-separated. The published address is
+`contact@jowainyanbu.com` (confirmed 20 August 2026), and using it here as well is the
+obvious default, but the destination does not have to match the published address.
 
-### 3. Confirm the canonical domain
+### 3. www vs non-www — RESOLVED in part
 
-Two different domains are in play, and only the client can say which is correct:
+**Domain: confirmed as `jowainyanbu.com`** (20 August 2026). The `www.jowain.net` printed
+in the company profile PDF is superseded and no longer appears anywhere on the site.
 
-| Domain | Evidence |
-| --- | --- |
-| **`jowainyanbu.com`** | Purchased, DNS live on Hostinger, valid SSL certificate, serving now |
-| `www.jowain.net` | Printed in the company profile PDF, and the host of the published email address `contactsul@jowain.net` |
-
-The code currently uses `jowainyanbu.com`. **Also decide www vs non-www** — pick one, and
-the other must 301 to it, or search engines index two copies of the site.
+Still open: **www vs non-www.** Pick one and 301 the other to it, or search engines index
+two copies of the site. Non-www is what currently serves.
 
 **Where it goes:** the `SITE_URL` environment variable. One value controls canonical tags,
 hreflang, sitemap, robots, Open Graph and all structured data.

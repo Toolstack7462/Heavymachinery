@@ -38,7 +38,7 @@ export function ContactInfo({
     {
       icon: "globe",
       label: dict.footer.website,
-      value: "www.jowain.net",
+      value: site.contact.website,
       href: site.url,
       external: true,
     },
