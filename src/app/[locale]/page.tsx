@@ -244,7 +244,7 @@ export default async function HomePage({
                     <Icon name={reason.icon} size={24} />
                   </span>
                   <span
-                    className="font-heading text-2xl font-extrabold text-white/15"
+                    className="font-heading text-2xl font-extrabold text-white/25"
                     aria-hidden="true"
                   >
                     {String(index + 1).padStart(2, "0")}

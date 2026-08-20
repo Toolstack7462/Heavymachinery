@@ -53,7 +53,7 @@ export default async function WhyChooseUsPage({
                 <div className="grid items-start gap-5 py-8 md:grid-cols-12 md:gap-8">
                   <div className="flex items-center gap-4 md:col-span-4">
                     <span
-                      className="font-heading text-3xl font-extrabold text-ink-200"
+                      className="font-heading text-3xl font-extrabold text-ink-400"
                       aria-hidden="true"
                     >
                       {String(index + 1).padStart(2, "0")}

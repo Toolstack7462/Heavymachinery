@@ -235,7 +235,7 @@ export function ValueCard({
         <IconTile name={value.icon} />
         {numbered !== undefined && (
           <span
-            className="font-heading text-2xl font-extrabold text-ink-150"
+            className="font-heading text-2xl font-extrabold text-ink-400"
             aria-hidden="true"
           >
             {String(numbered).padStart(2, "0")}
