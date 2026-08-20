@@ -199,7 +199,7 @@ export default async function AboutPage({
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {coreValues.map((value, index) => (
             <Reveal key={value.key} delay={index * 0.06}>
-              <ValueCard locale={locale} value={value} numbered={index + 1} />
+              <ValueCard locale={locale} value={value} />
             </Reveal>
           ))}
         </div>

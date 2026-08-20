@@ -243,12 +243,6 @@ export default async function HomePage({
                   <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-accent-300 ring-1 ring-white/10">
                     <Icon name={reason.icon} size={24} />
                   </span>
-                  <span
-                    className="font-heading text-2xl font-extrabold text-white/25"
-                    aria-hidden="true"
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
                 </div>
                 <h3 className="mt-5 font-heading text-lg font-bold text-white">
                   {reason.title[locale]}

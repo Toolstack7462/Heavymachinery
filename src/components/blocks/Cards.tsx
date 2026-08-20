@@ -222,25 +222,15 @@ export function IndustryCard({
 export function ValueCard({
   locale,
   value,
-  numbered,
 }: {
   locale: Locale;
   value: ValueItem;
   /** 1-based index, shown as a quiet ordinal for short value sets. */
-  numbered?: number;
 }) {
   return (
     <div className="group flex h-full flex-col rounded-2xl border border-ink-150 bg-white p-6 transition-[border-color,box-shadow] duration-300 hover:border-brand-200 hover:shadow-[var(--shadow-card)]">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-4">
         <IconTile name={value.icon} />
-        {numbered !== undefined && (
-          <span
-            className="font-heading text-2xl font-extrabold text-ink-400"
-            aria-hidden="true"
-          >
-            {String(numbered).padStart(2, "0")}
-          </span>
-        )}
       </div>
       <h3 className="mt-5 text-lg font-bold text-ink-900">
         {value.title[locale]}

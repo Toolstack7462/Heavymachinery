@@ -47,22 +47,20 @@ export default async function WhyChooseUsPage({
       />
       <Section>
         <ol className="divide-y divide-ink-150 border-y border-ink-150">
-          {reasons.map((reason, index) => (
+          {reasons.map((reason) => (
             <li key={reason.key}>
               <Reveal>
-                <div className="grid items-start gap-5 py-8 md:grid-cols-12 md:gap-8">
-                  <div className="flex items-center gap-4 md:col-span-4">
-                    <span
-                      className="font-heading text-3xl font-extrabold text-ink-400"
-                      aria-hidden="true"
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100">
-                      <Icon name={reason.icon} size={24} />
-                    </span>
-                  </div>
-                  <div className="md:col-span-8">
+                {/*
+                  Icon and copy sit side by side on a flex row rather than in a
+                  12-column grid. The grid existed to hold a large index numeral
+                  beside the icon; with the numeral gone, a 4-column well left
+                  the icon marooned against a wide empty gap before the heading.
+                */}
+                <div className="flex items-start gap-5 py-7">
+                  <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100">
+                    <Icon name={reason.icon} size={24} />
+                  </span>
+                  <div className="min-w-0">
                     <h2 className="text-xl md:text-2xl">
                       {reason.title[locale]}
                     </h2>
