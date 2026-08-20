@@ -13,6 +13,7 @@ import {
   Wrench,
   ClipboardCheck,
   Mail,
+  Phone,
   MapPin,
   Globe,
   Check,
@@ -39,7 +40,7 @@ import {
  * Never use emoji as icons.
  */
 
-const lucideMap: Record<string, LucideIcon> = {
+const lucideMap = {
   shield: Shield,
   medal: Medal,
   handshake: Handshake,
@@ -53,6 +54,7 @@ const lucideMap: Record<string, LucideIcon> = {
   wrench: Wrench,
   clipboard: ClipboardCheck,
   mail: Mail,
+  phone: Phone,
   mapPin: MapPin,
   globe: Globe,
   check: Check,
@@ -68,10 +70,10 @@ const lucideMap: Record<string, LucideIcon> = {
   compressor: Wind,
   welder: Flame,
   towerLight: Lightbulb,
-};
+} satisfies Record<string, LucideIcon>;
 
 /** Hand-authored equipment glyphs. */
-const equipmentGlyphs: Record<string, React.ReactNode> = {
+const equipmentGlyphs = {
   excavator: (
     <>
       <path d="M2 20h9" />
@@ -190,15 +192,23 @@ const equipmentGlyphs: Record<string, React.ReactNode> = {
       <path d="M7.5 9v7M11.5 9v7" />
     </>
   ),
-};
+} satisfies Record<string, React.ReactNode>;
+
+/**
+ * Every registered glyph name. Typing `name` against this union means an
+ * unregistered icon is a compile error rather than a silently empty element:
+ * the component returns null when a name does not resolve, so a typo used to
+ * ship as a missing icon that nothing caught.
+ */
+export type IconName = keyof typeof equipmentGlyphs | keyof typeof lucideMap;
 
 export interface IconProps extends SVGProps<SVGSVGElement> {
-  name: string;
+  name: IconName;
   size?: number;
 }
 
 export function Icon({ name, size = 24, className, ...props }: IconProps) {
-  const glyph = equipmentGlyphs[name];
+  const glyph = (equipmentGlyphs as Record<string, React.ReactNode>)[name];
   if (glyph) {
     return (
       <svg
@@ -219,7 +229,7 @@ export function Icon({ name, size = 24, className, ...props }: IconProps) {
       </svg>
     );
   }
-  const LucideCmp = lucideMap[name];
+  const LucideCmp = (lucideMap as Record<string, LucideIcon>)[name];
   if (!LucideCmp) return null;
   return (
     <LucideCmp

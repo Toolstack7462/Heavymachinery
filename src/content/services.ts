@@ -15,6 +15,7 @@
  */
 
 import type { L, LL } from "@/i18n/localized";
+import type { IconName } from "@/components/Icon";
 
 export interface ServiceItem {
   slug: string;
@@ -28,7 +29,7 @@ export interface ServiceItem {
   features: LL;
   /** Equipment slugs cross-linked from the detail page. */
   relatedEquipment: string[];
-  icon: string;
+  icon: IconName;
 }
 
 export const services: ServiceItem[] = [

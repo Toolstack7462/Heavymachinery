@@ -22,9 +22,9 @@ export function Hero({
   dict: Dictionary;
 }) {
   const facts = [
-    { icon: "calendar", label: dict.hero.metaEstablished },
-    { icon: "map", label: dict.hero.metaCoverage },
-    { icon: "users", label: dict.labels.operatorsShort },
+    { icon: "calendar" as const, label: dict.hero.metaEstablished },
+    { icon: "map" as const, label: dict.hero.metaCoverage },
+    { icon: "users" as const, label: dict.labels.operatorsShort },
   ];
 
   return (

@@ -20,6 +20,7 @@
  */
 
 import type { L, LL } from "@/i18n/localized";
+import type { IconName } from "@/components/Icon";
 
 export type EquipmentCategory =
   | "heavy-lifting"
@@ -44,14 +45,14 @@ export interface EquipmentItem {
   /** Typical jobs this equipment handles — capability, not project claims. */
   applications: LL;
   specs: EquipmentSpec[];
-  icon: string;
+  icon: IconName;
 }
 
 export interface CategoryMeta {
   key: EquipmentCategory;
   title: L;
   blurb: L;
-  icon: string;
+  icon: IconName;
 }
 
 export const equipmentCategories: CategoryMeta[] = [

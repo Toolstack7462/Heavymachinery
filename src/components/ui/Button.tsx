@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Icon } from "@/components/Icon";
+import { Icon, type IconName } from "@/components/Icon";
 
 type Variant = "primary" | "secondary" | "outline" | "onDark" | "ghost";
 type Size = "sm" | "md" | "lg";
@@ -37,8 +37,8 @@ const sizes: Record<Size, string> = {
 interface CommonProps {
   variant?: Variant;
   size?: Size;
-  icon?: string;
-  iconEnd?: string;
+  icon?: IconName;
+  iconEnd?: IconName;
   className?: string;
   children: ReactNode;
 }

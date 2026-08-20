@@ -63,6 +63,22 @@ export function Footer({
                   {site.contact.email}
                 </a>
               </li>
+              {site.contact.phones.map((phone) => (
+                <li key={phone.e164} className="flex items-start gap-3">
+                  <Icon
+                    name="phone"
+                    size={18}
+                    className="mt-3 shrink-0 text-accent-300 lg:mt-0.5"
+                  />
+                  <a
+                    href={`tel:${phone.e164}`}
+                    dir="ltr"
+                    className="flex min-h-[44px] items-center text-ink-300 tabular-nums transition-colors hover:text-white lg:min-h-0"
+                  >
+                    {phone.display}
+                  </a>
+                </li>
+              ))}
               <li className="flex items-start gap-3">
                 <Icon
                   name="globe"

@@ -24,6 +24,28 @@ const METADATA_ROUTES = new Set([
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  /*
+   * Canonical host: non-www, permanently.
+   *
+   * Both www.jowainyanbu.com and jowainyanbu.com resolved and returned 200
+   * independently, so the same 92 pages were reachable on two hosts and could
+   * be indexed twice. The canonical tags already pointed at the non-www host;
+   * this makes the server agree with them.
+   *
+   * 301, not the 307 that `NextResponse.redirect` defaults to: this is a
+   * permanent canonicalisation and search engines should consolidate on it.
+   * The path and query string are preserved, so deep links and campaign
+   * parameters survive the hop.
+   */
+  const host = request.headers.get("host") ?? "";
+  if (host.toLowerCase().startsWith("www.")) {
+    const url = request.nextUrl.clone();
+    url.host = host.slice(4);
+    url.protocol = "https";
+    url.port = "";
+    return NextResponse.redirect(url, 301);
+  }
+
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||

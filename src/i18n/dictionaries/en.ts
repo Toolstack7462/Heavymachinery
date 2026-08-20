@@ -213,6 +213,7 @@ export const en = {
     contact: "Contact",
     rights: "All rights reserved.",
     address: "Address",
+    phone: "Phone",
     email: "Email",
     website: "Website",
     privacy: "Privacy policy",

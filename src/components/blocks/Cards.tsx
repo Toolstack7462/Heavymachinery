@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Locale } from "@/config/site";
 import { localeHref, cn } from "@/lib/utils";
-import { Icon } from "@/components/Icon";
+import { Icon, type IconName } from "@/components/Icon";
 import { Tilt } from "@/components/motion/Tilt";
 import type { ServiceItem } from "@/content/services";
 import type { EquipmentItem } from "@/content/equipment";
@@ -23,7 +23,7 @@ function IconTile({
   className,
   size = 24,
 }: {
-  name: string;
+  name: IconName;
   className?: string;
   size?: number;
 }) {

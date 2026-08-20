@@ -88,12 +88,30 @@ export const site = {
 
   contact: {
     /**
-     * No telephone or WhatsApp number appears anywhere in the supplied
-     * profile. Keep `null` until the client provides verified numbers — the
-     * UI drops all call/WhatsApp affordances while these are null.
+     * Telephone numbers, supplied by the client on 20 August 2026.
+     *
+     * The supplied company profile contained no number at all, so for a long
+     * time every call affordance was absent rather than invented. These are the
+     * first verified numbers and they switch tap-to-call on across the header,
+     * footer, contact panel and the enquiry-failure fallback.
+     *
+     * `display` is what a human reads; `e164` is what `tel:` needs. Both Saudi
+     * mobile numbers: +966 followed by nine digits. Keep the two in step — the
+     * displayed string and the dialled string must never diverge.
      */
-    phone: null as string | null,
-    phoneE164: null as string | null,
+    phones: [
+      { display: "+966 53 799 4279", e164: "+966537994279" },
+      { display: "+966 56 174 2282", e164: "+966561742282" },
+    ] as ReadonlyArray<{ display: string; e164: string }>,
+
+    /**
+     * WhatsApp is NOT assumed from the numbers above. Both are Saudi mobiles
+     * and either could plausibly be the WhatsApp line, but "plausibly" is not
+     * verification: pointing a WhatsApp button at a number that does not answer
+     * on WhatsApp is a broken call-to-action. Set this to the confirmed E.164
+     * number and the WhatsApp affordance appears; leave it null and it stays
+     * absent. See docs/CLIENT-INPUT-REQUIRED.md.
+     */
     whatsapp: null as string | null,
 
     /**

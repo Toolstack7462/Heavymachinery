@@ -43,12 +43,12 @@ export default async function AboutPage({
     {
       label: dict.labels.established,
       value: String(site.foundedYear),
-      icon: "calendar",
+      icon: "calendar" as const,
     },
     {
       label: dict.labels.experience,
       value: dict.labels.yearsPlus,
-      icon: "gauge",
+      icon: "gauge" as const,
     },
     {
       label: dict.labels.location,
@@ -56,17 +56,17 @@ export default async function AboutPage({
         locale === "ar"
           ? "ينبع البحر، السعودية"
           : `${site.contact.address.city}, ${site.contact.address.country}`,
-      icon: "mapPin",
+      icon: "mapPin" as const,
     },
     {
       label: dict.labels.coverage,
       value: dict.hero.metaCoverage,
-      icon: "map",
+      icon: "map" as const,
     },
     {
       label: dict.labels.equipmentGroups,
       value: String(equipmentCategories.length),
-      icon: "layers",
+      icon: "layers" as const,
     },
   ];
 
@@ -157,13 +157,13 @@ export default async function AboutPage({
               kicker: dict.pages.visionKicker,
               title: dict.pages.visionTitle,
               body: vision[locale],
-              icon: "gauge",
+              icon: "gauge" as const,
             },
             {
               kicker: dict.pages.missionKicker,
               title: dict.pages.missionTitle,
               body: mission[locale],
-              icon: "medal",
+              icon: "medal" as const,
             },
           ].map((block, index) => (
             <Reveal key={block.title} delay={index * 0.06}>

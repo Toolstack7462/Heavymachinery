@@ -15,6 +15,7 @@
  */
 
 import type { L, LL } from "@/i18n/localized";
+import type { IconName } from "@/components/Icon";
 
 /* ------------------------------------------------------------------ */
 /* Company overview                                                    */
@@ -68,7 +69,7 @@ export interface ValueItem {
   key: string;
   title: L;
   description: L;
-  icon: string;
+  icon: IconName;
 }
 
 export const coreValues: ValueItem[] = [
@@ -181,7 +182,7 @@ export interface Industry {
   slug: string;
   title: L;
   description: L;
-  icon: string;
+  icon: IconName;
 }
 
 export const industries: Industry[] = [

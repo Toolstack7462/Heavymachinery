@@ -69,9 +69,9 @@ export function buildMetadata({
 /**
  * Organization + LocalBusiness graph.
  *
- * `telephone` is intentionally absent: the company has published no number, and
- * a schema graph asserting a fabricated one would be worse than an incomplete
- * profile. `sameAs` is omitted while no social accounts are confirmed.
+ * `telephone` now carries the client-confirmed numbers. `sameAs` is still
+ * omitted while no social accounts are confirmed — an incomplete graph beats a
+ * fabricated one.
  */
 export function organizationJsonLd() {
   return {
@@ -85,6 +85,7 @@ export function organizationJsonLd() {
     description: `Heavy equipment rental and transportation solutions across the Kingdom of Saudi Arabia since ${site.foundedYear}. Certified cranes, construction and earthmoving equipment, trailers, trucks, tankers and site power, with qualified operators and drivers.`,
     slogan: site.tagline,
     email: site.contact.email,
+    telephone: site.contact.phones.map((phone) => phone.e164),
     foundingDate: String(site.foundedYear),
     address: {
       "@type": "PostalAddress",
@@ -99,6 +100,7 @@ export function organizationJsonLd() {
         "@type": "ContactPoint",
         contactType: "sales",
         email: site.contact.email,
+        telephone: site.contact.phones.map((phone) => phone.e164),
         areaServed: site.contact.address.countryCode,
         availableLanguage: ["English", "Arabic"],
       },

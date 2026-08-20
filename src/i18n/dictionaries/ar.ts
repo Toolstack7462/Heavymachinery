@@ -216,6 +216,7 @@ export const ar: Dictionary = {
     contact: "التواصل",
     rights: "جميع الحقوق محفوظة.",
     address: "العنوان",
+    phone: "الهاتف",
     email: "البريد الإلكتروني",
     website: "الموقع الإلكتروني",
     privacy: "سياسة الخصوصية",
