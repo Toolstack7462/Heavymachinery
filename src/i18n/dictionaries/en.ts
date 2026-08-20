@@ -212,6 +212,7 @@ export const en = {
     equipment: "Equipment",
     contact: "Contact",
     rights: "All rights reserved.",
+    madeBy: "Made by",
     address: "Address",
     phone: "Phone",
     email: "Email",

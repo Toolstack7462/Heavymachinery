@@ -215,6 +215,7 @@ export const ar: Dictionary = {
     equipment: "المعدات",
     contact: "التواصل",
     rights: "جميع الحقوق محفوظة.",
+    madeBy: "تصميم وتطوير",
     address: "العنوان",
     phone: "الهاتف",
     email: "البريد الإلكتروني",

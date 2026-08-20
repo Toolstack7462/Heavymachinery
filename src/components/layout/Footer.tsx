@@ -140,6 +140,33 @@ export function Footer({
           <p>
             © {year} {site.legalName} {dict.footer.rights}
           </p>
+          {/*
+            Build credit. Deliberately quiet: it sits with the copyright rather
+            than in the link row, so it reads as attribution and does not
+            compete with the legal links or the enquiry call to action.
+
+            This is the only link on the site that opens a new tab, so it is
+            also the only one that needs `rel="noopener noreferrer"` — without
+            it the opened page can reach back through `window.opener`.
+          */}
+          <p className="text-ink-500">
+            {dict.footer.madeBy}{" "}
+            <a
+              href="https://genzdigitalstore.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              /*
+               * Inline links inside a sentence are exempt from WCAG 2.2 SC
+               * 2.5.8, so 17px tall is conformant. It is still fiddly to hit on
+               * a phone, so the hit area is grown with padding and pulled back
+               * with a matching negative margin: the same trick the footer link
+               * lists use, and it costs no layout.
+               */
+              className="-my-2 inline-block py-2 font-medium text-ink-400 underline underline-offset-2 transition-colors hover:text-ink-200"
+            >
+              Gen Z Digital Store
+            </a>
+          </p>
           <div className="flex flex-wrap items-center gap-x-5">
             {[
               { label: dict.footer.privacy, href: "/privacy-policy" },

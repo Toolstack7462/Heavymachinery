@@ -74,9 +74,15 @@ export const equipmentImages: Record<string, Img> = {
     altAr: "حفّارة مجنزرة وذراعها منخفض على منصة عمل",
   },
   "mini-excavators": {
-    id: "1637669886956-bf0e1cc4f0d3",
-    alt: "A compact excavator working on a raised platform in low light",
-    altAr: "حفّارة صغيرة تعمل على منصة مرتفعة في ضوء خفيف",
+    /*
+     * Replaced 20 August 2026. The previous frame was atmospheric but the
+     * machine sat tiny and half-hidden in heavy fog: a buyer could not see the
+     * equipment, which is the only reason the photograph is there.
+     * Verified: Wacker Neuson compact excavator, whole machine and arm visible.
+     */
+    id: "1759950345011-ee5a96640e00",
+    alt: "A compact tracked excavator with its arm folded, parked on open ground",
+    altAr: "حفّارة مصغّرة مجنزرة وذراعها مطوي، متوقفة على أرض مفتوحة",
   },
   "wheel-loaders": {
     id: "1629807473015-41699c4471b5",
@@ -89,9 +95,16 @@ export const equipmentImages: Record<string, Img> = {
     altAr: "رافعة متحركة بذراع مطوي، جاهزة للانتقال إلى الموقع",
   },
   "boom-trucks": {
-    id: "1768658500241-a96c803b10ae",
-    alt: "A boom truck loading material onto its own flat bed",
-    altAr: "شاحنة برافعة تحمّل المواد على سطحها",
+    /*
+     * Replaced 20 August 2026. The previous frame showed a rusted truck under a
+     * canopy with loose slings heaped on the bed. It was the right machine, but
+     * a company presenting a maintained fleet should not illustrate it with
+     * tired plant. Verified: Hyundai truck-mounted crane, knuckle boom behind
+     * the cab, outriggers down, flat bed clear.
+     */
+    id: "1770149683239-e22145da01ab",
+    alt: "A truck-mounted crane parked with its boom stowed over a clear flat bed",
+    altAr: "شاحنة مزوّدة برافعة، ذراعها مطوي فوق سطح تحميل خالٍ",
   },
   "dump-trucks": {
     id: "1629807472592-2649bfa09f9c",
@@ -120,10 +133,15 @@ export const equipmentImages: Record<string, Img> = {
     altAr: "رافعة زاحفة على جنزير وذراعها الشبكي مرفوع في الموقع",
   },
   telehandlers: {
-    // Verified: Merlo telehandler, telescopic boom extended, load raised.
-    id: "1779644522078-43c9a2e554d2",
-    alt: "A telehandler raising a pallet of bricks to an upper floor",
-    altAr: "رافعة تلسكوبية ترفع منصّة من الطوب إلى طابق علوي",
+    /*
+     * The Merlo frame that first went in here was the right machine but shot
+     * portrait, so the 16:10 card cropped it to mostly building facade with the
+     * machine cut off. Verified replacement: JCB telehandler, landscape, whole
+     * machine in frame.
+     */
+    id: "1742070122884-06cfe88142ce",
+    alt: "A compact telehandler with its telescopic boom lowered, parked kerbside",
+    altAr: "رافعة تلسكوبية مدمجة وذراعها منخفض، متوقفة على جانب الطريق",
   },
   rollers: {
     // Verified: JCB VM115 single-drum vibratory soil compactor.
