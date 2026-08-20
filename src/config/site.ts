@@ -115,16 +115,22 @@ export const site = {
     whatsapp: null as string | null,
 
     /**
-     * Published enquiry inbox, confirmed by the client on 20 August 2026.
+     * Published enquiry inbox.
      *
-     * This SUPERSEDES the company profile, which printed the contact line as
-     * one unbroken string, "Contactsul@jowain.net". That was carried verbatim
-     * for a while rather than silently "corrected", and the ambiguity is now
-     * resolved: the address is `contact@jowainyanbu.com`, on the same domain
-     * the site is served from. Keeping the inbox and the site on one domain is
-     * also what makes SPF and DKIM straightforward for enquiry delivery.
+     * HISTORY, because this has moved twice and the reasoning matters:
+     * the company profile printed the contact line as one unbroken string,
+     * "Contactsul@jowain.net". That was carried verbatim rather than silently
+     * "corrected". It was then briefly changed to contact@jowainyanbu.com on
+     * instruction, and changed back here on 20 August 2026 at the client's
+     * explicit direction. This address is the one to publish.
+     *
+     * NOTE FOR ENQUIRY DELIVERY: this inbox is on jowain.net, while the site
+     * and the Resend sending domain are jowainyanbu.com. That is fine for a
+     * published contact address, but `EMAIL_FROM` must still be on the
+     * Resend-verified domain — never this address — or SPF and DKIM fail and
+     * the mail lands in spam. See docs/ENVIRONMENT.md.
      */
-    email: "contact@jowainyanbu.com",
+    email: "contactsul@jowain.net",
 
     address: {
       /** The profile gives a city only — no street address. */

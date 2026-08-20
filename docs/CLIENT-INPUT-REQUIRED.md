@@ -9,8 +9,14 @@ real company's website is worse than an absent one.
 For business *facts* still open (phone, address, hours, logo), the authoritative list is
 [`MISSING-INFO.md`](./MISSING-INFO.md). This file covers what the **deployment** needs.
 
-**Resolved 20 August 2026:** the published email is `contact@jowainyanbu.com` and the
-canonical domain is `jowainyanbu.com`. Both were open questions; neither is any longer.
+**Resolved 20 August 2026:** the canonical domain is `jowainyanbu.com`, non-www, with www
+301ing to it. The published email is **`contactsul@jowain.net`**, set at the client's
+explicit direction.
+
+> Note for enquiry delivery: that inbox is on `jowain.net` while the site and the Resend
+> sending domain are `jowainyanbu.com`. That is fine for a published address, but
+> `EMAIL_FROM` must be on the Resend-verified domain and never this address, or SPF and
+> DKIM fail and enquiries land in spam.
 
 ---
 
@@ -102,7 +108,26 @@ the site's only third-party runtime dependency.
 `public/brand/jowain-emblem*.png` is derived from the supplied `Logo.pdf`. Confirm it is
 the approved mark, or supply an SVG.
 
-### 9. Social profiles
+### 8b. Logos for the nine direct clients
+
+The "Direct client relationships" section names nine companies from the company profile:
+
+| Saudi Arabia | Qatar |
+| --- | --- |
+| Kabbani · TCC · Abraak International | Landworx Company · UCC Qatar · Redco International Qatar · Petrosarve Qatar · Iris Qatar · UCC PMV Qatar |
+
+**No artwork exists for any of them.** The 25 marks on the main wall were sliced from the
+client-supplied logo board; that board was checked and none of these nine appear on it.
+
+They currently render as a wall of typographic marks: each name set in the display face on
+its own card. That is deliberate rather than a placeholder. Sourcing these from the web
+would mean guessing at third-party trademarks, and the acronyms are genuinely ambiguous —
+"UCC" and "TCC" match many unrelated companies. A wrong logo on a client wall is worse
+than a well-set name.
+
+**To swap in real marks:** supply the logo files (SVG preferred, otherwise the highest
+resolution available with transparency) and they drop into `src/content/clients.ts`
+alongside the existing 25. No other change is needed.
 
 `site.social` is empty, so the footer icons hide. Add any confirmed LinkedIn / Instagram /
 Facebook / YouTube URLs; they also populate `sameAs` in the Organization structured data.

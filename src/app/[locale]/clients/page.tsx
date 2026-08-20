@@ -60,24 +60,43 @@ export default async function ClientsPage({
 
       <Section muted>
         <SectionHeader title={dict.pages.clientsDirectTitle} />
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
-          {directClients.map((group, index) => (
-            <Reveal key={group.region.en} delay={index * 0.06}>
-              <div className="h-full rounded-2xl border border-ink-150 bg-white p-6">
+        {/*
+          A wall of typographic marks, not a list with a hairline under every
+          row. These nine are named in the company profile but no artwork for
+          them was supplied: the 25 marks above came from the client's own logo
+          board, and none of these appear on it. Setting each name in the
+          display face is honest — it presents the client without passing a
+          guessed graphic off as their trademark. Drop a real logo into
+          `src/content/clients.ts` and this becomes an image wall with no other
+          change. See docs/CLIENT-INPUT-REQUIRED.md.
+        */}
+        <div className="mt-10 space-y-10">
+          {directClients.map((group, groupIndex) => (
+            <Reveal key={group.region.en} delay={groupIndex * 0.06}>
+              <div className="flex items-center gap-3">
+                <span className="rule" aria-hidden="true" />
                 <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-brand-700">
                   {group.region[locale]}
                 </h3>
-                <ul className="mt-4 divide-y divide-ink-150">
-                  {group.names.map((name) => (
-                    <li
-                      key={name}
-                      className="py-2.5 font-medium text-ink-800 first:pt-0 last:pb-0"
-                    >
-                      {name}
-                    </li>
-                  ))}
-                </ul>
               </div>
+              <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {group.names.map((name) => (
+                  <li key={name}>
+                    <div className="flex h-full min-h-[88px] items-center justify-center rounded-xl border border-ink-150 bg-white px-4 py-5 text-center transition-colors hover:border-brand-200">
+                      {/*
+                        dir="ltr" so bidi does not reorder a Latin company name
+                        inside the Arabic layout.
+                      */}
+                      <span
+                        dir="ltr"
+                        className="font-heading text-sm font-bold leading-snug tracking-tight text-ink-800 sm:text-base"
+                      >
+                        {name}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </Reveal>
           ))}
         </div>
