@@ -91,7 +91,7 @@ export default async function HomePage({
                     {dict.labels.exploreCategory}
                     <Icon
                       name="arrowRight"
-                      size={15}
+                      size={16}
                       className="transition-transform duration-200 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
                     />
                   </span>

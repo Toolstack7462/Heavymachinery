@@ -58,7 +58,7 @@ export default async function FaqsPage({
                 {faq.question[locale]}
                 <Icon
                   name="chevronRight"
-                  size={20}
+                  size={18}
                   className="shrink-0 rotate-90 text-brand-600 transition-transform duration-200 group-open:-rotate-90"
                 />
               </summary>

@@ -150,7 +150,7 @@ export function EquipmentCard({
               />
               <Icon
                 name={item.icon}
-                size={26}
+                size={24}
                 className="relative mb-3 text-brand-300"
               />
               {highlight && (
@@ -203,7 +203,7 @@ export function IndustryCard({
       id={industry.slug}
       className={cn(cardBase, "scroll-mt-24 flex-row gap-5 p-6")}
     >
-      <IconTile name={industry.icon} className="shrink-0" size={26} />
+      <IconTile name={industry.icon} className="shrink-0" size={24} />
       <div>
         <CardHeading
           level={headingLevel}

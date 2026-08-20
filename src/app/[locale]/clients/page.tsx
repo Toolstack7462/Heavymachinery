@@ -48,7 +48,12 @@ export default async function ClientsPage({
       <Section>
         <SectionHeader title={dict.pages.clientsGridTitle} />
         <ClientWall locale={locale} className="mt-10" />
-        <p className="mt-8 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+        {/*
+          `measure` (68ch), not `max-w-3xl`. At 12px a 48rem box put 151
+          characters on one line — DESIGN.md makes this exact point: a pixel
+          max-width says nothing about how many characters land on the line.
+        */}
+        <p className="measure mt-8 text-xs leading-relaxed text-muted-foreground">
           {dict.labels.clientNote}
         </p>
       </Section>
