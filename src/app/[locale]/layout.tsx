@@ -160,6 +160,23 @@ export default async function LocaleLayout({
 
 export const metadata = {
   metadataBase: new URL(site.url),
+  /*
+   * Search Console ownership tokens.
+   *
+   * Driven by environment variables so the token is never committed, and so
+   * the tag simply does not render until one is set. Google accepts several
+   * verification methods; the meta tag is the one that survives a redeploy
+   * without touching DNS, which matters here because DNS lives in hPanel.
+   *
+   *   GOOGLE_SITE_VERIFICATION=<the content value Google gives you>
+   *   BING_SITE_VERIFICATION=<the content value Bing gives you>
+   */
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
+      : undefined,
+  },
 };
 
 export const viewport = {
