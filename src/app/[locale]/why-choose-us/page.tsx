@@ -32,7 +32,25 @@ export default async function WhyChooseUsPage({
 }) {
   const { locale } = await params;
   const dict = getDictionary(locale);
-  const reasons = [...whyChooseUs, ...fleetHighlights];
+  /*
+   * `fleetHighlights` exists for the Quality page, where it stands alone as a
+   * two-card "fleet readiness" pair and duplicates nothing.
+   *
+   * Here it sits directly under `whyChooseUs`, and one of its two entries —
+   * "Qualified personnel & KSA coverage" — is a merge of the two reasons
+   * immediately above it: "Kingdom-wide coverage" and "Qualified personnel".
+   * It even reuses the same `users` icon as the latter, so the page printed
+   * the same claim twice, with the same glyph, four rows apart. Only the
+   * highlight that adds something new is carried over.
+   *
+   * The entry is filtered, not deleted: removing it from the content array
+   * would strip a card off the Quality page, where it is not a duplicate.
+   */
+  const restatedOnThisPage = new Set(["qualified-coverage"]);
+  const reasons = [
+    ...whyChooseUs,
+    ...fleetHighlights.filter((item) => !restatedOnThisPage.has(item.key)),
+  ];
 
   return (
     <>

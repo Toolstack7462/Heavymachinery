@@ -139,6 +139,16 @@ export const whyChooseUs: ValueItem[] = [
 /* Fleet highlights — profile page "Fleet & Equipment Overview"         */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Fleet-readiness highlights, written for the Quality page where they stand
+ * alone.
+ *
+ * NOTE ON OVERLAP: `qualified-coverage` deliberately restates `kingdom-wide`
+ * and `qualified-personnel` from `whyChooseUs` above, because on the Quality
+ * page those reasons are not present and the point still needs making. Any
+ * page that renders BOTH arrays must filter this key out or it will print the
+ * same claim twice — see src/app/[locale]/why-choose-us/page.tsx.
+ */
 export const fleetHighlights: ValueItem[] = [
   {
     key: "ready-for-deployment",
