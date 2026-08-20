@@ -126,13 +126,24 @@ export function EquipmentCard({
         href={localeHref(locale, `/fleet/${item.slug}`)}
         className={cn(cardBase, "overflow-hidden")}
       >
-        <div className="relative h-44 overflow-hidden bg-ink-900">
+        {/*
+          Aspect ratio, not a fixed height.
+          
+          `h-44` gave a 350x176 box on a 390px phone, a ratio of about 2:1. With
+          object-cover that threw away most of a taller source: the crawler
+          crane card showed the cab only, with the tracks and lattice boom that
+          identify the machine cropped off. A ratio scales with the card, so the
+          image gets taller as the column narrows, which is the opposite of what
+          a fixed height does.
+        */}
+        <div className="relative aspect-[16/10] overflow-hidden bg-ink-900 sm:aspect-[3/2] lg:aspect-[16/10]">
           {photo ? (
             <Image
               src={unsplash(photo.id, 640, 70)}
               alt={locale === "ar" ? photo.altAr : photo.alt}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              style={photo.position ? { objectPosition: photo.position } : undefined}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             />
           ) : (

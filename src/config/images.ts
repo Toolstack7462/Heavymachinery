@@ -29,6 +29,16 @@ export function unsplash(id: string, w = 1600, q = 76): string {
 
 export interface Img {
   id: string;
+  /**
+   * Optional CSS `object-position` for the crop.
+   *
+   * Cards crop with `object-cover`, which keeps the centre. That is right for
+   * most frames and wrong for a few: a tall photograph of a crawler crane
+   * centres on the cab and clips the tracks, which are the feature that tells a
+   * buyer it is a crawler and not a wheeled mobile crane. Setting this biases
+   * the crop toward the part of the image that identifies the machine.
+   */
+  position?: string;
   /** Alt text is written as description, never as a filename or keyword list. */
   alt: string;
   altAr: string;
@@ -129,6 +139,9 @@ export const equipmentImages: Record<string, Img> = {
   "crawler-cranes": {
     // Verified: Kobelco crawler crane, crawler tracks and lattice boom.
     id: "1678860886415-dd142078048a",
+    // Portrait source; no landscape crawler crane exists in the free library.
+    // Bias the crop downward so the tracks make the frame.
+    position: "center 72%",
     alt: "A crawler crane on tracks with its lattice boom raised at a site",
     altAr: "رافعة زاحفة على جنزير وذراعها الشبكي مرفوع في الموقع",
   },

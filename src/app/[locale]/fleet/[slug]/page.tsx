@@ -111,6 +111,7 @@ export default async function EquipmentDetailPage({
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 42vw"
+                  style={photo.position ? { objectPosition: photo.position } : undefined}
                   className="object-cover"
                 />
               </div>
