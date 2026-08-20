@@ -66,6 +66,12 @@ canonical tags and the redirect rules.
 | `ItemList` | `/fleet` |
 | `BreadcrumbList` | via `components/Breadcrumbs.tsx` |
 
+The sitemap also carries **22 `<image:image>` entries**, one per equipment page
+that has a verified photograph. Machinery imagery is a real entry point for a
+rental business, and a photo that exists only inside a `/_next/image` URL is not
+discovered as reliably. Pages still rendering the engineered panel are skipped
+rather than declared with an empty image.
+
 Two deliberate decisions:
 
 **Equipment pages use `Service`, not `Product`.** There is no published price, and a
@@ -121,14 +127,58 @@ does not support.
 
 ---
 
+## Submission and verification
+
+### Already done, no account required
+
+**IndexNow** submits to Bing, Yandex, Seznam and Naver in one POST. Ownership is
+proved by a key file at the site root, so **`public/<key>.txt` must not be
+deleted or renamed** — the engines re-check it.
+
+```bash
+npm run seo:indexnow          # reads sitemap.xml, verifies the key file, submits
+npm run seo:indexnow -- --dry # print what would be sent
+```
+
+Last run: 90 URLs, HTTP 202 (accepted). Re-run it after any deploy that adds or
+changes pages. Google does **not** participate in IndexNow.
+
+### Needs the site owner once: Google Search Console
+
+Verification tokens are read from the environment, so nothing secret is
+committed and the tag does not render until a token exists:
+
+```
+GOOGLE_SITE_VERIFICATION=<content value from Google>
+BING_SITE_VERIFICATION=<content value from Bing>     # optional
+```
+
+Steps:
+
+1. <https://search.google.com/search-console> → **Add property** → **URL prefix**
+   → `https://jowainyanbu.com` (non-www, the canonical host).
+2. Choose **HTML tag**. Google shows
+   `<meta name="google-site-verification" content="XXXX" />` — copy only the
+   `content` value.
+3. Set `GOOGLE_SITE_VERIFICATION` to that value in the hosting environment
+   (`~/app/.env` on Passenger) and **redeploy**. The value is baked into the
+   prerendered HTML, so a restart alone is not enough.
+4. Confirm it is live: `curl -s https://jowainyanbu.com/en | grep google-site-verification`
+5. Back in Search Console, click **Verify**.
+6. **Sitemaps** → submit `sitemap.xml`.
+7. Check **International Targeting** for hreflang errors after a few days.
+
+The URL-prefix property covers the canonical host. Because www 301s to non-www,
+a separate www property is not needed.
+
 ## After launch
 
-1. Verify the property in **Google Search Console** (DNS TXT via Hostinger is easiest).
-2. Submit `https://<domain>/sitemap.xml`.
-3. Confirm the international targeting report shows the `en`/`ar` pair with no errors.
-4. Test structured data — <https://search.google.com/test/rich-results>.
-5. Confirm the canonical host: one of www / non-www, with the other 301ing to it.
-6. Optionally add **Bing Webmaster Tools** (imports directly from Search Console).
+1. Search Console property and sitemap: see *Submission and verification* above.
+2. Test structured data — <https://search.google.com/test/rich-results>.
+3. Canonical host: **resolved.** non-www is canonical and www 301s to it,
+   verified live including deep links with query strings.
+4. Bing: already covered by IndexNow. Bing Webmaster Tools is optional and can
+   import from Search Console if a dashboard is wanted.
 
 ### Verifying a deploy
 

@@ -19,6 +19,8 @@ a filled-in file.**
 | `NEXT_PUBLIC_SITE_URL` | — | — | build and run | alias for `SITE_URL` |
 | `NODE_ENV` | — | — | run | set by the platform |
 | `PORT` | — | — | run | `3000` |
+| `GOOGLE_SITE_VERIFICATION` | — | — | **build** | unset — tag not rendered |
+| `BING_SITE_VERIFICATION` | — | — | **build** | unset — tag not rendered |
 
 ---
 
