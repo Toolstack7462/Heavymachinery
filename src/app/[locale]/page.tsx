@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Locale } from "@/config/site";
 import { site } from "@/config/site";
-import { images, unsplash } from "@/config/images";
+import { images, photoSrc } from "@/config/images";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata, seoText } from "@/lib/seo";
 import { localeHref } from "@/lib/utils";
@@ -138,7 +138,7 @@ export default async function HomePage({
           <Reveal className="lg:col-span-6">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-ink-900">
               <Image
-                src={unsplash(images.fleetLineup.id, 1200, 76)}
+                src={photoSrc(images.fleetLineup.id)}
                 alt={
                   locale === "ar"
                     ? images.fleetLineup.altAr

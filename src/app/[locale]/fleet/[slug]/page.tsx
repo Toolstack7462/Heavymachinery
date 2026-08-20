@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/config/site";
 import { locales } from "@/i18n/config";
-import { equipmentImage, unsplash } from "@/config/images";
+import { equipmentImage, photoSrc } from "@/config/images";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata, equipmentJsonLd } from "@/lib/seo";
 import { localeHref, cn } from "@/lib/utils";
@@ -106,7 +106,7 @@ export default async function EquipmentDetailPage({
             {photo ? (
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-ink-900">
                 <Image
-                  src={unsplash(photo.id, 900, 78)}
+                  src={photoSrc(photo.id)}
                   alt={locale === "ar" ? photo.altAr : photo.alt}
                   fill
                   priority

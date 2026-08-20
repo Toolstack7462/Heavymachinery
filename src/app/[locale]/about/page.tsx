@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import type { Locale } from "@/config/site";
 import { site } from "@/config/site";
-import { images, unsplash } from "@/config/images";
+import { images, photoSrc } from "@/config/images";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata, seoText } from "@/lib/seo";
 import { localeHref } from "@/lib/utils";
@@ -132,7 +132,7 @@ export default async function AboutPage({
       {/* Full-bleed capability band */}
       <section className="relative h-[260px] overflow-hidden md:h-[400px]">
         <Image
-          src={unsplash(images.siteDusk.id, 1920, 74)}
+          src={photoSrc(images.siteDusk.id)}
           alt={locale === "ar" ? images.siteDusk.altAr : images.siteDusk.alt}
           fill
           sizes="100vw"

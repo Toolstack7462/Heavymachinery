@@ -2,7 +2,7 @@
 
 import { useRef, type CSSProperties } from "react";
 import Image from "next/image";
-import { images, unsplash } from "@/config/images";
+import { images, photoSrc } from "@/config/images";
 import type { Locale } from "@/config/site";
 
 /**
@@ -55,7 +55,7 @@ export function HeroMedia({ locale }: { locale: Locale }) {
         style={{ "--parallax-x": "0px", "--parallax-y": "0px" } as CSSProperties}
       >
         <Image
-          src={unsplash(images.hero.id, 1920, 78)}
+          src={photoSrc(images.hero.id)}
           alt={locale === "ar" ? images.hero.altAr : images.hero.alt}
           fill
           priority

@@ -20,14 +20,32 @@
  * ============================================================================
  */
 
-const BASE = "https://images.unsplash.com/photo-";
+/**
+ * Photography is SELF-HOSTED under `public/photos/<key>.jpg`.
+ *
+ * It used to be fetched from images.unsplash.com at request time, which meant
+ * every cold image cost the server an outbound HTTPS round trip to Unsplash
+ * before `sharp` could even start resizing. On CloudLinux shared hosting, where
+ * CPU is capped per account, that showed up exactly as reported: equipment
+ * pages slow to paint, and images that sometimes never arrived at all. It also
+ * made the fleet grid depend on a third party staying up.
+ *
+ * Serving from disk removes the round trip, removes the dependency, and lets
+ * Next optimise from a local file. Masters are capped at a 1600px long edge and
+ * re-encoded at quality 82 progressive, because nothing on the site renders
+ * larger than that.
+ *
+ * The Unsplash License permits this: download, host and use commercially, no
+ * attribution required. `mini-excavators.jpg` is client-supplied, not Unsplash.
+ */
 
-/** Build an optimised Unsplash URL. next/image re-optimises on top of this. */
-export function unsplash(id: string, w = 1600, q = 76): string {
-  return `${BASE}${id}?auto=format&fit=crop&w=${w}&q=${q}`;
+/** Public path for a photo key. */
+export function photoSrc(key: string): string {
+  return `/photos/${key}.jpg`;
 }
 
 export interface Img {
+  /** File key: resolves to `/photos/<key>.jpg`. */
   id: string;
   /**
    * Optional CSS `object-position` for the crop.
@@ -46,22 +64,22 @@ export interface Img {
 
 export const images = {
   hero: {
-    id: "1628645419184-26a1f2757340",
+    id: "hero",
     alt: "A tracked excavator standing on open ground at golden hour",
     altAr: "حفّارة مجنزرة على أرض مفتوحة عند ساعة الغروب",
   },
   fleetLineup: {
-    id: "1610477865545-37711c53144d",
+    id: "fleetLineup",
     alt: "Excavators and support plant staged in a line across an equipment yard",
     altAr: "حفّارات ومعدات مساندة مصطفّة في ساحة المعدات",
   },
   siteDusk: {
-    id: "1583024011792-b165975b52f5",
+    id: "siteDusk",
     alt: "An excavator silhouetted against a dusk sky on a prepared site",
     altAr: "حفّارة تظهر بظلّها أمام سماء الغروب في موقع مُهيّأ",
   },
   earthworks: {
-    id: "1652303713917-2666b8bee507",
+    id: "earthworks",
     alt: "An excavator cutting a trench with an operator in high-visibility gear",
     altAr: "حفّارة تشقّ خندقاً بوجود مشغّل يرتدي زياً عالي الوضوح",
   },
@@ -79,7 +97,7 @@ export const images = {
  */
 export const equipmentImages: Record<string, Img> = {
   excavators: {
-    id: "1649807533255-bbc9c9fb7d77",
+    id: "excavators",
     alt: "A tracked excavator with its bucket lowered on a working platform",
     altAr: "حفّارة مجنزرة وذراعها منخفض على منصة عمل",
   },
@@ -90,17 +108,17 @@ export const equipmentImages: Record<string, Img> = {
      * equipment, which is the only reason the photograph is there.
      * Verified: Wacker Neuson compact excavator, whole machine and arm visible.
      */
-    id: "1759950345011-ee5a96640e00",
+    id: "mini-excavators",
     alt: "A compact tracked excavator with its arm folded, parked on open ground",
     altAr: "حفّارة مصغّرة مجنزرة وذراعها مطوي، متوقفة على أرض مفتوحة",
   },
   "wheel-loaders": {
-    id: "1629807473015-41699c4471b5",
+    id: "wheel-loaders",
     alt: "A wheel loader lifting a full bucket of earth",
     altAr: "لودر بعجل يرفع حمولة كاملة من التراب",
   },
   "mobile-cranes": {
-    id: "1780362959783-9373296db52b",
+    id: "mobile-cranes",
     alt: "A mobile crane with its boom stowed, parked and ready to mobilise",
     altAr: "رافعة متحركة بذراع مطوي، جاهزة للانتقال إلى الموقع",
   },
@@ -112,12 +130,12 @@ export const equipmentImages: Record<string, Img> = {
      * tired plant. Verified: Hyundai truck-mounted crane, knuckle boom behind
      * the cab, outriggers down, flat bed clear.
      */
-    id: "1770149683239-e22145da01ab",
+    id: "boom-trucks",
     alt: "A truck-mounted crane parked with its boom stowed over a clear flat bed",
     altAr: "شاحنة مزوّدة برافعة، ذراعها مطوي فوق سطح تحميل خالٍ",
   },
   "dump-trucks": {
-    id: "1629807472592-2649bfa09f9c",
+    id: "dump-trucks",
     alt: "An articulated dump truck loaded with material on a haul road",
     altAr: "قلّاب مفصلي محمّل بالمواد على طريق نقل",
   },
@@ -132,13 +150,13 @@ export const equipmentImages: Record<string, Img> = {
    */
   "skid-steer-loaders": {
     // Verified: John Deere 332G, four wheels, lift arms, bucket attached.
-    id: "1650220691079-7358e0760f1c",
+    id: "skid-steer-loaders",
     alt: "A compact skid steer loader with its bucket resting on the ground",
     altAr: "لودر انزلاقي صغير وجاروفه مستقرّ على الأرض",
   },
   "crawler-cranes": {
     // Verified: Kobelco crawler crane, crawler tracks and lattice boom.
-    id: "1678860886415-dd142078048a",
+    id: "crawler-cranes",
     // Portrait source; no landscape crawler crane exists in the free library.
     // Bias the crop downward so the tracks make the frame.
     position: "center 72%",
@@ -152,19 +170,19 @@ export const equipmentImages: Record<string, Img> = {
      * machine cut off. Verified replacement: JCB telehandler, landscape, whole
      * machine in frame.
      */
-    id: "1742070122884-06cfe88142ce",
+    id: "telehandlers",
     alt: "A compact telehandler with its telescopic boom lowered, parked kerbside",
     altAr: "رافعة تلسكوبية مدمجة وذراعها منخفض، متوقفة على جانب الطريق",
   },
   rollers: {
     // Verified: JCB VM115 single-drum vibratory soil compactor.
-    id: "1782442002533-1aec0cf5a9d8",
+    id: "rollers",
     alt: "A single-drum vibratory roller standing on a prepared road base",
     altAr: "مدحلة هزّازة بأسطوانة واحدة على طبقة أساس مُهيّأة",
   },
   "scissor-and-man-lifts": {
     // Verified: a row of scissor lifts, scissor mechanism and rails visible.
-    id: "1756402664856-91a90f90b70b",
+    id: "scissor-and-man-lifts",
     alt: "Scissor lifts lined up in an equipment yard with their platforms lowered",
     altAr: "مقصّات رفع مصطفّة في ساحة المعدات ومنصّاتها منخفضة",
   },

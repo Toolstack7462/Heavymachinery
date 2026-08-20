@@ -49,11 +49,9 @@ export function cspDirectives(isProduction: boolean): string[] {
     `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"}`,
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self'",
-    // Optimised images are served same-origin from /_next/image; the Unsplash
-    // host is listed because it is the one remote source `remotePatterns`
-    // permits, so the two stay in step. `data:`/`blob:` cover inline SVG
-    // glyphs and the blur placeholder.
-    "img-src 'self' data: blob: https://images.unsplash.com",
+    // Photography is self-hosted, so no remote image origin is permitted at
+    // all. `data:`/`blob:` cover inline SVG glyphs and the blur placeholder.
+    "img-src 'self' data: blob:",
     "connect-src 'self'",
     // No third-party frames anywhere on the site (the contact page links to
     // Google Maps rather than embedding it), so frames can be forbidden.

@@ -8,7 +8,7 @@ import type { ServiceItem } from "@/content/services";
 import type { EquipmentItem } from "@/content/equipment";
 import { getCategoryMeta, equipmentHighlight } from "@/content/equipment";
 import type { Industry, ValueItem } from "@/content/company";
-import { equipmentImage, unsplash } from "@/config/images";
+import { equipmentImage, photoSrc } from "@/config/images";
 
 /**
  * Card elevation rule: resting state is a solid 1px border and no shadow —
@@ -139,7 +139,7 @@ export function EquipmentCard({
         <div className="relative aspect-[16/10] overflow-hidden bg-ink-900 sm:aspect-[3/2] lg:aspect-[16/10]">
           {photo ? (
             <Image
-              src={unsplash(photo.id, 640, 70)}
+              src={photoSrc(photo.id)}
               alt={locale === "ar" ? photo.altAr : photo.alt}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

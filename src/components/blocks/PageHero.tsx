@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { Locale } from "@/config/site";
 import { Breadcrumbs, type Crumb } from "@/components/Breadcrumbs";
 import { Reveal } from "@/components/motion/Reveal";
-import { unsplash, type Img } from "@/config/images";
+import { photoSrc, type Img } from "@/config/images";
 
 /**
  * Standard interior-page hero.
@@ -101,7 +101,7 @@ export function PageHero({
                 />
                 <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-ink-150 bg-ink-900 lg:aspect-[4/3]">
                   <Image
-                    src={unsplash(image.id, 1200, 74)}
+                    src={photoSrc(image.id)}
                     alt={locale === "ar" ? image.altAr : image.alt}
                     fill
                     sizes="(max-width: 1024px) 100vw, 45vw"

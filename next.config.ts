@@ -46,11 +46,11 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
   images: {
     formats: ["image/avif", "image/webp"],
-    // Scoped to the one host the site actually loads photography from, so the
-    // image optimiser cannot be used as an open proxy for arbitrary URLs.
-    remotePatterns: [
-      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
-    ],
+    /*
+     * No remotePatterns at all. Photography is self-hosted, so the optimiser
+     * has no reason to fetch a remote URL, and with the list empty it cannot be
+     * used as an open proxy for arbitrary origins under this domain.
+     */
   },
   async headers() {
     return [

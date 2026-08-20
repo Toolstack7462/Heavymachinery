@@ -4,7 +4,7 @@ import { locales } from "@/i18n/config";
 import { localeHref } from "@/lib/utils";
 import { services } from "@/content/services";
 import { equipment } from "@/content/equipment";
-import { equipmentImage, unsplash } from "@/config/images";
+import { equipmentImage, photoSrc } from "@/config/images";
 
 /** Static route paths (locale-agnostic). */
 const staticPaths = [
@@ -60,7 +60,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const slug = path.startsWith("/fleet/") ? path.slice("/fleet/".length) : null;
     if (!slug) return [];
     const photo = equipmentImage(slug);
-    return photo ? [unsplash(photo.id, 1200, 78)] : [];
+    return photo ? [photoSrc(photo.id)] : [];
   };
 
   return [...staticPaths, ...dynamicPaths].flatMap((path) =>
