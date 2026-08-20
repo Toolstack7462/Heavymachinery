@@ -98,6 +98,45 @@ export const equipmentImages: Record<string, Img> = {
     alt: "An articulated dump truck loaded with material on a haul road",
     altAr: "قلّاب مفصلي محمّل بالمواد على طريق نقل",
   },
+
+  /*
+   * Added 20 August 2026. Each of the three was downloaded and looked at before
+   * being accepted, because Unsplash alt text cannot be trusted for machinery:
+   * the top result for "bulldozer" is a Doosan DL300 WHEEL LOADER, and the top
+   * results for "crawler crane" include two skid steers. Publishing on the
+   * strength of a caption would have put the wrong machine under a category
+   * heading, which to a procurement engineer is a specification error.
+   */
+  "skid-steer-loaders": {
+    // Verified: John Deere 332G, four wheels, lift arms, bucket attached.
+    id: "1650220691079-7358e0760f1c",
+    alt: "A compact skid steer loader with its bucket resting on the ground",
+    altAr: "لودر انزلاقي صغير وجاروفه مستقرّ على الأرض",
+  },
+  "crawler-cranes": {
+    // Verified: Kobelco crawler crane, crawler tracks and lattice boom.
+    id: "1678860886415-dd142078048a",
+    alt: "A crawler crane on tracks with its lattice boom raised at a site",
+    altAr: "رافعة زاحفة على جنزير وذراعها الشبكي مرفوع في الموقع",
+  },
+  telehandlers: {
+    // Verified: Merlo telehandler, telescopic boom extended, load raised.
+    id: "1779644522078-43c9a2e554d2",
+    alt: "A telehandler raising a pallet of bricks to an upper floor",
+    altAr: "رافعة تلسكوبية ترفع منصّة من الطوب إلى طابق علوي",
+  },
+  rollers: {
+    // Verified: JCB VM115 single-drum vibratory soil compactor.
+    id: "1782442002533-1aec0cf5a9d8",
+    alt: "A single-drum vibratory roller standing on a prepared road base",
+    altAr: "مدحلة هزّازة بأسطوانة واحدة على طبقة أساس مُهيّأة",
+  },
+  "scissor-and-man-lifts": {
+    // Verified: a row of scissor lifts, scissor mechanism and rails visible.
+    id: "1756402664856-91a90f90b70b",
+    alt: "Scissor lifts lined up in an equipment yard with their platforms lowered",
+    altAr: "مقصّات رفع مصطفّة في ساحة المعدات ومنصّاتها منخفضة",
+  },
 };
 
 export function equipmentImage(slug: string): Img | undefined {
