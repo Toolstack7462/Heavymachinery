@@ -29,12 +29,31 @@ export function Header({
   const drawerRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
+  /** Sentinel at the top of the document; see the scroll effect below. */
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Raise the header shadow once the page has scrolled off the top.
+   *
+   * Driven by an IntersectionObserver on an 8px sentinel sitting at the top of
+   * the document, not by a scroll listener. A `scroll` handler runs on every
+   * scroll frame for the entire life of the page on every route; this fires
+   * exactly twice, when the sentinel crosses the viewport edge in either
+   * direction. The sentinel is 8px tall with a matching negative margin, so it
+   * reproduces the previous `scrollY > 8` threshold at zero layout cost.
+   */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    // Without IntersectionObserver the header simply keeps its resting
+    // border, which is the `scrolled === false` default. Nothing to set.
+    if (!("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setScrolled(!entry!.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
 
   /**
@@ -148,7 +167,15 @@ export function Header({
   };
 
   return (
-    <header
+    <>
+      {/*
+        Scroll sentinel. In normal flow at the very top of the document, 8px
+        tall with a matching negative margin so it occupies no space. The
+        header itself is sticky and never leaves the viewport, so it cannot
+        observe its own position.
+      */}
+      <div ref={sentinelRef} aria-hidden="true" className="h-2 -mb-2" />
+      <header
       className={cn(
         "sticky top-0 z-[var(--z-sticky)] w-full bg-white transition-shadow duration-300",
         scrolled
@@ -330,7 +357,8 @@ export function Header({
           </div>
         </div>
       )}
-    </header>
+      </header>
+    </>
   );
 }
 

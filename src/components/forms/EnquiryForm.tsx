@@ -457,7 +457,7 @@ export function EnquiryForm({
       <button
         type="submit"
         disabled={status === "sending"}
-        className="group/btn inline-flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3.5 font-heading font-semibold text-white transition-all duration-150 hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 active:scale-[0.985] disabled:opacity-60 sm:w-auto"
+        className="group/btn inline-flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3.5 font-heading font-semibold text-white transition-[background-color,opacity,transform] duration-150 hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 active:scale-[0.985] disabled:opacity-60 sm:w-auto"
       >
         {status === "sending" ? (
           <>
